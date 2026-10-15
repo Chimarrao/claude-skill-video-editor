@@ -25,14 +25,14 @@ spec = tmp / "spec.json"
 r = subprocess.run(
     [
         sys.executable,
-        str(CAP / "spec_do_plano.py"),
-        "--nome",
+        str(CAP / "spec_from_plan.py"),
+        "--name",
         "TESTE overlay",
-        "--voz",
+        "--voice",
         voice,
         "--overlay",
         args.overlay,
-        "--saida",
+        "--output",
         str(spec),
     ],
     capture_output=True,
@@ -43,7 +43,7 @@ spec_doc = json.load(open(spec))
 light_overlay = spec_doc.get("overlay_leve") or []  # webdoc com B-roll: rótulo leve PODE ficar sobre o clipe
 env = dict(os.environ, CAPCUT_DRAFTS_DIR=str(drafts), CAPCUT_TESTE="1")
 r = subprocess.run(
-    [sys.executable, str(CAP / "montar_draft.py"), str(spec), "--forcar"],
+    [sys.executable, str(CAP / "build_draft.py"), str(spec), "--force"],
     capture_output=True,
     text=True,
     env=env,

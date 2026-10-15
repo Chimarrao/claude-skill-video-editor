@@ -31,7 +31,7 @@ spec["nome"] = "TESTE marca"
 json.dump(spec, open(tmp / "spec.json", "w"))
 env = dict(os.environ, CAPCUT_DRAFTS_DIR=str(drafts), CAPCUT_TESTE="1")
 r = subprocess.run(
-    [sys.executable, str(CAP / "montar_draft.py"), str(tmp / "spec.json"), "--forcar"],
+    [sys.executable, str(CAP / "build_draft.py"), str(tmp / "spec.json"), "--force"],
     capture_output=True,
     text=True,
     env=env,

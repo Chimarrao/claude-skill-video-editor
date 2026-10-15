@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Lista (somente leitura) as trilhas/segmentos de um draft do CapCut: tempo, fonte, velocidade, escala/posição, volume, tipo e nome do material.
-Uso: dump_draft.py <pasta_do_draft | draft_info.json> [--materiais]   (--materiais: lista também compound clips, áudios, loudness)
+Uso: dump_draft.py <pasta_do_draft | draft_info.json> [--materials]   (--materials: lista também compound clips, áudios, loudness)
 """
 
 import json, os, sys
@@ -12,7 +12,7 @@ M = {}
 for k in ("videos", "audios", "texts", "stickers", "drafts", "effects"):
     for m in j["materials"].get(k, []):
         M[m["id"]] = (k, m)
-nm = (
+display_name = (
     lambda m: os.path.basename((m.get("path") or "").replace("\\", "/"))
     or m.get("material_name")
     or m.get("name")
@@ -32,9 +32,9 @@ for ti, t in enumerate(j["tracks"]):
         sc = cl.get("scale") or {}
         tf = cl.get("transform") or {}
         print(
-            f"  {tr['start'] / 1e6:8.2f}-{(tr['start'] + tr['duration']) / 1e6:8.2f} ({tr['duration'] / 1e6:6.2f}s) src {sr.get('start', 0) / 1e6:7.2f}+{sr.get('duration', 0) / 1e6:6.2f} v={s.get('speed')} vol={s.get('volume')} esc=({sc.get('x')},{sc.get('y')}) pos=({tf.get('x')},{tf.get('y')}) [{k}] {nm(m)[:60]} {m.get('type', '')}"
+            f"  {tr['start'] / 1e6:8.2f}-{(tr['start'] + tr['duration']) / 1e6:8.2f} ({tr['duration'] / 1e6:6.2f}s) src {sr.get('start', 0) / 1e6:7.2f}+{sr.get('duration', 0) / 1e6:6.2f} v={s.get('speed')} vol={s.get('volume')} esc=({sc.get('x')},{sc.get('y')}) pos=({tf.get('x')},{tf.get('y')}) [{k}] {display_name(m)[:60]} {m.get('type', '')}"
         )
-if "--materiais" in sys.argv:
+if "--materials" in sys.argv or "--materiais" in sys.argv:
     print("\n--- materiais compostos (drafts) ---")
     for d in j["materials"].get("drafts", []):
         print(d.get("id"), d.get("name"), round(d.get("duration", 0) / 1e6, 1))
