@@ -1,0 +1,135 @@
+{
+ "assembly": {
+  "arquivo": "ola.asm",
+  "linguagem": "Assembly x86-64",
+  "hl": "x86asm",
+  "cor": "#fd971f",
+  "codigo": "section .data\n  msg db \"Ola, mundo\", 10\nsection .text\n  global _start\n_start:\n  mov eax, 1      ; sys_write\n  mov edi, 1      ; stdout\n  mov esi, msg\n  mov edx, 11\n  syscall\n  mov eax, 60     ; sys_exit\n  xor edi, edi\n  syscall"
+ },
+ "fortran": {
+  "arquivo": "area.f90",
+  "linguagem": "Fortran",
+  "hl": "fortran",
+  "cor": "#a6e22e",
+  "codigo": "program area\n  implicit none\n  real :: r = 2.0\n  print *, \"Ola, mundo\"\n  print *, \"Area:\", 3.14159 * r**2\nend program area"
+ },
+ "cobol": {
+  "arquivo": "SOMA.cob",
+  "linguagem": "COBOL",
+  "hl": "cobol",
+  "cor": "#3ddc97",
+  "codigo": "IDENTIFICATION DIVISION.\nPROGRAM-ID. SOMA.\nDATA DIVISION.\nWORKING-STORAGE SECTION.\n01 A PIC 9 VALUE 2.\n01 B PIC 9 VALUE 3.\n01 C PIC 99.\nPROCEDURE DIVISION.\n    ADD A TO B GIVING C.\n    DISPLAY C.\n    STOP RUN."
+ },
+ "c": {
+  "arquivo": "main.c",
+  "linguagem": "C",
+  "hl": "c",
+  "cor": "#66d9ef",
+  "codigo": "#include <stdio.h>\n#include <stdlib.h>\n\nint main(void) {\n    int *p = malloc(sizeof(int));\n    *p = 42;\n    printf(\"%d\\n\", *p);\n    free(p);\n    return 0;\n}"
+ },
+ "php": {
+  "arquivo": "index.php",
+  "linguagem": "PHP",
+  "hl": "php",
+  "cor": "#ae81ff",
+  "codigo": "<?php\n  $nome = \"mundo\";\n?>\n<h1>Olá, <?= $nome ?>!</h1>\n<ul>\n<?php foreach ([1, 2, 3] as $n): ?>\n  <li>Item <?= $n ?></li>\n<?php endforeach; ?>\n</ul>"
+ },
+ "javascript": {
+  "arquivo": "app.js",
+  "linguagem": "JavaScript",
+  "hl": "javascript",
+  "cor": "#e6db74",
+  "codigo": "const nome = \"mundo\";\n\ndocument\n  .querySelector(\"button\")\n  .addEventListener(\"click\", () => {\n    alert(`Olá, ${nome}!`);\n  });"
+ },
+ "typescript": {
+  "arquivo": "soma.ts",
+  "linguagem": "TypeScript",
+  "hl": "typescript",
+  "cor": "#66d9ef",
+  "codigo": "function somar(a: number, b: number): number {\n  return a + b;\n}\n\nsomar(2, \"3\"); // erro: string não é number"
+ },
+ "java": {
+  "arquivo": "Main.java",
+  "linguagem": "Java",
+  "hl": "java",
+  "cor": "#fd971f",
+  "codigo": "public class Main {\n  public static void main(String[] args) {\n    System.out.println(\"Olá, Mundo\");\n  }\n}"
+ },
+ "csharp": {
+  "arquivo": "Program.cs",
+  "linguagem": "C#",
+  "hl": "csharp",
+  "cor": "#ae81ff",
+  "codigo": "using System;\n\nvar nome = \"mundo\";\nvar lista = new List<int> { 1, 2, 3 };\n\nConsole.WriteLine($\"Olá, {nome}!\");\nConsole.WriteLine(lista.Sum());"
+ },
+ "cpp": {
+  "arquivo": "main.cpp",
+  "linguagem": "C++",
+  "hl": "cpp",
+  "cor": "#66d9ef",
+  "codigo": "#include <iostream>\n#include <vector>\n\nint main() {\n  std::vector<int> v{1, 2, 3};\n  for (auto n : v)\n    std::cout << n << \"\\n\";\n}"
+ },
+ "rust": {
+  "arquivo": "main.rs",
+  "linguagem": "Rust",
+  "hl": "rust",
+  "cor": "#fd971f",
+  "codigo": "fn main() {\n    let s = String::from(\"olá\");\n    let t = s;\n    println!(\"{s}\");\n    // erro: `s` foi movido para `t`\n}"
+ },
+ "go": {
+  "arquivo": "main.go",
+  "linguagem": "Go",
+  "hl": "go",
+  "cor": "#66d9ef",
+  "codigo": "package main\n\nimport (\n    \"fmt\"\n    \"sync\"\n)\n\nfunc main() {\n    var wg sync.WaitGroup\n    wg.Add(1)\n    go func() {\n        defer wg.Done()\n        fmt.Println(\"goroutine\")\n    }()\n    wg.Wait()\n}"
+ },
+ "python": {
+  "arquivo": "analise.py",
+  "linguagem": "Python",
+  "hl": "python",
+  "cor": "#e6db74",
+  "codigo": "import pandas as pd\n\ndf = pd.read_csv(\"vendas.csv\")\nmedia = df[\"valor\"].mean()\nprint(f\"Média: {media:.2f}\")"
+ },
+ "r": {
+  "arquivo": "grafico.R",
+  "linguagem": "R",
+  "hl": "r",
+  "cor": "#66d9ef",
+  "codigo": "library(ggplot2)\n\nggplot(mtcars, aes(wt, mpg)) +\n  geom_point() +\n  geom_smooth(method = \"lm\")"
+ },
+ "sql": {
+  "arquivo": "consulta.sql",
+  "linguagem": "SQL",
+  "hl": "sql",
+  "cor": "#fd971f",
+  "codigo": "SELECT nome, cidade\nFROM usuarios\nWHERE cidade = 'Recife'\nORDER BY nome;"
+ },
+ "swift": {
+  "arquivo": "main.swift",
+  "linguagem": "Swift",
+  "hl": "swift",
+  "cor": "#f92672",
+  "codigo": "let nome = \"mundo\"\nvar idade: Int? = nil\n\nif let idade = idade {\n    print(\"\\(nome) tem \\(idade)\")\n}"
+ },
+ "kotlin": {
+  "arquivo": "Main.kt",
+  "linguagem": "Kotlin",
+  "hl": "kotlin",
+  "cor": "#ae81ff",
+  "codigo": "fun main() {\n    val nome: String? = null\n    println(nome?.length ?: 0)\n}"
+ },
+ "lua": {
+  "arquivo": "ola.lua",
+  "linguagem": "Lua",
+  "hl": "lua",
+  "cor": "#66d9ef",
+  "codigo": "local function saudar(nome)\n  return \"Olá, \" .. nome\nend\n\nprint(saudar(\"mundo\"))"
+ },
+ "elixir": {
+  "arquivo": "ola.exs",
+  "linguagem": "Elixir",
+  "hl": "elixir",
+  "cor": "#ae81ff",
+  "codigo": "defmodule Ola do\n  def saudar(nome) do\n    \"Olá, #{nome}!\" |> IO.puts()\n  end\nend\n\nOla.saudar(\"mundo\")"
+ }
+}

@@ -1,0 +1,13 @@
+# arquivos grandes / pessoais (não publicar)
+assets/fundo_preenchimento_20min.mp4
+banco/assets.db
+banco/*.db-journal
+*.part
+.DS_Store
+__pycache__/
+node_modules/
+venv/
+venv_align/
+
+# material privado (marca do canal, assets de vídeos específicos, pacote de marca do CapCut)
+privado/
