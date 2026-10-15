@@ -566,7 +566,7 @@ EV_G = []  # eventos de itens de grafo (palavra a palavra)
 VAZIOS = set()
 
 
-def layout(itens, dir_, W=1760, H=940):
+def layout(itens, dir_, W=1760, H=940, smax=1.5):
     idx = {it["id"]: i for i, it in enumerate(itens) if it["id"]}
     n = len(itens)
     base = [i for i, it in enumerate(itens) if not it["sobre"] and it["img"]]
@@ -624,6 +624,17 @@ def layout(itens, dir_, W=1760, H=940):
                 for i in niveis[d]
             }
             espalha(niveis[d], des)
+    # ALINHAMENTO PELO ÍCONE (não pelo texto): irmãos de um mesmo nível ficam com passo uniforme entre os CENTROS dos ícones,
+    # usando o maior item do grupo como medida. Sem isso o rótulo mais longo empurra os vizinhos e os ícones ficam desalinhados.
+    for d, nivel in niveis.items():
+        grupos = {}
+        for i in nivel:
+            grupos.setdefault(tuple(sorted(pais[i])), []).append(i)
+        if len(grupos) == 1 and len(nivel) > 1:  # um único grupo no nível (fileira ou leque): centraliza com passo igual
+            passo = max(larg(i) for i in nivel) + GAPB
+            centro = sum(pos[i] for i in nivel) / len(nivel)
+            for k, i in enumerate(sorted(nivel, key=lambda i: pos[i])):
+                pos[i] = centro + (k - (len(nivel) - 1) / 2) * passo
     # coordenada de profundidade
     espessura = {d: max(prof(i) for i in niveis[d]) for d in niveis}
     cd, c = {}, 0
@@ -636,7 +647,7 @@ def layout(itens, dir_, W=1760, H=940):
     hi = max(pos[i] + larg(i) / 2 for i in base)
     ext_larg = hi - lo
     ext_x, ext_y = (ext_prof, ext_larg) if LR else (ext_larg, ext_prof)
-    s = min(1.5, W / ext_x, H / ext_y)  # amplia até 1.5x para ocupar a tela
+    s = min(smax, W / ext_x, H / ext_y)  # amplia até `smax` para ocupar a tela
     cl = (lo + hi) / 2
     cp = (cd[0] - espessura[0] / 2 + cd[L] + espessura[L] / 2) / 2
     out = {}
@@ -791,12 +802,18 @@ def montar_grafo(c, t0, t1):
     return dict(tipo="grafo", id=c["id"], itens=out_items, arestas=arestas), ev
 
 
+def bbox_real(itens, out):
+    """Caixa que envolve TODOS os itens desenhados (placa + rótulo, com a largura real do logo): (x0, y0, x1, y1) em px."""
+    rs = [retangulo(itens[i], out[i]) for i in range(len(itens)) if itens[i]["img"]]
+    return (min(r[0] for r in rs), min(r[1] for r in rs), max(r[2] for r in rs), max(r[3] for r in rs))
+
+
 def grafo_estatico(itens, dir_, liga, W, H):
     """Layout de um grafo/árvore dentro de uma região WxH (para peças de cenas compostas). Revelação sequencial no TS."""
     for it in itens:
         resolver_imagem(it)
     idx = {it["id"]: i for i, it in enumerate(itens) if it["id"]}
-    pos, s, depth = layout(itens, dir_, W, H)
+    pos, s, depth = layout(itens, dir_, W, H, smax=1.0)  # a ampliação final (ESCALA_GRAFO) é feita depois, com o bbox real
     out = []
     for i, it in enumerate(itens):
         if it["sobre"]:
@@ -844,7 +861,8 @@ def grafo_estatico(itens, dir_, liga, W, H):
                 bus=barras[(a, b)],
             )
         )
-    return out, arestas
+    bbox = bbox_real(itens, out)
+    return out, arestas, bbox
 
 
 def montar_texto(c, t0, t1):
@@ -963,7 +981,7 @@ def montar_composta(c, t0, t1):
                     )
         if p["tipo"] == "grafo":
             ems = [it.get("em") for it in props["itens"]]
-            itens_g, arestas_g = grafo_estatico(props["itens"], props["dir"], props["liga"], 1300, 700)
+            itens_g, arestas_g, bbox_g = grafo_estatico(props["itens"], props["dir"], props["liga"], 1700, 800)
             eventos_g, busca_g = [], t
             for k_, em_ in enumerate(ems):
                 if em_ is None:
@@ -995,23 +1013,31 @@ def montar_composta(c, t0, t1):
                 nome_g = f"g{len(EV_G)}_{c['id']}"
                 EV_G.append((f"{c['id']}-{nome_g}", tg))
                 eventos_g.append(f"{c['id']}-{nome_g}")
-            props = dict(itens=itens_g, arestas=arestas_g, eventos=eventos_g, esc=CFG["ESC_GRAFO"])
-            # caixa do grafo já ampliada (esc) dentro do quadro e FORA da zona do avatar do canal (canto inferior direito 240x240)
-            if itens_g:
-                xs = [(g["x"] - max(g["h"] * 0.6, 150), g["x"] + max(g["h"] * 0.6, 150)) for g in itens_g]
-                ys = [(g["y"] - g["h"] / 2, g["y"] + g["h"] / 2 + 70) for g in itens_g]
-                rx0, rx1, ry0, ry1 = (
-                    min(a for a, _ in xs),
-                    max(b for _, b in xs),
-                    min(a for a, _ in ys),
-                    max(b for _, b in ys),
+            # o grafo COMPLETO (último item) precisa ficar visível >= 2.5 s antes de o próximo clipe/fim da cena escondê-lo
+            _ult = max([e[1] for e in EV_G if e[0].startswith(c["id"] + "-")] + [t])
+            _esconde = min([a_ - CFG["LEAD_CLIPE"] for a_, _ in JC.get(c["id"], []) if a_ - CFG["LEAD_CLIPE"] > t] + [t1 - SAIDA])
+            if _esconde - _ult < 2.5:
+                AVISOS.append(
+                    f"[{c['id']}] grafo de {t:.1f}s não completa: último item em {_ult:.1f}s e some em {_esconde:.1f}s (< 2.5 s completo); "
+                    f"antecipe os itens, encurte o grafo ou mova o clipe (animação 'só de um lado' é proibida)"
                 )
-                # ampliação automática: até ESCALA_GRAFO, limitada pelo que cabe no quadro (±900 × ±500) centrado
-                e_ = round(min(CFG["ESC_GRAFO"], 1800 / max(rx1 - rx0, 1), 1000 / max(ry1 - ry0, 1)), 2)
+            props = dict(itens=itens_g, arestas=arestas_g, eventos=eventos_g, esc=CFG["ESC_GRAFO"])
+            # Ampliação automática com o bbox REAL (largura de logos incluída): até ESCALA_GRAFO, limitada pelo que cabe no quadro (±900 × ±480),
+            # recentralizada, e fora da zona do avatar do canal (canto inferior direito).
+            if itens_g:
+                rx0, ry0, rx1, ry1 = bbox_g
+                e_ = round(min(CFG["ESC_GRAFO"], 1800 / max(rx1 - rx0, 1), 960 / max(ry1 - ry0, 1)), 2)
                 props["esc"] = e_
                 cx, cy = (rx0 + rx1) / 2, (ry0 + ry1) / 2  # recentraliza o grafo
                 props["dx"], props["dy"] = round(-cx * e_, 1), round(-cy * e_, 1)
                 x0, x1, y0, y1 = (rx0 - cx) * e_, (rx1 - cx) * e_, (ry0 - cy) * e_, (ry1 - cy) * e_
+                for _k, _g in enumerate(itens_g):  # nenhum elemento pode ser gigante (placa larga de logo cortada na borda)
+                    _w = max(_g.get("pw") or 0, _g.get("iw") or 0, _g["h"]) * e_
+                    _h = max(_g.get("ph") or 0, _g["h"]) * e_
+                    if _w > 720 or _h > 520:
+                        AVISOS.append(
+                            f"[{c['id']}] item {_k + 1} do grafo ({_g['img']}) fica gigante ({_w:.0f}x{_h:.0f}px): diminua `h` ou use logo mais compacto"
+                        )
                 if e_ < 1.2:
                     AVISOS.append(
                         f"[{c['id']}] grafo só cabe ampliado {e_}x (< 1.2x: pequeno demais, o usuário dá zoom à mão): menos itens/ramos"
@@ -1040,6 +1066,11 @@ def montar_composta(c, t0, t1):
             mx = max(len(re.sub(r"\*([a-z]:)?", "", l)) for l in props["linhas"]) + 2
             props["tam"] = int(max(56, min(84, 1500 / (mx * 0.61))))
         out.append(dict(slot=p["slot"], tipo=p["tipo"], props=props, beat=nomes[t]))
+    VIDA_PECAS[c["id"]] = []
+    for _p, _t in zip(pecas, tempos):
+        _some = min([a_ - CFG["LEAD_CLIPE"] for a_, _ in JC.get(c["id"], []) if a_ - CFG["LEAD_CLIPE"] > _t] + [t1 - SAIDA])
+        if _p["tipo"] != "titulo":
+            VIDA_PECAS[c["id"]].append((_t, _some))
     js = dict(tipo="secao" if c["tipo"] == "secao" else "item", id=c["id"], pecas=out)
     if c["tipo"] == "item":
         i = c["idx"]
@@ -1451,16 +1482,17 @@ if __name__ == "__main__":
                 raise SystemExit(
                     f"BROLL: '{item}' nao e uma janela B(...)/V(...) (no webdoc com B-roll o vídeo só roda em B/V ou nas pausas de uma ListaCurta; animação e vídeo não disputam a tela)"
                 )
-        elif item not in janelas or janelas[item][2] != "item":
-            raise SystemExit(f"BROLL: '{item}' nao e um item de lista (B-roll so dentro de itens)")
+        elif item not in janelas or janelas[item][2] not in ("item", "secao", "vazio"):
+            raise SystemExit(
+                f"BROLL: '{item}' nao e uma cena de item/Secao/Bloco/V (B-roll não roda em G/Tx; use Bloco(...) no gancho e V/Secao no encerramento)"
+            )
         ini, fim, _ = janelas[item]
         dur_tl = (i1 - i0) / vel
         if webdoc and item in JANELAS_VIDEO:
             ini = min(a_ for a_, _ in JANELAS_VIDEO[item])
         if not webdoc:
-            assert (
-                t0 >= ini + MENU_DURACAO - 0.05
-            ), f"BROLL {item}: comeca antes do fim do menu/cartela ({ini + MENU_DURACAO:.1f}s)"
+            _piso = MENU_DURACAO if janelas[item][2] == "item" else (3.0 if janelas[item][2] == "secao" else 0.0)
+            assert t0 >= ini + _piso - 0.05, f"BROLL {item}: comeca antes do fim da cartela/animação inicial ({ini + _piso:.1f}s)"
         else:
             assert t0 >= ini - 0.05, f"BROLL {item}: comeca antes da janela ({ini:.1f}s)"
         assert t0 + dur_tl <= fim + 0.05, f"BROLL {item}: passa do fim do item ({fim:.1f}s)"
@@ -1468,6 +1500,13 @@ if __name__ == "__main__":
             1.0 <= vel <= 2.0
         ), f"BROLL {item}: velocidade {vel} (entre 1.0 e 2.0; o usuário estica o clipe com 1.3-1.9x ao remover animações)"
         assert t0 >= fim_anterior - 0.01, f"BROLL {item}: sobrepoe o clipe anterior"
+        if por_item.get(item):  # vão entre dois clipes da MESMA janela: ou 0 ou uma janela de animação de verdade (>= 4 s)
+            _gap = t0 - por_item[item][-1]["t_fim"]
+            if 0.05 < _gap < 4.0:
+                AVISOS.append(
+                    f"[{item}] vão de {_gap:.1f}s entre dois clipes ({por_item[item][-1]['t_fim']:.1f}→{t0:.1f}s): pequeno demais para uma animação; "
+                    f"estenda o clipe anterior até {t0:.1f}s (ou abra um vão >= 4 s com animação)"
+                )
         if dur_tl < 3.0:
             print(
                 "AVISO B-ROLL:",
@@ -1486,6 +1525,25 @@ if __name__ == "__main__":
     for a_ in AVISOS_BROLL:
         print("AVISO PEÇA×B-ROLL:", a_)
     if broll and not webdoc:
+        # COBERTURA: nenhum trecho >= 2 s pode ficar só com o fundo e a fala (sem clipe E sem animação visível).
+        livres_ok = set(getattr(_pd, "VAZIOS_PERMITIDOS", []))
+        for it_id, (ini_, fim_, tp_) in janelas.items():
+            if tp_ not in ("item", "secao", "vazio") or it_id in livres_ok:
+                continue
+            a0 = ini_ + (MENU_DURACAO if tp_ == "item" else 0.0)  # a cartela do item conta como conteúdo
+            ocupado = [(x["t_inicio"], x["t_fim"]) for x in por_item.get(it_id, [])] + [
+                (a, b) for a, b in VIDA_PECAS.get(it_id, [])
+            ]
+            if tp_ == "secao" and not VIDA_PECAS.get(it_id):
+                ocupado.append((ini_, ini_ + 3.0))
+            cur = a0
+            for a, b in sorted(ocupado):
+                if a - cur >= 2.0:
+                    AVISOS.append(f"[{it_id}] {cur:.1f}–{a:.1f}s ({a - cur:.1f}s) só com fundo e fala: falta animação ou B-roll")
+                cur = max(cur, b)
+            if fim_ - cur >= 2.0:
+                AVISOS.append(f"[{it_id}] {cur:.1f}–{fim_:.1f}s ({fim_ - cur:.1f}s) só com fundo e fala: falta animação ou B-roll")
+
         # proporção vídeo × animação (o usuário corta animação e estica B-roll: o padrão é VÍDEO; animação é tempero)
         tot_it = tot_cl = 0.0
         viol = []

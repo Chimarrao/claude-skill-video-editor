@@ -73,6 +73,20 @@ export function menuTerminal(itens: ItemTerminal[], largura = 820, titulo = 'ite
   jan.add(barra);
   const grupos: Node[] = [];
   const nomes: Txt[] = [];
+  // COLUNAS ALINHADAS (nome | detalhe): o detalhe começa sempre no mesmo x, à ESQUERDA, logo depois do maior nome.
+  // Se não couber na janela, todas as fontes encolhem juntas (mesmo fator).
+  const slug = (r: string) =>
+    r
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-|-$/g, '');
+  const maiorNome = Math.max(...itens.map(i => slug(i.rotulo).length));
+  const maiorDetalhe = Math.max(0, ...itens.map(i => (i.detalhe ?? '').length));
+  const FN = 28; // fonte do nome
+  const FD = 24; // fonte do detalhe
+  const larguraNecessaria = 36 + 230 + maiorNome * FN * 0.62 + 36 + maiorDetalhe * FD * 0.62 + 36;
+  const k = Math.min(1, largura / larguraNecessaria);
+  const colDetalhe = -largura / 2 + 36 + 230 + maiorNome * FN * 0.62 * k + 36;
   itens.forEach((it, i) => {
     const g = (<Node opacity={0} />) as Node;
     const y = yL(i);
@@ -99,13 +113,10 @@ export function menuTerminal(itens: ItemTerminal[], largura = 820, titulo = 'ite
     );
     const n = (
       <Txt
-        text={it.rotulo
-          .toLowerCase()
-          .replace(/[^a-z0-9]+/g, '-')
-          .replace(/^-|-$/g, '')}
+        text={slug(it.rotulo)}
         fontFamily={MONO}
         fontWeight={700}
-        fontSize={28}
+        fontSize={FN * k}
         fill={MK.comentario}
         position={[x0 + 230, y]}
         offset={[-1, 0]}
@@ -117,10 +128,10 @@ export function menuTerminal(itens: ItemTerminal[], largura = 820, titulo = 'ite
         <Txt
           text={it.detalhe}
           fontFamily={MONO}
-          fontSize={24}
+          fontSize={FD * k}
           fill={MK.cinza}
-          position={[largura / 2 - 36, y]}
-          offset={[1, 0]}
+          position={[colDetalhe, y]}
+          offset={[-1, 0]}
         />,
       );
     jan.add(g);

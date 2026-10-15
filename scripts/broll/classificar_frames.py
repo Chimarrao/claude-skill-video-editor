@@ -13,6 +13,7 @@ O OCR (tesseract) conta palavras GRANDES (altura > 4,5% do quadro): texto de edi
 import argparse, glob, json, os, subprocess, sys, tempfile
 import numpy as np
 from PIL import Image
+import cv2
 import torch
 from transformers import CLIPModel, CLIPProcessor
 
@@ -68,6 +69,16 @@ def classificar(imgs):
             s[d] += float(v)
         out.append(s)
     return out
+
+
+_HAAR = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_frontalface_default.xml")
+
+
+def tem_rosto(path):
+    """True se o detector Haar encontra um rosto frontal (>= 7% da altura) no quadro."""
+    cinza = cv2.cvtColor(cv2.imread(path), cv2.COLOR_BGR2GRAY)
+    minimo = max(24, int(cinza.shape[0] * 0.07))
+    return len(_HAAR.detectMultiScale(cinza, 1.1, 6, minSize=(minimo, minimo))) > 0
 
 
 def ocr_grande(path):
@@ -128,7 +139,13 @@ def analisar(arq, t0, t1, passo):
         sc = classificar([Image.open(f).convert("RGB") for _, f in lote])
         for (t, f), s in zip(lote, sc):
             nocr = ocr_grande(f)
+            if tem_rosto(
+                f
+            ):  # rosto/webcam/apresentador em qualquer parte do quadro (CLIP não vê rostos pequenos)
+                s["pessoa"] = max(s["pessoa"], 0.9)
             topo = max(s, key=s.get)
+            if s["pessoa"] >= 0.9:
+                topo = "pessoa"
             if nocr >= 3 and topo in ("desktop", "texto_editado"):
                 topo = "texto_editado"
             res.append(dict(t=t, cat=topo, ocr=nocr, **{k: round(v, 2) for k, v in s.items()}))
@@ -141,13 +158,41 @@ def resumo(res):
     return pc
 
 
-def reprova(pc):
+def cortes_por_minuto(arq, t0, t1):
+    """Taxa de cortes de cena (ffmpeg scene>0.35). Vídeo SUPER EDITADO (muitos cortes, zooms, memes) não serve como B-roll de tela."""
+    r = subprocess.run(
+        [
+            "ffmpeg",
+            "-v",
+            "info",
+            "-ss",
+            str(t0),
+            "-t",
+            str(max(1.0, t1 - t0)),
+            "-i",
+            arq,
+            "-vf",
+            "select='gt(scene,0.35)',showinfo",
+            "-an",
+            "-f",
+            "null",
+            "-",
+        ],
+        capture_output=True,
+        text=True,
+    )
+    n = r.stderr.count("pts_time")
+    return n * 60.0 / max(1.0, t1 - t0)
+
+
+def reprova(pc, cpm=0.0):
     return (
         pc["jogo"] > 0.15
         or pc["pessoa"] > 0.15
         or pc["texto_editado"] > 0.25
         or pc["camera_monitor"] > 0.40
         or pc["preto"] > 0.3
+        or cpm > 14  # mais de ~14 cortes/min = vídeo super editado
     )
 
 
@@ -161,13 +206,15 @@ if a.clipes:
             continue
         res = analisar(pv, 0, max(2, b["t_fim"] - b["t_inicio"]), 2.0)
         pc = resumo(res)
-        r = reprova(pc)
+        cpm = cortes_por_minuto(pv, 0, max(2, b["t_fim"] - b["t_inicio"]) / 1.0)
+        r = reprova(pc, cpm)
         ruins += r
         marca = "REPROVA" if r else "ok     "
         nome = os.path.basename(b["arquivo"])[:34]
         print(
             f"{marca} clip {k:02d} {nome:34s} fonte {b['in']:.0f}-{b['out']:.0f}s  "
             + " ".join(f"{c}={pc[c]*100:.0f}%" for c in nomes if pc[c] > 0)
+            + f" cortes/min={cpm:.0f}"
         )
         relatorio.append(dict(clip=k, arquivo=b["arquivo"], **pc))
 if a.video:
@@ -197,7 +244,7 @@ if a.video:
         f"TRECHOS LIMPOS em {os.path.basename(a.video)} (desktop, sem jogo/pessoa/texto editado; >= {a.min_limpo:.0f}s):"
     )
     for x, y in runs:
-        print(f"   {x:7.0f}-{y:7.0f}s  ({y - x:.0f}s)")
+        print(f"   {x:7.0f}-{y:7.0f}s  ({y - x:.0f}s)  cortes/min={cortes_por_minuto(a.video, x, y):.0f}")
     relatorio = dict(limpos=runs, quadros=res)
 if a.json:
     json.dump(relatorio, open(a.json, "w"), ensure_ascii=False, indent=1)
