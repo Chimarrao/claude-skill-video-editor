@@ -3,10 +3,10 @@
 // 2) exportador FFmpeg gera .mov ProRes 4444 com canal alpha (o padrão é mp4 sem transparência).
 import fs from 'node:fs';
 
-function patch(file, pares) {
+function patch(file, pairs) {
   if (!fs.existsSync(file)) return console.log('ignorado (não existe):', file);
   let s = fs.readFileSync(file, 'utf8');
-  for (const [de, para] of pares) s = s.split(de).join(para);
+  for (const [from, dst] of pairs) s = s.split(from).join(dst);
   fs.writeFileSync(file, s);
   console.log('ok:', file);
 }

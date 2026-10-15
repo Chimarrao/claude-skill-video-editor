@@ -35,13 +35,13 @@ if [ -d "/Applications/CapCut.app" ]; then ok "CapCut" "/Applications/CapCut.app
 if has_cmd sqlite3; then ok "sqlite3" "$(sqlite3 --version | cut -d' ' -f1)"; else nok "sqlite3" "brew install sqlite"; OPTIONAL_MISSING=1; fi
 echo "== Banco de assets"
 cd "$(dirname "$0")/.." || exit 1
-if [ -f banco/assets.db ]; then ok "banco/assets.db" "$(sqlite3 banco/assets.db 'select count(*) from assets' 2>/dev/null) assets"; elif [ -f banco/assets.publico.db ]; then nok "banco/assets.db" "cp banco/assets.publico.db banco/assets.db"; if ask "copiar banco público"; then cp banco/assets.publico.db banco/assets.db && ok "banco/assets.db" "criado"; fi; fi
+if [ -f database/assets.db ]; then ok "database/assets.db" "$(sqlite3 database/assets.db 'select count(*) from assets' 2>/dev/null) assets"; elif [ -f database/assets.publico.db ]; then nok "database/assets.db" "cp database/assets.publico.db database/assets.db"; if ask "copiar banco público"; then cp database/assets.publico.db database/assets.db && ok "database/assets.db" "criado"; fi; fi
 if [ "$PROJECT" = 1 ]; then
   echo "== Projeto atual ($(pwd -P | sed 's/.*\///' ) → use dentro de animacao/)"; cd "$OLDPWD" 2>/dev/null || true
   [ -f package.json ] || { nok "package.json" "rode dentro da pasta animacao/ do projeto"; exit 1; }
   [ -d node_modules ] && ok "node_modules" "ok" || { nok "node_modules" "npm install"; ask "npm install" && npm install --no-audit --no-fund && npm run postinstall; }
   [ -x venv/bin/python ] && ok "venv (whisper)" "ok" || { nok "venv" "uv venv --python 3.12 venv && uv pip install --python venv/bin/python faster-whisper pillow onnxruntime 'opencv-python-headless<4.11'"; ask "venv + faster-whisper" && uv venv --python 3.12 venv && uv pip install --python venv/bin/python faster-whisper pillow onnxruntime "opencv-python-headless<4.11"; }
-  [ -x venv_align/bin/python ] && ok "venv_align" "ok" || { nok "venv_align" "uv venv --python 3.12 venv_align && uv pip install --python venv_align/bin/python torch torchaudio soundfile 'numpy<2' 'transformers<4.50' pillow 'opencv-python-headless<4.11'"; ask "venv_align (alinhador + CLIP)" && uv venv --python venv_align/bin/python torch torchaudio soundfile "numpy<2" "transformers<4.50" pillow "opencv-python-headless<4.11"; }
+  [ -x venv_align/bin/python ] && ok "venv_align" "ok" || { nok "venv_align" "uv venv --python 3.12 venv_align && uv pip install --python venv_align/bin/python torch torchaudio soundfile 'numpy<2' 'transformers<4.50' pillow 'opencv-python-headless<4.11'"; ask "venv_align (alinhador + CLIP)" && uv venv --python 3.12 venv_align && uv pip install --python venv_align/bin/python torch torchaudio soundfile "numpy<2" "transformers<4.50" pillow "opencv-python-headless<4.11"; }
   [ -d /tmp/pp/node_modules/puppeteer-core ] && ok "puppeteer-core" "/tmp/pp" || { nok "puppeteer-core" "mkdir -p /tmp/pp && cd /tmp/pp && npm i puppeteer-core"; ask "puppeteer-core" && (mkdir -p /tmp/pp && cd /tmp/pp && npm i puppeteer-core); }
 fi
 echo; [ "$MISSING" = 0 ] && echo "Tudo o que é obrigatório está instalado." || echo "Faltam itens obrigatórios (veja ❌). Rode com --install."

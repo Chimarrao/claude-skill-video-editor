@@ -1,27 +1,27 @@
 #!/usr/bin/env python3
-"""Planeja o B-roll na timeline a partir de broll_analise.json (com `item` e `nota` preenchidos olhando as folhas) + plano.json + transcricao.json.
-Uso: python plan_broll.py [--analysis broll_analise.json] [--plan plano.json] [--transcript transcricao.json] [--max-per-item 2] [--tl-max 12]
-Regras: B-roll só dentro de itens (depois do menu/cartela); trechos com nota>=3 e sem avisos_visuais; 1 clipe por item (2 se houver trecho bom
+"""Planeja o B-roll na timeline a partir de broll_analysis.json (com `item` e `nota` preenchidos olhando as folhas) + plan.json + transcription.json.
+Uso: python plan_broll.py [--analysis broll_analysis.json] [--plan plan.json] [--transcript transcription.json] [--max-per-item 2] [--tl-max 12]
+Regras: B-roll só dentro de itens (depois do menu/cartela); trechos com nota>=3 e sem warnings_visual; 1 clipe por item (2 se houver trecho bom
 e janela >= 30 s; 3 nunca automático); início/fim nos limites de frase da narração; cada clipe >= 3 s NA timeline (já com a aceleração);
-sem sobreposição; item sem trecho bom = fica sem B-roll (listado no resumo). Saída: broll_plano.json e linhas `BROLL = [...]` para o plan_data.py.
-Campos opcionais por trecho: `melhor_in` (s da fonte onde começar), `velocidade_sugerida` (1/1.5/2)."""
+sem sobreposição; item sem trecho bom = fica sem B-roll (listado no resumo). Saída: broll_plan.json e linhas `BROLL = [...]` para o plan_data.py.
+Campos opcionais por trecho: `best_in` (s da fonte onde começar), `speed_suggested` (1/1.5/2)."""
 
 import argparse, bisect, json, sys
 
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--analysis", "--analise", default="broll_analise.json")
-    parser.add_argument("--plan", "--plano", default="plano.json")
-    parser.add_argument("--transcript", "--transcricao", default="transcricao.json")
-    parser.add_argument("--max-per-item", "--max-por-item", type=int, default=2)
+    parser.add_argument("--analysis", default="broll_analysis.json")
+    parser.add_argument("--plan", default="plan.json")
+    parser.add_argument("--transcript", default="transcription.json")
+    parser.add_argument("--max-per-item", type=int, default=2)
     parser.add_argument("--tl-max", type=float, default=12.0)
-    parser.add_argument("--min-score", "--nota-min", type=int, default=3)
+    parser.add_argument("--min-score", type=int, default=3)
     args = parser.parse_args()
     analysis = json.load(open(args.analysis))
     plan = json.load(open(args.plan))
     transcript = json.load(open(args.transcript))
-    windows, menu_duration = plan["janelas"], plan.get("menu_duracao", 3.7)
+    windows, menu_duration = plan["windows"], plan.get("menu_duration", 3.7)
     boundaries = sorted({round(x, 2) for s in transcript["segments"] for x in (s["start"], s["end"])})
 
     def next_boundary(t):  # primeira fronteira >= t
@@ -34,11 +34,11 @@ def main():
 
     by_item = {}
     for v in analysis:
-        if v.get("tipo") != "video":
+        if v.get("kind") != "video":
             continue
-        for t in v["trechos"]:
-            if t.get("item") and (t.get("nota") or 0) >= args.min_score and not t.get("avisos_visuais"):
-                by_item.setdefault(t["item"], []).append((t["nota"], v, t))
+        for t in v["spans"]:
+            if t.get("item") and (t.get("score") or 0) >= args.min_score and not t.get("warnings_visual"):
+                by_item.setdefault(t["item"], []).append((t["score"], v, t))
     plan_out, summary, skipped = [], [], []
     for item, (start, end, type) in windows.items():
         if type != "item":
@@ -52,8 +52,8 @@ def main():
         used = 0
         cursor = lo
         for k, (score, v, t) in enumerate(candidates[:n]):
-            speed = float(t.get("velocidade_sugerida", 1.5))
-            span = t["fim"] - t["inicio"]
+            speed = float(t.get("speed_suggested", 1.5))
+            span = t["end"] - t["start"]
             free_start = next_boundary(cursor) if k == 0 else next_boundary(max(cursor, lo + (hi - lo) * 0.45))
             if free_start >= hi - 3:
                 break
@@ -63,14 +63,14 @@ def main():
             tl_end = prev_boundary(free_start + duration)
             tl_end = tl_end if tl_end - free_start >= 3.0 else free_start + duration
             duration = tl_end - free_start
-            src_in = float(t.get("melhor_in", t["inicio"] + min(1.5, span * 0.2)))
+            src_in = float(t.get("best_in", t["start"] + min(1.5, span * 0.2)))
             src_out = src_in + duration * speed
-            if src_out > t["fim"] + 0.05:  # recua o início para caber
-                src_in = max(t["inicio"], t["fim"] - duration * speed)
+            if src_out > t["end"] + 0.05:  # recua o início para caber
+                src_in = max(t["start"], t["end"] - duration * speed)
                 src_out = src_in + duration * speed
-            plan_out.append((item, v["arquivo"], round(src_in, 2), round(src_out, 2), speed, round(free_start, 2)))
+            plan_out.append((item, v["file"], round(src_in, 2), round(src_out, 2), speed, round(free_start, 2)))
             summary.append(
-                f"{item:14} {free_start:7.1f}s +{duration:4.1f}s  {speed}x  {v['arquivo'].split('/')[-1]} [{src_in:.1f}-{src_out:.1f}] nota {score}"
+                f"{item:14} {free_start:7.1f}s +{duration:4.1f}s  {speed}x  {v['file'].split('/')[-1]} [{src_in:.1f}-{src_out:.1f}] nota {score}"
             )
             cursor = tl_end
             used += 1
@@ -78,18 +78,18 @@ def main():
             skipped.append((item, "trechos não cabem (>=3 s) na janela"))
     json.dump(
         [
-            dict(item=i, arquivo=f, **{"in": a_, "out": b}, velocidade=v, t_inicio=t)
+            dict(item=i, file=f, **{"in": a_, "out": b}, speed=v, t_start=t)
             for i, f, a_, b, v, t in plan_out
         ],
-        open("broll_plano.json", "w"),
+        open("broll_plan.json", "w"),
         ensure_ascii=False,
         indent=1,
     )
-    with open("broll_plano.py", "w") as f:
+    with open("broll_plan.py", "w") as f:
         f.write("BROLL = [\n" + "".join(f"    {tuple(p)!r},\n" for p in plan_out) + "]\n")
     print("\n".join(summary))
-    print(f"\n{len(plan_out)} clipes em {len({p[0] for p in plan_out})} itens; SEM B-roll: {skipped or 'nenhum'}")
-    print("-> broll_plano.json e broll_plano.py (cole BROLL no plano_dados.py e rode plan.py)")
+    print(f"\n{len(plan_out)} clipes em {len({p[0] for p in plan_out})} itens; SEM B-roll: {skipped or 'none'}")
+    print("-> broll_plan.json e broll_plan.py (cole BROLL no plan_data.py e rode plan.py)")
 
 
 if __name__ == "__main__":

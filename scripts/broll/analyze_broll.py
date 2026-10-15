@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
-"""Análise dos vídeos de B-roll (pasta Assets/) -> broll_analise.json + folhas de contato (a "visão" do assistente).
-Uso: python analyze_broll.py <folder> [--output broll_analise.json] [--contact-sheets folhas_broll] [--no-speech]
+"""Análise dos vídeos de B-roll (pasta Assets/) -> broll_analysis.json + folhas de contato (a "visão" do assistente).
+Uso: python analyze_broll.py <folder> [--output broll_analysis.json] [--contact-sheets sheets_broll] [--no-speech]
 Por arquivo: ffprobe (dur, resolução, fps, áudio), cortes de cena (scene>0.3), pretos (blackdetect), congelados (freezedetect),
 movimento médio (score de cena a 5 fps), transcrição da fala do clipe (faster-whisper, se houver áudio audível) e folhas de contato
-(1 frame a cada ~2 s + 1 frame por corte, com carimbo de tempo). Os campos item/nota/avisos_visuais são preenchidos DEPOIS, olhando as folhas.
+(1 frame a cada ~2 s + 1 frame por corte, com carimbo de tempo). Os campos item/nota/warnings_visual são preenchidos DEPOIS, olhando as folhas.
 Trechos candidatos = intervalos entre cortes (curtos são unidos), com score automático."""
 
 import argparse, json, os, re, subprocess, sys, tempfile
@@ -34,11 +34,11 @@ def ffprobe(path):
     v = next((s for s in d.get("streams", []) if s["codec_type"] == "video"), {})
     num, den = (v.get("r_frame_rate", "30/1").split("/") + ["1"])[:2]
     return dict(
-        duracao=float(d.get("format", {}).get("duration") or 0),
-        largura=v.get("width"),
-        altura=v.get("height"),
+        duration=float(d.get("format", {}).get("duration") or 0),
+        width=v.get("width"),
+        height=v.get("height"),
         fps=round(float(num) / max(float(den), 1), 2),
-        tem_audio=any(s["codec_type"] == "audio" for s in d.get("streams", [])),
+        has_audio=any(s["codec_type"] == "audio" for s in d.get("streams", [])),
         codec=v.get("codec_name"),
     )
 
@@ -88,7 +88,7 @@ def _db():
 
 def transcribe(path):
     # cache no banco (SHA-1 do arquivo + modelo)
-    model = os.environ.get("MODELO", "small")
+    model = os.environ.get("MODEL", "small")
     cache = Path(tempfile.mktemp(suffix=".json"))
     if (
         subprocess.run(
@@ -129,13 +129,13 @@ def _transcribe(path):
         capture_output=True,
     ).stdout
     w = np.frombuffer(raw, dtype=np.float32)[
-        : int(float(os.environ.get("FALA_MAX", 600)) * 16000)
-    ]  # só os primeiros FALA_MAX s (padrão 600) p/ não demorar em vídeos longos
-    m = WhisperModel(os.environ.get("MODELO", "small"), device="cpu", compute_type="int8")
+        : int(float(os.environ.get("SPEECH_MAX", 600)) * 16000)
+    ]  # só os primeiros SPEECH_MAX s (padrão 600) p/ não demorar em vídeos longos
+    m = WhisperModel(os.environ.get("MODEL", "small"), device="cpu", compute_type="int8")
     segments, info = m.transcribe(w, beam_size=3, vad_filter=True, condition_on_previous_text=False)
     return dict(
-        idioma=info.language,
-        segmentos=[dict(inicio=round(s.start, 2), fim=round(s.end, 2), texto=s.text.strip()) for s in segments],
+        language=info.language,
+        segments=[dict(start=round(s.start, 2), end=round(s.end, 2), text=s.text.strip()) for s in segments],
     )
 
 
@@ -218,8 +218,8 @@ def build_segments(duration, cuts, blacks, frozen, motion):
         if covers(blacks) > 0.15:
             warnings.append("tela preta")
         if covers(frozen) > 0.3:
-            warnings.append("congelado")
-        out.append(dict(inicio=round(a, 2), fim=round(b, 2), duracao=round(b - a, 2), avisos_auto=warnings))
+            warnings.append("frozen")
+        out.append(dict(start=round(a, 2), end=round(b, 2), duration=round(b - a, 2), warnings_auto=warnings))
     return out
 
 
@@ -232,52 +232,52 @@ def suggested_speed(motion, has_speech):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("folder")
-    parser.add_argument("--output", "--saida", default="broll_analise.json")
-    parser.add_argument("--contact-sheets", "--folhas", default="folhas_broll")
-    parser.add_argument("--no-speech", "--sem-fala", action="store_true")
+    parser.add_argument("--output", default="broll_analysis.json")
+    parser.add_argument("--contact-sheets", default="sheets_broll")
+    parser.add_argument("--no-speech", action="store_true")
     args = parser.parse_args()
     folder = Path(args.folder)
     results = []
     for file in sorted(folder.rglob("*")):
         if file.name.startswith(".") or file.suffix.lower() not in VIDEO_EXTS | IMAGE_EXTS:
             continue
-        print("analisando", file.name, flush=True)
+        print("analyzing", file.name, flush=True)
         if file.suffix.lower() in IMAGE_EXTS:
             results.append(
                 dict(
-                    arquivo=str(file),
-                    tipo="imagem",
-                    notas="imagem estática: usar só como still (≥3 s), sem velocidade",
+                    file=str(file),
+                    kind="image",
+                    scores="imagem estática: usar só como still (≥3 s), sem velocidade",
                 )
             )
             continue
         info = ffprobe(file)
         cuts, blacks, frozen, motion = single_pass(file)
-        volume = mean_volume(file) if info["tem_audio"] else -91.0
+        volume = mean_volume(file) if info["has_audio"] else -91.0
         speech = None if (args.no_speech or volume < -42) else transcribe(file)
-        has_speech = bool(speech and sum(len(s["texto"]) for s in speech["segmentos"]) > 25)
-        segments = build_segments(info["duracao"], cuts, blacks, frozen, motion)
+        has_speech = bool(speech and sum(len(s["text"]) for s in speech["segments"]) > 25)
+        segments = build_segments(info["duration"], cuts, blacks, frozen, motion)
         for segment in segments:
             segment.update(
                 item=None,
-                nota=None,
-                avisos_visuais=[],
-                ritmo=("lento" if motion < 0.012 else "movimentado"),
-                velocidade_sugerida=suggested_speed(motion, has_speech),
+                score=None,
+                warnings_visual=[],
+                rhythm=("slow" if motion < 0.012 else "busy"),
+                speed_suggested=suggested_speed(motion, has_speech),
             )
         results.append(
             dict(
-                arquivo=str(file),
-                tipo="video",
+                file=str(file),
+                kind="video",
                 **info,
                 cortes=cuts,
-                pretos=blacks,
-                congelados=frozen,
-                movimento=motion,
+                blacks=blacks,
+                frozen=frozen,
+                motion=motion,
                 volume_medio_db=volume,
-                fala=speech,
-                folhas=contact_sheet(file, info["duracao"], cuts, Path(args.contact_sheets), file.stem),
-                trechos=segments,
+                speech=speech,
+                sheets=contact_sheet(file, info["duration"], cuts, Path(args.contact_sheets), file.stem),
+                spans=segments,
             )
         )
     json.dump(results, open(args.output, "w"), ensure_ascii=False, indent=1)

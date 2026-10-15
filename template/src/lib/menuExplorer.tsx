@@ -1,133 +1,133 @@
 import {Circle, Layout, Rect, Txt} from '@motion-canvas/2d';
 import {all, createRef, easeInOutCubic, easeOutCubic, ThreadGenerator} from '@motion-canvas/core';
 import {MK, MONO} from './monokai';
-import {SOMBRA} from './estilo';
+import {SHADOW} from './style';
 
 export interface ItemMenu {
-  rotulo: string;
-  arquivo: string;
-  cor: string;
+  label: string;
+  file: string;
+  color: string;
 }
 export interface MenuExplorer {
   no: Rect;
   /** Entra com o destaque no item `de` (ou nenhum) e desliza até o item `para`. */
-  entrar(de: number, para: number): ThreadGenerator;
-  sair(): ThreadGenerator;
+  enter(from: number, dst: number): ThreadGenerator;
+  exit(): ThreadGenerator;
 }
 
-const ALTURA_LINHA = 46;
-const CABECALHO = 92;
+const HEIGHT_LINE = 46;
+const HEADER = 92;
 
 /**
  * Menu de itens no formato do explorador de arquivos do VS Code (Monokai). Aparece a cada troca de item da
  * lista: a barra de destaque desliza do item anterior para o novo; itens já vistos ficam claros.
  */
-export function menuExplorer(itens: ItemMenu[], largura = 700, titulo = 'ITENS'): MenuExplorer {
-  const altura = CABECALHO + itens.length * ALTURA_LINHA + 28;
-  const barra = createRef<Rect>();
+export function menuExplorer(items: ItemMenu[], width = 700, title = 'ITEMS'): MenuExplorer {
+  const height = HEADER + items.length * HEIGHT_LINE + 28;
+  const bar = createRef<Rect>();
   const no = createRef<Rect>();
-  const textos: Txt[] = [];
-  const pontos: Circle[] = [];
+  const texts: Txt[] = [];
+  const points: Circle[] = [];
   <Rect
     ref={no}
-    width={largura}
-    height={altura}
+    width={width}
+    height={height}
     radius={18}
-    fill={MK.fundo}
+    fill={MK.background}
     stroke="rgba(255,255,255,0.16)"
     lineWidth={2}
     clip
     opacity={0}
-    {...SOMBRA}
+    {...SHADOW}
   >
     <Rect
       layout={false}
-      width={largura}
-      height={CABECALHO - 14}
-      y={-altura / 2 + (CABECALHO - 14) / 2}
-      fill={MK.fundo2}
+      width={width}
+      height={HEADER - 14}
+      y={-height / 2 + (HEADER - 14) / 2}
+      fill={MK.background2}
     />
     <Txt
       layout={false}
-      text="EXPLORADOR"
+      text="EXPLORER"
       fontFamily={MONO}
       fontSize={22}
       fontWeight={700}
       letterSpacing={4}
-      fill={MK.cinza}
-      x={-largura / 2 + 36}
-      y={-altura / 2 + 30}
+      fill={MK.gray}
+      x={-width / 2 + 36}
+      y={-height / 2 + 30}
       offset={[-1, 0]}
     />
     <Txt
       layout={false}
-      text={`⌄ ${titulo}`}
+      text={`⌄ ${title}`}
       fontFamily={MONO}
       fontSize={24}
       fontWeight={700}
-      fill={MK.texto}
-      x={-largura / 2 + 36}
-      y={-altura / 2 + 66}
+      fill={MK.text}
+      x={-width / 2 + 36}
+      y={-height / 2 + 66}
       offset={[-1, 0]}
     />
     <Rect
-      ref={barra}
+      ref={bar}
       layout={false}
-      width={largura - 24}
-      height={ALTURA_LINHA - 6}
+      width={width - 24}
+      height={HEIGHT_LINE - 6}
       radius={8}
       fill="rgba(166, 226, 46, 0.16)"
-      stroke={MK.verde}
+      stroke={MK.green}
       lineWidth={2}
-      y={-altura / 2 + CABECALHO + ALTURA_LINHA / 2}
+      y={-height / 2 + HEADER + HEIGHT_LINE / 2}
       opacity={0}
     />
   </Rect>;
-  const raiz = no();
-  itens.forEach((it, i) => {
-    const y = -altura / 2 + CABECALHO + ALTURA_LINHA * i + ALTURA_LINHA / 2;
+  const root = no();
+  items.forEach((it, i) => {
+    const y = -height / 2 + HEADER + HEIGHT_LINE * i + HEIGHT_LINE / 2;
     const c = createRef<Circle>();
     const t = createRef<Txt>();
-    raiz.add(<Circle ref={c} layout={false} size={16} fill={it.cor} x={-largura / 2 + 52} y={y} opacity={0.35} />);
-    raiz.add(
+    root.add(<Circle ref={c} layout={false} size={16} fill={it.color} x={-width / 2 + 52} y={y} opacity={0.35} />);
+    root.add(
       <Txt
         ref={t}
         layout={false}
-        text={`${itens.length > 9 ? String(i + 1).padStart(2, '0') : String(i + 1)}  ${it.arquivo}`}
+        text={`${items.length > 9 ? String(i + 1).padStart(2, '0') : String(i + 1)}  ${it.file}`}
         fontFamily={MONO}
         fontSize={29}
         fontWeight={500}
-        fill={MK.comentario}
-        x={-largura / 2 + 82}
+        fill={MK.comment}
+        x={-width / 2 + 82}
         y={y}
         offset={[-1, 0]}
       />,
     );
-    textos.push(t());
-    pontos.push(c());
+    texts.push(t());
+    points.push(c());
   });
-  const yDe = (i: number) => -altura / 2 + CABECALHO + ALTURA_LINHA * i + ALTURA_LINHA / 2;
+  const yFrom = (i: number) => -height / 2 + HEADER + HEIGHT_LINE * i + HEIGHT_LINE / 2;
   return {
-    no: raiz,
-    *entrar(de: number, para: number) {
+    no: root,
+    *enter(from: number, dst: number) {
       // itens anteriores a `de` já vistos (claros)
-      textos.forEach((t, i) => {
-        t.fill(i <= de ? MK.texto : MK.comentario);
-        pontos[i].opacity(i <= de ? 0.9 : 0.35);
+      texts.forEach((t, i) => {
+        t.fill(i <= from ? MK.text : MK.comment);
+        points[i].opacity(i <= from ? 0.9 : 0.35);
       });
-      barra().y(yDe(Math.max(de, 0)));
-      barra().opacity(de >= 0 ? 1 : 0);
-      raiz.scale(0.94);
-      yield* all(raiz.opacity(1, 0.3), raiz.scale(1, 0.4, easeOutCubic));
-      yield* barra().opacity(1, 0.15);
+      bar().y(yFrom(Math.max(from, 0)));
+      bar().opacity(from >= 0 ? 1 : 0);
+      root.scale(0.94);
+      yield* all(root.opacity(1, 0.3), root.scale(1, 0.4, easeOutCubic));
+      yield* bar().opacity(1, 0.15);
       yield* all(
-        barra().y(yDe(para), 0.55, easeInOutCubic),
-        textos[para].fill(MK.verde, 0.4),
-        pontos[para].opacity(1, 0.4),
+        bar().y(yFrom(dst), 0.55, easeInOutCubic),
+        texts[dst].fill(MK.green, 0.4),
+        points[dst].opacity(1, 0.4),
       );
     },
-    *sair() {
-      yield* all(raiz.opacity(0, 0.3), raiz.scale(0.96, 0.3));
+    *exit() {
+      yield* all(root.opacity(0, 0.3), root.scale(0.96, 0.3));
     },
   };
 }

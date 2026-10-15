@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
 """Gera um vídeo-placeholder (fundo escuro + texto) para trechos SEM B-roll aproveitável, para o usuário trocar à mão no CapCut.
 Uso: generate_placeholder.py "<subject>" --output ../Assets/_placeholders/ph_x.mp4 [--duration 60] [--detail "o que colocar aqui"]
-No plano_dados.py use como clipe normal: ('item', '<saida>', 0, <dur_do_trecho>, 1.0, <t_inicio>)."""
+No plan_data.py use como clipe normal: ('item', '<saida>', 0, <dur_do_trecho>, 1.0, <t_start>)."""
 
 import argparse, os, subprocess
 from PIL import Image, ImageDraw, ImageFont
 
 parser = argparse.ArgumentParser()
 parser.add_argument("subject")
-parser.add_argument("--output", "--saida", required=True)
-parser.add_argument("--duration", "--dur", type=float, default=60)
-parser.add_argument("--detail", "--detalhe", default="")
+parser.add_argument("--output", required=True)
+parser.add_argument("--duration", type=float, default=60)
+parser.add_argument("--detail", default="")
 args = parser.parse_args()
 os.makedirs(os.path.dirname(os.path.abspath(args.output)), exist_ok=True)
 img = Image.new("RGB", (1920, 1080), (46, 20, 20))

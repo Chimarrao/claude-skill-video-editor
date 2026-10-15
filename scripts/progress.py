@@ -57,7 +57,7 @@ def main():
     ap.add_argument("--total", type=float, default=0)
     ap.add_argument("--fps", type=float, default=30)
     ap.add_argument("--regex", default=r"(\d+(?:\.\d+)?)\s*%")
-    ap.add_argument("--label", default="progresso")
+    ap.add_argument("--label", default="progress")
     ap.add_argument("--interval", type=float, default=5)
     ap.add_argument("--once", action="store_true")
     args = ap.parse_args()

@@ -10,8 +10,8 @@ parser = argparse.ArgumentParser()
 parser.add_argument("video")
 parser.add_argument("start", type=float)
 parser.add_argument("end", type=float)
-parser.add_argument("--step", "--passo", type=float, default=1.0)
-parser.add_argument("--output", "--saida", default="folha_trecho.png")
+parser.add_argument("--step", type=float, default=1.0)
+parser.add_argument("--output", default="sheet_span.png")
 args = parser.parse_args()
 timestamps = []
 t = args.start

@@ -1,10 +1,10 @@
 import puppeteer from 'puppeteer-core';
 import fs from 'fs';
 try {
-  const preview = JSON.parse(fs.readFileSync('src/scenes/previa.json', 'utf8'));
-  if (preview.ativa)
+  const preview = JSON.parse(fs.readFileSync('src/scenes/preview.json', 'utf8'));
+  if (preview.active)
     console.log(
-      'AVISO: PREVIA_BROLL ativa — o motor a ignora ao renderizar, mas confirme PREVIA_BROLL=False no plano_dados.py',
+      'AVISO: BROLL_PREVIEW ativa — o motor a ignora ao renderizar, mas confirme BROLL_PREVIEW=False no plan_data.py',
     );
 } catch (e) {}
 const OUT = process.env.OUT || '/tmp/none';

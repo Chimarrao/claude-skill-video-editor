@@ -1,12 +1,12 @@
 import {Img, Layout, Rect, RectProps, Txt} from '@motion-canvas/2d';
-import {BRANCO, FONTE, FUNDO_CARD, RAIO, SOMBRA, SOMBRA_TEXTO, TRACO} from './estilo';
+import {WHITE, FONT, BACKGROUND_CARD, RADIUS, SHADOW, SHADOW_TEXT, STROKE} from './style';
 
 /**
  * Card arredondado: imagem opcional no topo, `texto` em destaque e `legenda` menor.
  * `imagem` é a URL importada (`import logo from '../images/x.svg'`).
  * Nasce invisível (opacity 0) — use `aparecer(card)`.
  */
-export function card(texto: string, imagem?: string, legenda?: string, props: RectProps = {}): Rect {
+export function card(text: string, image?: string, caption?: string, props: RectProps = {}): Rect {
   return (
     <Rect
       layout
@@ -16,33 +16,33 @@ export function card(texto: string, imagem?: string, legenda?: string, props: Re
       gap={18}
       padding={[36, 52]}
       minWidth={360}
-      radius={RAIO}
-      fill={FUNDO_CARD}
-      stroke={BRANCO}
-      lineWidth={TRACO}
+      radius={RADIUS}
+      fill={BACKGROUND_CARD}
+      stroke={WHITE}
+      lineWidth={STROKE}
       opacity={0}
-      {...SOMBRA}
+      {...SHADOW}
       {...props}
     >
-      {imagem ? <Img src={imagem} height={140} /> : null}
+      {image ? <Img src={image} height={140} /> : null}
       <Txt
-        text={texto}
-        fontFamily={FONTE}
+        text={text}
+        fontFamily={FONT}
         fontWeight={700}
         fontSize={56}
-        fill={BRANCO}
+        fill={WHITE}
         textAlign="center"
-        {...SOMBRA_TEXTO}
+        {...SHADOW_TEXT}
       />
-      {legenda ? (
+      {caption ? (
         <Txt
-          text={legenda}
-          fontFamily={FONTE}
+          text={caption}
+          fontFamily={FONT}
           fontWeight={400}
           fontSize={34}
           fill="rgba(255,255,255,0.85)"
           textAlign="center"
-          {...SOMBRA_TEXTO}
+          {...SHADOW_TEXT}
         />
       ) : null}
     </Rect>

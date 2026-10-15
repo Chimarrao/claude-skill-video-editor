@@ -8,14 +8,14 @@ Uma **skill de edição de vídeo completa**: a partir de uma narração (`.wav`
 
 | Etapa | O que acontece | Onde |
 |---|---|---|
-| 1. Transcrição | `faster-whisper` (large-v3) com vocabulário do tema + **alinhamento forçado** palavra a palavra (wav2vec2, ~30 ms) | `template/transcrever.py`, `template/alinhar.py` |
-| 2. Plano | Você (ou o Claude) escreve `plano_dados.py`; o motor resolve âncoras por frase falada, valida proporção, sobreposição, zonas proibidas e sincronia | `template/plano.py` |
+| 1. Transcrição | `faster-whisper` (large-v3) com vocabulário do tema + **alinhamento forçado** palavra a palavra (wav2vec2, ~30 ms) | `template/transcribe.py`, `template/align.py` |
+| 2. Plano | Você (ou o Claude) escreve `plan_data.py`; o motor resolve âncoras por frase falada, valida proporção, sobreposição, zonas proibidas e sincronia | `template/plan.py` |
 | 3. Animações | Motion Canvas (TypeScript): grafos/árvores, logos, fotos, estatísticas, comparativos, linhas do tempo, listas curtas, menus de lista (explorador ou terminal `ls`) | `template/src/` |
 | 4. B-roll | Análise de vídeos (cortes, movimento, OCR, CLIP, rostos), folhas de contato, escolha de trechos limpos, proxies de prévia | `scripts/broll/` |
-| 5. Render | Overlay `.mov` ProRes 4444 com transparência (1080p ou 4K), com barra de progresso | `scripts/renderizar.mjs`, `scripts/progresso.py` |
+| 5. Render | Overlay `.mov` ProRes 4444 com transparência (1080p ou 4K), com barra de progresso | `scripts/render.mjs`, `scripts/progress.py` |
 | 6. Montagem | Projeto novo no CapCut: preenchimento → B-roll (com buracos) → overlay recortado → narração (+ música, avatar, vinhetas via pacote de marca privado) | `scripts/capcut/` |
-| 7. Testes | Regras estáticas, "teste dos testes" (mutações), overlay alpha por render de fatia, rótulos × fala, clipes sem pessoas, montagem do CapCut | `scripts/testes/` |
-| 8. Memória | Banco SQLite de logos/ícones/variações de lista; transcrições e vídeos ficam só no banco local | `banco/`, `scripts/assets_db.py` |
+| 7. Testes | Regras estáticas, "teste dos testes" (mutações), overlay alpha por render de fatia, rótulos × fala, clipes sem pessoas, montagem do CapCut | `scripts/tests/` |
+| 8. Memória | Banco SQLite de logos/ícones/variações de lista; transcrições e vídeos ficam só no banco local | `database/`, `scripts/assets_db.py` |
 
 Tipos de vídeo suportados: **Lista sem B-roll · Webdoc sem B-roll · Lista de argumentos sem B-roll · Lista com B-roll · Webdoc com B-roll**, mais um catálogo de **14 estilos de lista** (pódio, terminal `ls`, metrô, tier list…).
 
@@ -27,12 +27,12 @@ mkdir -p ~/.claude/skills && cp -R animacao-narracao ~/.claude/skills/
 cd ~/.claude/skills/animacao-narracao
 
 # 2) confira e instale os requisitos (macOS + Homebrew)
-scripts/verificar_instalar.sh              # só verifica (✅/❌)
-scripts/verificar_instalar.sh --instalar   # instala o que faltar, perguntando antes
-scripts/verificar_instalar.sh --projeto    # (dentro de animacao/) prepara venvs, node_modules e puppeteer do projeto
+scripts/check_install.sh              # só verifica (✅/❌)
+scripts/check_install.sh --install   # instala o que faltar, perguntando antes
+scripts/check_install.sh --project    # (dentro de animacao/) prepara venvs, node_modules e puppeteer do projeto
 
 # 3) banco de assets (logos/ícones/variações, sem dados pessoais)
-cp banco/assets.publico.db banco/assets.db
+cp database/assets.publico.db database/assets.db
 ```
 
 Depois, no Claude Code, peça: *"crie as animações e o projeto do CapCut para este áudio"* — a skill pergunta o tipo de vídeo e segue o fluxo de ponta a ponta.
@@ -49,32 +49,32 @@ Depois, no Claude Code, peça: *"crie as animações e o projeto do CapCut para 
 | Pasta | Conteúdo |
 |---|---|
 | `SKILL.md` | instruções e regras da skill |
-| `template/` | projeto Motion Canvas base + `plano.py` (motor de plano/sincronia) |
-| `scripts/` | transcrição, B-roll, CapCut, testes, banco (`assets_db.py`), requisitos (`verificar_instalar.sh`), publicação (`publicar.sh`) |
-| `exemplo/` | modelos de `plano_dados.py` e código das 14 variações de lista |
+| `template/` | projeto Motion Canvas base + `plan.py` (motor de plano/sincronia) |
+| `scripts/` | transcrição, B-roll, CapCut, testes, banco (`assets_db.py`), requisitos (`check_install.sh`), publicação (`publish.sh`) |
+| `examples/` | modelos de `plan_data.py` e código das 14 variações de lista |
 | `assets/` | logos e fundos de preenchimento (o de 20 min **não** vai para o repositório) |
-| `banco/` | `assets.publico.db` (SQLite em base64: logos, ícones, variações) |
-| `referencias/` | aprendizados de edições reais |
-| `privado/` | **ignorado pelo git**: pacote de marca do CapCut, assets de vídeos específicos |
+| `database/` | `assets.publico.db` (SQLite em base64: logos, ícones, variações) |
+| `references/` | aprendizados de edições reais |
+| `private/` | **ignorado pelo git**: pacote de marca do CapCut, assets de vídeos específicos |
 
 ## Pacote de marca (privado)
-Música de fundo, avatar no canto, propaganda e vinheta final entram no CapCut a partir de um pacote extraído de um projeto seu (`scripts/capcut/extrair_pacote_marca.py`), guardado em `privado/` e **nunca versionado**. Veja `SKILL.md`.
+Música de fundo, avatar no canto, propaganda e vinheta final entram no CapCut a partir de um pacote extraído de um projeto seu (`scripts/capcut/extract_brand_pack.py`), guardado em `private/` e **nunca versionado**. Veja `SKILL.md`.
 
 ## Fundo de preenchimento de 20 min
-`assets/fundo_preenchimento_20min.mp4` (1,1 GB) não está no repositório. Sem ele o gerador usa `fundo_preenchimento.mp4` (20 s) em cópias sequenciais. Para gerar o seu: repita um vídeo curto até 20 min com `ffmpeg -stream_loop`.
+`assets/background_filler_20min.mp4` (1,1 GB) não está no repositório. Sem ele o gerador usa `background_filler.mp4` (20 s) em cópias sequenciais. Para gerar o seu: repita um vídeo curto até 20 min com `ffmpeg -stream_loop`.
 
 ## Testes
 ```bash
-python scripts/testes/testar_regras_lista_broll.py    # regras da Lista com B-roll
-python scripts/testes/testar_regras_webdoc_broll.py   # regras do Webdoc com B-roll
-python scripts/testes/testar_mutacoes.py              # teste dos testes (injeta defeitos)
-python scripts/testes/testar_capcut_overlay.py        # monta o draft em pasta temporária
-python scripts/testes/testar_overlay_alpha.py         # render de uma fatia e checagem do alfa
-python scripts/testes/testar_rotulos_vs_fala.py       # rótulos das animações × fala
-python scripts/testes/testar_clipes_sem_pessoas.py    # clipes de B-roll sem rostos
+python scripts/tests/test_list_broll_rules.py    # regras da Lista com B-roll
+python scripts/tests/test_webdoc_broll_rules.py   # regras do Webdoc com B-roll
+python scripts/tests/test_mutations.py              # teste dos testes (injeta defeitos)
+python scripts/tests/test_capcut_overlay.py        # monta o draft em pasta temporária
+python scripts/tests/test_overlay_alpha.py         # render de uma fatia e checagem do alfa
+python scripts/tests/test_labels_vs_speech.py       # rótulos das animações × fala
+python scripts/tests/test_clips_without_people.py    # clips de B-roll sem rostos
 ```
 (rodar dentro de `animacao/`, a pasta do projeto gerado)
 
 ## Observações
 - Logos e fotos de terceiros pertencem aos respectivos donos; use conforme a licença/uso justo do seu canal.
-- `scripts/publicar.sh "mensagem"` faz commit + push e regenera o banco público sem dados pessoais.
+- `scripts/publish.sh "mensagem"` faz commit + push e regenera o banco público sem dados pessoais.

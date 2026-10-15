@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """Análise das IMAGENS da pasta Assets/ (Webdoc com B-roll): dimensão, proporção, transparência, tamanho, uso sugerido e folha de contato.
-Uso (em animacao/): python analyze_images.py [folder] [--output imagens_analise.json] [--contact-sheet folha_imagens.png]
+Uso (em animacao/): python analyze_images.py [folder] [--output images_analysis.json] [--contact-sheet sheet_images.png]
 Uso sugerido (heurística; CONFIRA a folha de contato — o conteúdo só você enxerga):
-  tela        largura >= 700 px e sem transparência → entra como Tela('asset:arquivo', 'legenda curta') (print/foto com legenda, parada, sem zoom)
-  tela_baixa  400–699 px → serve em Tela com largura reduzida (o plano.py nunca estica além da resolução)
-  logo        transparente (ou quadrada pequena) → LogoSolto/Logo/grafo (cartão branco se escuro/opaco)
+  tela        largura >= 700 px e sem transparência → entra como Screenshot('asset:arquivo', 'legenda curta') (print/foto com legenda, parada, sem zoom)
+  low_screen  400–699 px → serve em Tela com largura reduzida (o plan.py nunca estica além da resolução)
+  logo        transparente (ou quadrada pequena) → FreeLogo/Logo/grafo (cartão branco se escuro/opaco)
   descartar   < 400 px, ou proporção > 4:1 (banner), ou arquivo mínimo
 Nunca esticar imagem além da resolução nem aplicar zoom lento de enchimento."""
 
@@ -15,8 +15,8 @@ from PIL import Image, ImageDraw
 
 parser = argparse.ArgumentParser()
 parser.add_argument("folder", nargs="?", default="../Assets")
-parser.add_argument("--output", "--saida", default="imagens_analise.json")
-parser.add_argument("--contact-sheet", "--folha", default="folha_imagens.png")
+parser.add_argument("--output", default="images_analysis.json")
+parser.add_argument("--contact-sheet", default="sheet_images.png")
 args = parser.parse_args()
 EXT = (".png", ".jpg", ".jpeg", ".webp", ".gif", ".bmp", ".avif")
 files = sorted(f for f in os.listdir(args.folder) if f.lower().endswith(EXT) and not f.startswith("."))
@@ -37,29 +37,29 @@ for f in files:
         brightness = sum(0.2126 * r + 0.7152 * g + 0.0722 * b for r, g, b in px) / len(px)
         aspect = w / h
         if min(w, h) < 400 or aspect > 4 or aspect < 0.25:
-            usage = "descartar"
+            usage = "discard"
         elif alpha:
             usage = "logo"
         elif w >= 700:
-            usage = "tela"
+            usage = "screen"
         else:
-            usage = "tela_baixa"
+            usage = "low_screen"
         if alpha and min(w, h) >= 400 and w >= 700 and aspect > 1.2:
             usage = "logo"  # banner transparente largo: provável logo/wordmark
         results.append(
             dict(
-                arquivo=f,
-                largura=w,
-                altura=h,
-                proporcao=round(aspect, 2),
-                transparente=alpha,
-                luminosidade=round(brightness),
+                file=f,
+                width=w,
+                height=h,
+                proportion=round(aspect, 2),
+                transparent=alpha,
+                luminosity=round(brightness),
                 kb=os.path.getsize(path) // 1024,
-                uso=usage,
+                use=usage,
             )
         )
     except Exception as e:
-        results.append(dict(arquivo=f, erro=str(e), uso="descartar"))
+        results.append(dict(file=f, error=str(e), use="discard"))
 json.dump(results, open(args.output, "w"), ensure_ascii=False, indent=1)
 # folha de contato para conferir o conteúdo de olho (só a imagem mostra o real)
 W, H, cols = 360, 270, 5
@@ -69,7 +69,7 @@ draw = ImageDraw.Draw(sheet)
 for k, r in enumerate(results):
     x, y = (k % cols) * W, (k // cols) * H
     try:
-        image = Image.open(os.path.join(args.folder, r["arquivo"])).convert("RGBA")
+        image = Image.open(os.path.join(args.folder, r["file"])).convert("RGBA")
         image.thumbnail((W - 8, H - 34))
         # fundo cinza para ver transparência na miniatura
         background = Image.new("RGBA", image.size, (70, 70, 70, 255))
@@ -80,12 +80,12 @@ for k, r in enumerate(results):
     draw.rectangle((x, y + H - 28, x + W, y + H), fill=(0, 0, 0))
     draw.text(
         (x + 4, y + H - 24),
-        f"{r['arquivo'][:30]} {r.get('largura','?')}x{r.get('altura','?')} {r['uso']}",
+        f"{r['file'][:30]} {r.get('width','?')}x{r.get('height','?')} {r['use']}",
         fill=(255, 255, 0),
     )
 sheet.save(args.contact_sheet)
 print(f"{len(results)} imagens -> {args.output}, {args.contact_sheet}")
 for r in results:
     print(
-        f"  {r['uso']:10s} {r.get('largura','?')}x{r.get('altura','?')} {'alfa ' if r.get('transparente') else ''}{r['arquivo']}"
+        f"  {r['use']:10s} {r.get('width','?')}x{r.get('height','?')} {'alfa ' if r.get('transparent') else ''}{r['file']}"
     )

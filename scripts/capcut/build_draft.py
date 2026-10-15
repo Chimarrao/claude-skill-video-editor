@@ -1,21 +1,21 @@
 #!/usr/bin/env python3
 """Monta um projeto NOVO no CapCut (Mac) a partir de um spec JSON: voz + B-roll (velocidade por segmento, com buracos)
-+ overlay .mov com alpha numa 2ª trilha de vídeo por cima. Baseado no gerador do VideoGen (teste2/services/capcut-draft/cli.py):
++ overlay .mov com alpha numa 2ª trilha de vídeo por cima. Baseado no gerador do VideoGen (test2/services/capcut-draft/cli.py):
 clona um draft que abre no CapCut (aqui: scripts/capcut/template_draft, cópia mínima) e reescreve draft_info.json.
 
 Uso:  python3 build_draft.py spec.json [--no-backup] [--force]
-(apelidos antigos ainda aceitos: --sem-backup, --forcar)
+(apelidos antigos ainda aceitos: --without-backup, --force)
 spec.json:
 { "nome": "Título do vídeo", "voz": "/abs/pronto.wav", "overlay": "/abs/animacao/output/project.mov" | null,
-  "capa_frame": "/abs/frame.png" | null (senão extrai da voz/overlay), "preenchimento": "/abs/outro_fundo.mp4" (opcional),
+  "cover_frame": "/abs/frame.png" | null (senão extrai da voz/overlay), "preenchimento": "/abs/outro_fundo.mp4" (opcional),
   "clipes": [ {"arquivo": "/abs/Assets/x.mp4", "in": 12.0, "out": 30.0,      # trecho da FONTE (s)
                "velocidade": 2.0,                                           # 1.0 | 1.5 | 2.0 (aplicada no CapCut)
-               "t_inicio": 85.4,                                            # posição na timeline (s); buracos permitidos
+               "t_start": 85.4,                                            # posição na timeline (s); buracos permitidos
                "item": "Rust"} ] }
 Ordem das trilhas (de baixo p/ cima): 1) "preenchimento" = vídeo de preenchimento (spec "preenchimento", padrão ../../assets/fundo_preenchimento.mp4)
 contínuo cobrindo 100% da narração (cópias em sequência, última recortada, 1x, mudo) — NUNCA tem buraco (o CapCut não aceita vazio na 1ª trilha);
 2) "clipes" = os trechos de B-roll nas posições exatas, 1.5x/2x, mudos, COM buracos (onde aparece o preenchimento de baixo; é onde o usuário coloca vídeo na mão);
-3) "overlay" = .mov alpha; 4) "narracao". Opcional no spec: "janelas" e "menu_duracao" (de plano.json) só para o resumo por item.
+3) "overlay" = .mov alpha; 4) "narracao". Opcional no spec: "janelas" e "menu_duration" (de plan.json) só para o resumo por item.
 Formato (descoberto no VideoGen e confirmado aqui): IDs = UUID MAIÚSCULO; tempos em microssegundos; mídia copiada para <draft>/media e
 referenciada por `##_draftpath_placeholder_0E685133-18CE-45ED-8CB8-2904A212EC80_##/media/<arq>`; speed no segmento + material `speeds`;
 source_timerange.duration = (out-in); target_timerange.duration = (out-in)/velocidade."""
@@ -39,7 +39,7 @@ TEMPLATE = HERE / "template_draft"
 DRAFTS = Path(
     os.environ.get("CAPCUT_DRAFTS_DIR")
     or (Path.home() / "Movies/CapCut/User Data/Projects/com.lveditor.draft")
-)  # CAPCUT_DRAFTS_DIR + CAPCUT_TESTE=1: teste em pasta temporária (symlink em vez de cópia)
+)  # CAPCUT_DRAFTS_DIR + CAPCUT_TEST=1: teste em pasta temporária (symlink em vez de cópia)
 PH = "##_draftpath_placeholder_0E685133-18CE-45ED-8CB8-2904A212EC80_##"
 CANVAS_W, CANVAS_H = 1920, 1080
 BASE_NAMES = ("VideoGen-macos-FIX", "VideoGen-UNIX-Sovietico", "VideoGen-unix-sovietico")
@@ -59,16 +59,16 @@ def frames_to_us(n):  # frames -> microssegundos
     return int(round(n * 1_000_000 / FPS))
 
 
-DEFAULT_FILLER = HERE.parent.parent / "assets" / "fundo_preenchimento.mp4"  # 20 s (fallback: várias cópias)
+DEFAULT_FILLER = HERE.parent.parent / "assets" / "background_filler.mp4"  # 20 s (fallback: várias cópias)
 LONG_FILLER = (
-    HERE.parent.parent / "assets" / "fundo_preenchimento_20min.mp4"
+    HERE.parent.parent / "assets" / "background_filler_20min.mp4"
 )  # 20 min (padrão: 1 segmento aparado)
 
 
 def build_sections(spec, total_s):
     """Intervalos nomeados [(t0, t1, nome, item_idx|None)] cobrindo 0..total_s, p/ nomear os preenchimentos."""
-    windows = spec.get("janelas") or {}
-    menu = float(spec.get("menu_duracao", 3.7))
+    windows = spec.get("windows") or {}
+    menu = float(spec.get("menu_duration", 3.7))
     categories = []
     order = sorted(windows.items(), key=lambda kv: kv[1][0])
     item_count = 0
@@ -165,7 +165,7 @@ def copy_media(src, dst):
 def _copy(src, dst):
     if dst.exists():
         return
-    if os.environ.get("CAPCUT_TESTE") == "1":
+    if os.environ.get("CAPCUT_TEST") == "1":
         os.symlink(os.path.abspath(src), dst)
         return
     if (
@@ -182,11 +182,11 @@ def cover_scale(w, h):
 
 
 def make_cover(spec, voice_dur, dest, tmp_dir):
-    f = spec.get("capa_frame")
+    f = spec.get("cover_frame")
     if not f:
         overlay_src = spec.get("overlay")
-        source = spec["clipes"][0]["arquivo"] if spec.get("clipes") else overlay_src
-        t = spec["clipes"][0]["in"] + 1 if spec.get("clipes") else 1
+        source = spec["clips"][0]["file"] if spec.get("clips") else overlay_src
+        t = spec["clips"][0]["in"] + 1 if spec.get("clips") else 1
         f = str(tmp_dir / "capa_src.png")
         subprocess.run(["ffmpeg", "-y", "-ss", str(t), "-i", source, "-frames:v", "1", f], capture_output=True)
     subprocess.run(
@@ -224,8 +224,8 @@ def build(spec, backup=True, force=False):
     capcut_running = subprocess.run(["pgrep", "-x", "CapCut"], capture_output=True).returncode == 0
     if capcut_running and not force:
         sys.exit("O CapCut está aberto (ele reescreve drafts abertos). Feche-o ou use --force.")
-    name = spec["nome"]
-    voice = Path(spec["voz"])
+    name = spec["name"]
+    voice = Path(spec["voice"])
     overlay = Path(spec["overlay"]) if spec.get("overlay") else None
     assert voice.exists(), f"voz não encontrada: {voice}"
     project = DRAFTS / name
@@ -265,7 +265,7 @@ def build(spec, backup=True, force=False):
     total_f = int(voice_dur_us * FPS // 1_000_000)  # voz inteira em frames
     # preenchimento: padrão = arquivo longo de 20 min (UM segmento aparado pela borda até a duração da narração; o arquivo inteiro fica no material,
     # então dá para puxar a borda no CapCut). Fallback: arquivo de 20 s em cópias sequenciais. Trocável via spec["preenchimento"].
-    filler_p = Path(spec.get("preenchimento") or (LONG_FILLER if LONG_FILLER.exists() else DEFAULT_FILLER))
+    filler_p = Path(spec.get("filler") or (LONG_FILLER if LONG_FILLER.exists() else DEFAULT_FILLER))
     assert filler_p.exists(), f"vídeo de preenchimento não encontrado: {filler_p}"
     f_dur, fw, fh = probe(filler_p)
     f_frames = max(
@@ -311,15 +311,15 @@ def build(spec, backup=True, force=False):
         return seg
 
     timeline_clips = []  # (f0, f1, seg, summary)
-    for c in sorted(spec.get("clipes", []), key=lambda c: c["t_inicio"]):
-        src = Path(c["arquivo"])
+    for c in sorted(spec.get("clips", []), key=lambda c: c["t_start"]):
+        src = Path(c["file"])
         assert src.exists(), src
         copy_media(src, media_dir / src.name)
         file_dur, w, h = probe(src)
-        speed = float(c.get("velocidade", 1.0))
+        speed = float(c.get("speed", 1.0))
         i0, i1 = float(c["in"]), float(c["out"])
         assert 0 <= i0 < i1 <= file_dur + 0.05, f"trecho fora do arquivo: {src.name} {i0}-{i1} (dur {file_dur:.1f})"
-        f0 = to_frames(c["t_inicio"])
+        f0 = to_frames(c["t_start"])
         nf = max(1, to_frames((i1 - i0) / speed))
         f1 = min(f0 + nf, total_f)
         tl_us = frames_to_us(f1 - f0)
@@ -362,7 +362,7 @@ def build(spec, backup=True, force=False):
                 cursor,
                 cursor + n,
                 new_video_seg(
-                    filler_p, filler_p.name, f_dur, fw, fh, 0, frames_to_us(n), frames_to_us(cursor), frames_to_us(n), 1.0, "PREENCHIMENTO"
+                    filler_p, filler_p.name, f_dur, fw, fh, 0, frames_to_us(n), frames_to_us(cursor), frames_to_us(n), 1.0, "FILLER"
                 ),
             )
         )
@@ -377,15 +377,15 @@ def build(spec, backup=True, force=False):
     summary = [r[3] for r in timeline_clips]
 
     # ---- voz ----
-    copy_media(voice, media_dir / "voz_narracao.wav")
+    copy_media(voice, media_dir / "voice_narration.wav")
     aud = deepcopy(amat_t)
     aid = uid()
     aud.update(
         {
             "id": aid,
             "duration": voice_dur_us,
-            "path": f"{PH}/media/voz_narracao.wav",
-            "name": "voz_narracao.wav",
+            "path": f"{PH}/media/voice_narration.wav",
+            "name": "voice_narration.wav",
             "type": "extract_music",
         }
     )
@@ -408,10 +408,10 @@ def build(spec, backup=True, force=False):
         {
             **deepcopy(v_tracks[0]),
             "id": uid(),
-            "name": "preenchimento",
+            "name": "filler",
             "segments": [x[2] for x in filler_segs],
         },
-        {**deepcopy(v_tracks[0]), "id": uid(), "name": "clipes", "segments": segs},
+        {**deepcopy(v_tracks[0]), "id": uid(), "name": "clips", "segments": segs},
     ]
     for i_t, t_ in enumerate(tracks):
         for sg in t_["segments"]:
@@ -435,8 +435,8 @@ def build(spec, backup=True, force=False):
             }
         )
         mats["videos"].append(mat)
-        # overlay RECORTADO nas janelas sem B-roll (spec["overlay_segmentos"], gerado por spec_from_plan.py); sem a chave: 1 segmento contínuo
-        overlay_windows = spec.get("overlay_segmentos") or [[0, min(d_ov, voice_dur_us / 1e6)]]
+        # overlay RECORTADO nas janelas sem B-roll (spec["overlay_segments"], gerado por spec_from_plan.py); sem a chave: 1 segmento contínuo
+        overlay_windows = spec.get("overlay_segments") or [[0, min(d_ov, voice_dur_us / 1e6)]]
         ov_segs = []
         for s0, s1 in overlay_windows:
             f0, f1 = to_frames(s0), min(to_frames(s1), to_frames(d_ov), total_f)
@@ -462,15 +462,15 @@ def build(spec, backup=True, force=False):
             )
             ov_segs.append(seg)
         tracks.append({**deepcopy(v_tracks[1]), "id": uid(), "name": "overlay", "segments": ov_segs})
-    tracks.append({**deepcopy(a_track), "id": uid(), "name": "narracao", "segments": [aseg]})
+    tracks.append({**deepcopy(a_track), "id": uid(), "name": "narration", "segments": [aseg]})
 
     # ---- marca (música, avatar, propaganda após o gancho, vinheta final) — só se o spec pedir e o pacote privado existir ----
     meta_path = project / "draft_meta_info.json"
     meta = json.loads(meta_path.read_text())
-    brand_spec = spec.get("marca")
+    brand_spec = spec.get("brand")
     brand_total = None
     if brand_spec:
-        brand_pack = brand.load(brand_spec.get("pacote") or brand.DEFAULT_PACK)
+        brand_pack = brand.load(brand_spec.get("pack") or brand.DEFAULT_PACK)
         if brand_pack is None:
             print(
                 "[capcut] AVISO: spec pede 'marca' mas o pacote privado não existe (rode extract_brand_pack.py); projeto sem marca"
@@ -483,12 +483,12 @@ def build(spec, backup=True, force=False):
                 project,
                 meta,
                 voice_dur_us,
-                us(brand_spec["propaganda_t"]),
-                us(brand_spec.get("propaganda_retoma", brand_spec["propaganda_t"])),
-                us(brand_spec.get("final_antes_do_fim", 6.9)),
+                us(brand_spec["promo_t"]),
+                us(brand_spec.get("promo_resume", brand_spec["promo_t"])),
+                us(brand_spec.get("final_before_end", 6.9)),
             )
             print(
-                f"[capcut] marca aplicada: propaganda em {brand_spec['propaganda_t']:.1f}s (tudo depois desloca), "
+                f"[capcut] marca aplicada: propaganda em {brand_spec['promo_t']:.1f}s (tudo depois desloca), "
                 f"música + avatar + vinheta final; duração total {brand_total / 1e6:.1f}s"
             )
 
@@ -588,7 +588,7 @@ def build(spec, backup=True, force=False):
 
     # ---- root_meta_info (lista de projetos do CapCut) ----
     root_path = DRAFTS / "root_meta_info.json"
-    if not root_path.exists() and os.environ.get("CAPCUT_TESTE") == "1":
+    if not root_path.exists() and os.environ.get("CAPCUT_TEST") == "1":
         root_path.write_text(json.dumps({"all_draft_store": [], "draft_ids": []}))
     shutil.copy2(root_path, DRAFTS / f"root_meta_info.json.bak_{time.strftime('%Y%m%d_%H%M%S')}")
     root = json.loads(root_path.read_text())
@@ -637,7 +637,7 @@ def build(spec, backup=True, force=False):
         "| item | tem B-roll? | arquivos / trechos / velocidade | vazio na trilha de clipes (s) |",
         "|---|---|---|---|",
     ]
-    windows = spec.get("janelas") or {}
+    windows = spec.get("windows") or {}
     item_keys = [k for k, v in sorted(windows.items(), key=lambda kv: kv[1][0]) if v[2] == "item"]
     by_item = {}
     for it, f, a, b, v, t0, dd in summary:
@@ -649,14 +649,14 @@ def build(spec, backup=True, force=False):
     other = filler_total / FPS - sum(filler_by_item.values())
     table.append(f"| intro/seções/conclusão | — | — | {other:.1f} |")
     print("\n".join(table))
-    (project / "RESUMO_BROLL.md").write_text("\n".join(table) + "\n")
+    (project / "SUMMARY_BROLL.md").write_text("\n".join(table) + "\n")
     return project
 
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("spec")
-    ap.add_argument("--no-backup", "--sem-backup", action="store_true")
-    ap.add_argument("--force", "--forcar", action="store_true")
+    ap.add_argument("--no-backup", action="store_true")
+    ap.add_argument("--force", action="store_true")
     args = ap.parse_args()
     build(json.load(open(args.spec)), backup=not args.no_backup, force=args.force)

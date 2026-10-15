@@ -6,7 +6,7 @@ Uso (em animacao/):
   venv_align/bin/python <skill>/scripts/broll/classify_frames.py --clips            # confere os proxies src/videos/clip_NN.mp4 do plano (src/scenes/broll.json)
   venv_align/bin/python <skill>/scripts/broll/classify_frames.py --video ARQ.mp4 [--start 0 --end 1800 --step 6]   # varre um vídeo inteiro e lista TRECHOS LIMPOS
 Saída: tabela por clipe (% de quadros em cada categoria) e, com --video, as janelas limpas (>= --min-clean s) para usar como B-roll. Sai 1 se algum clipe reprova.
-Categorias (rótulos CLIP em inglês): desktop (OK), jogo, pessoa, texto_editado, camera_monitor, preto. Reprova clipe se jogo>15%, pessoa>15%, texto_editado>25% ou camera_monitor>40%.
+Categorias (rótulos CLIP em inglês): desktop (OK), jogo, pessoa, text_edited, camera_monitor, preto. Reprova clipe se jogo>15%, pessoa>15%, text_edited>25% ou camera_monitor>40%.
 O OCR (tesseract) conta palavras GRANDES (altura > 4,5% do quadro): texto de edição (título/legenda) costuma ser grande; UI de sistema tem texto pequeno.
 """
 
@@ -18,13 +18,13 @@ import torch
 from transformers import CLIPModel, CLIPProcessor
 
 parser = argparse.ArgumentParser()
-parser.add_argument("--clips", "--clipes", action="store_true")
+parser.add_argument("--clips", action="store_true")
 parser.add_argument("--video")
-parser.add_argument("--start", "--de", type=float, default=0)
-parser.add_argument("--end", "--ate", type=float, default=0)
-parser.add_argument("--step", "--passo", type=float, default=6)
-parser.add_argument("--min-clean", "--min-limpo", type=float, default=30)
-parser.add_argument("--skip-ocr", "--sem-ocr", action="store_true")
+parser.add_argument("--start", type=float, default=0)
+parser.add_argument("--end", type=float, default=0)
+parser.add_argument("--step", type=float, default=6)
+parser.add_argument("--min-clean", type=float, default=30)
+parser.add_argument("--skip-ocr", action="store_true")
 parser.add_argument("--json")
 args = parser.parse_args()
 LABELS = {
@@ -33,9 +33,9 @@ LABELS = {
         "a screenshot of a computer software user interface",
         "a tablet or phone operating system screen",
     ],
-    "jogo": ["a video game with a character, health bar and combo counter", "a 3D video game scene"],
-    "pessoa": ["a close-up of a person's face", "a person talking to the camera", "a webcam video of people"],
-    "texto_editado": [
+    "game": ["a video game with a character, health bar and combo counter", "a 3D video game scene"],
+    "person": ["a close-up of a person's face", "a person talking to the camera", "a webcam video of people"],
+    "text_edited": [
         "a youtube video with a big title text overlay",
         "a slide with large captions and subtitles text",
         "a thumbnail with text",
@@ -44,7 +44,7 @@ LABELS = {
         "a photo of a CRT monitor on a desk filmed with a camera",
         "a hand holding a device in a room",
     ],
-    "preto": ["a black screen", "a blank white screen"],
+    "black": ["a black screen", "a blank white screen"],
 }
 names = list(LABELS)
 prompts = [phrase for name in names for phrase in LABELS[name]]
@@ -142,12 +142,12 @@ def analyze(file, start, end, step):
             if has_face(
                 frame_path
             ):  # rosto/webcam/apresentador em qualquer parte do quadro (CLIP não vê rostos pequenos)
-                frame_scores["pessoa"] = max(frame_scores["pessoa"], 0.9)
+                frame_scores["person"] = max(frame_scores["person"], 0.9)
             top_cat = max(frame_scores, key=frame_scores.get)
-            if frame_scores["pessoa"] >= 0.9:
-                top_cat = "pessoa"
-            if skip_ocr >= 3 and top_cat in ("desktop", "texto_editado"):
-                top_cat = "texto_editado"
+            if frame_scores["person"] >= 0.9:
+                top_cat = "person"
+            if skip_ocr >= 3 and top_cat in ("desktop", "text_edited"):
+                top_cat = "text_edited"
             frames.append(dict(t=timestamp, cat=top_cat, ocr=skip_ocr, **{k: round(v, 2) for k, v in frame_scores.items()}))
     return frames
 
@@ -187,11 +187,11 @@ def cuts_per_minute(file, start, end):
 
 def should_reject(fractions, cpm=0.0):
     return (
-        fractions["jogo"] > 0.15
-        or fractions["pessoa"] > 0.15
-        or fractions["texto_editado"] > 0.25
+        fractions["game"] > 0.15
+        or fractions["person"] > 0.15
+        or fractions["text_edited"] > 0.25
         or fractions["camera_monitor"] > 0.40
-        or fractions["preto"] > 0.3
+        or fractions["black"] > 0.3
         or cpm > 14  # mais de ~14 cortes/min = vídeo super editado
     )
 
@@ -204,19 +204,19 @@ if args.clips:
         proxy_path = f"src/videos/clip_{k:02d}.mp4"
         if not os.path.exists(proxy_path):
             continue
-        frames = analyze(proxy_path, 0, max(2, entry["t_fim"] - entry["t_inicio"]), 2.0)
+        frames = analyze(proxy_path, 0, max(2, entry["t_end"] - entry["t_start"]), 2.0)
         fractions = summarize(frames)
-        cpm = cuts_per_minute(proxy_path, 0, max(2, entry["t_fim"] - entry["t_inicio"]) / 1.0)
+        cpm = cuts_per_minute(proxy_path, 0, max(2, entry["t_end"] - entry["t_start"]) / 1.0)
         rejected = should_reject(fractions, cpm)
         rejected_count += rejected
-        status_label = "REPROVA" if rejected else "ok     "
-        name = os.path.basename(entry["arquivo"])[:34]
+        status_label = "FAILS" if rejected else "ok     "
+        name = os.path.basename(entry["file"])[:34]
         print(
             f"{status_label} clip {k:02d} {name:34s} fonte {entry['in']:.0f}-{entry['out']:.0f}s  "
             + " ".join(f"{c}={fractions[c]*100:.0f}%" for c in names if fractions[c] > 0)
             + f" cortes/min={cpm:.0f}"
         )
-        report.append(dict(clip=k, arquivo=entry["arquivo"], **fractions))
+        report.append(dict(clip=k, file=entry["file"], **fractions))
 if args.video:
     duration = float(
         subprocess.run(
@@ -245,7 +245,7 @@ if args.video:
     )
     for x, y in clean_runs:
         print(f"   {x:7.0f}-{y:7.0f}s  ({y - x:.0f}s)  cortes/min={cuts_per_minute(args.video, x, y):.0f}")
-    report = dict(limpos=clean_runs, quadros=frames)
+    report = dict(clean=clean_runs, frames=frames)
 if args.json:
     json.dump(report, open(args.json, "w"), ensure_ascii=False, indent=1)
 sys.exit(1 if rejected_count else 0)

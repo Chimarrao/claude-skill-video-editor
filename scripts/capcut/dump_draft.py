@@ -23,7 +23,7 @@ print(
     f"{j.get('name')} · {j['duration'] / 1e6:.1f}s · canvas {j.get('canvas_config', {}).get('width')}x{j.get('canvas_config', {}).get('height')}"
 )
 for ti, t in enumerate(j["tracks"]):
-    print(f"\n=== trilha {ti} {t['type']} nome={t.get('name')!r} segs={len(t['segments'])}")
+    print(f"\n=== trilha {ti} {t['type']} name={t.get('name')!r} segs={len(t['segments'])}")
     for s in t["segments"]:
         k, m = M.get(s["material_id"], ("?", {}))
         tr = s["target_timerange"]
