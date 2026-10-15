@@ -31,7 +31,7 @@ pp = Path("/tmp/pp")
 pp.mkdir(exist_ok=True)
 if not (pp / "node_modules/puppeteer-core").exists():
     subprocess.run(["npm", "i", "puppeteer-core"], cwd=pp, capture_output=True)
-shutil.copy(SC / "renderizar.mjs", pp / "render_fatia.mjs")
+shutil.copy(SC / "render.mjs", pp / "render_fatia.mjs")
 for f in ("render.stop",):
     (pp / f).unlink(missing_ok=True)
 vite = None

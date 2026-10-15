@@ -1,51 +1,51 @@
 import puppeteer from 'puppeteer-core';
 import fs from 'fs';
-// uso: node shots.mjs <frames_totais> <arquivo_shots.json> [prefixo]   (shots = [[nome, segundos], ...])
+// uso: node capture_scenes.mjs <total_frames> <shots_file.json> [prefix]   (shots = [[name, segundos], ...])
 const total = Number(process.argv[2]);
 const shots = JSON.parse(fs.readFileSync(process.argv[3]));
-const pref = process.argv[4] || 's_';
-const escala = 1745 / total;
-const b = await puppeteer.launch({
+const prefix = process.argv[4] || 's_';
+const scale = 1745 / total;
+const browser = await puppeteer.launch({
   executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
   headless: 'new',
   args: ['--no-sandbox'],
   defaultViewport: {width: 1800, height: 1000},
 });
-const p = await b.newPage();
-p.on('pageerror', e => console.log('PAGEERR', e.message));
-p.on('console', m => {
+const page = await browser.newPage();
+page.on('pageerror', e => console.log('PAGEERR', e.message));
+page.on('console', m => {
   if (m.type() === 'error' && !/Connection timeout|Outdated Optimize/.test(m.text()))
     console.log('ERR', m.text().slice(0, 300));
 });
-await p.goto('http://localhost:9000', {waitUntil: 'networkidle2'});
+await page.goto('http://localhost:9000', {waitUntil: 'networkidle2'});
 await new Promise(r => setTimeout(r, 12000));
 const cur = async () =>
-  p.evaluate(() => {
+  page.evaluate(() => {
     const m = document.body.innerText.match(/\[(\d+)\]/);
     return m ? Number(m[1]) : -1;
   });
 let pan = 0;
-for (const [nome, seg] of shots) {
-  const f = Math.round(seg * 30);
-  let x = 926 + escala * f - pan;
+for (const [name, sec] of shots) {
+  const f = Math.round(sec * 30);
+  let x = 926 + scale * f - pan;
   if (x > 1680 || x < 120) {
-    const novo = Math.max(0, 926 + escala * f - 900);
-    await p.mouse.move(1300, 900);
-    await p.mouse.wheel({deltaX: novo - pan});
-    pan = novo;
+    const newPan = Math.max(0, 926 + scale * f - 900);
+    await page.mouse.move(1300, 900);
+    await page.mouse.wheel({deltaX: newPan - pan});
+    pan = newPan;
     await new Promise(r => setTimeout(r, 800));
-    x = 926 + escala * f - pan;
+    x = 926 + scale * f - pan;
   }
   for (let k = 0; k < 4; k++) {
-    await p.mouse.click(x, 830);
+    await page.mouse.click(x, 830);
     await new Promise(r => setTimeout(r, 900));
     const c = await cur();
     const d = f - c;
     if (Math.abs(d) <= 5) break;
-    x += d * escala;
+    x += d * scale;
   }
   await new Promise(r => setTimeout(r, 1400));
-  await p.screenshot({path: `/tmp/pp/${pref}${nome}.png`, clip: {x: 454, y: 0, width: 1346, height: 762}});
+  await page.screenshot({path: `/tmp/pp/${prefix}${name}.png`, clip: {x: 454, y: 0, width: 1346, height: 762}});
 }
-await b.close();
+await browser.close();
 console.log('done');

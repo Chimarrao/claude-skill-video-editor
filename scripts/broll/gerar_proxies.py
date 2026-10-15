@@ -14,7 +14,10 @@ VF = "scale=640:360:force_original_aspect_ratio=increase,crop=640:360,fps=30"
 def go(i):
     c = B[i]
     out = f"src/videos/clip_{i+1:02d}.mp4"
-    if os.path.exists(out):
+    # a assinatura (arquivo, in, out) evita reaproveitar um proxy antigo quando o plano muda e o índice NN passa a apontar para outro trecho
+    assinatura = f"{c['arquivo']}|{c['in']}|{c['out']}"
+    marca = out + ".src"
+    if os.path.exists(out) and os.path.exists(marca) and open(marca).read() == assinatura:
         return out
     subprocess.run(
         [
@@ -45,6 +48,7 @@ def go(i):
         ],
         check=True,
     )
+    open(marca, "w").write(assinatura)
     return out
 
 

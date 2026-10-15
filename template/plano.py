@@ -24,6 +24,8 @@ ZONA_AVATAR = (
     300,
 )  # (x, y) em coords do centro: canto inferior direito reservado ao avatar do canal (sticker do criador)
 MENU_DURACAO = 3.7  # tempo ocupado pelo menu na troca de item (as peças só entram depois)
+DICAS = []  # sugestões não bloqueantes (impressas no fim)
+VIDA_PECAS = {}  # id da cena -> [(entra, some)] das peças (para checar cobertura)
 PROPAGANDA_T = [
     None,
     None,
@@ -220,8 +222,8 @@ def Fatos(linhas, em=None, logo=None):
 
 def Grafo(itens, dir="LR", liga=(), em=None):
     for _it in itens:
-        if _it.get("rotulo") and len(_it["rotulo"]) > 22:
-            raise SystemExit(f"Grafo: rotulo '{_it['rotulo']}' > 22 caracteres (sobrepoe o vizinho); encurte")
+        if _it.get("rotulo") and len(_it["rotulo"]) > 26:
+            raise SystemExit(f"Grafo: rotulo '{_it['rotulo']}' > 26 caracteres (sobrepoe o vizinho); encurte")
     """Peça de grafo/árvore dentro de um item de lista (região da direita, ~1060x640); os itens aparecem em sequência."""
     return dict(slot="dir", tipo="grafo", em=em, props=dict(itens=itens, dir=dir, liga=list(liga)))
 
@@ -318,7 +320,7 @@ def Tempo(id, entrada, itens, marcos):
 
 def trazer_asset(ref):
     """'asset:foto.jpg' -> copia (<= 1800 px) de ../Assets/foto.jpg para src/images/tela_asset_<slug>.<ext> e devolve o nome sem extensão.
-    Só use arquivos que o USUÁRIO deixou na pasta Assets/ (webdoc com B-roll); nada de baixar imagem de contexto da internet.
+    Arquivos da pasta Assets/ do usuário (ou imagens baixadas por você — autorizado, informar no relatório).
     """
     arq = ref[6:]
     for pasta in ("../Assets", "../assets", "Assets", "assets"):
@@ -630,7 +632,9 @@ def layout(itens, dir_, W=1760, H=940, smax=1.5):
         grupos = {}
         for i in nivel:
             grupos.setdefault(tuple(sorted(pais[i])), []).append(i)
-        if len(grupos) == 1 and len(nivel) > 1:  # um único grupo no nível (fileira ou leque): centraliza com passo igual
+        if (
+            len(grupos) == 1 and len(nivel) > 1
+        ):  # um único grupo no nível (fileira ou leque): centraliza com passo igual
             passo = max(larg(i) for i in nivel) + GAPB
             centro = sum(pos[i] for i in nivel) / len(nivel)
             for k, i in enumerate(sorted(nivel, key=lambda i: pos[i])):
@@ -813,7 +817,9 @@ def grafo_estatico(itens, dir_, liga, W, H):
     for it in itens:
         resolver_imagem(it)
     idx = {it["id"]: i for i, it in enumerate(itens) if it["id"]}
-    pos, s, depth = layout(itens, dir_, W, H, smax=1.0)  # a ampliação final (ESCALA_GRAFO) é feita depois, com o bbox real
+    pos, s, depth = layout(
+        itens, dir_, W, H, smax=1.0
+    )  # a ampliação final (ESCALA_GRAFO) é feita depois, com o bbox real
     out = []
     for i, it in enumerate(itens):
         if it["sobre"]:
@@ -981,7 +987,9 @@ def montar_composta(c, t0, t1):
                     )
         if p["tipo"] == "grafo":
             ems = [it.get("em") for it in props["itens"]]
-            itens_g, arestas_g, bbox_g = grafo_estatico(props["itens"], props["dir"], props["liga"], 1700, 800)
+            itens_g, arestas_g, bbox_g = grafo_estatico(
+                props["itens"], props["dir"], props["liga"], 1700, 800
+            )
             eventos_g, busca_g = [], t
             for k_, em_ in enumerate(ems):
                 if em_ is None:
@@ -1013,12 +1021,14 @@ def montar_composta(c, t0, t1):
                 nome_g = f"g{len(EV_G)}_{c['id']}"
                 EV_G.append((f"{c['id']}-{nome_g}", tg))
                 eventos_g.append(f"{c['id']}-{nome_g}")
-            # o grafo COMPLETO (último item) precisa ficar visível >= 2.5 s antes de o próximo clipe/fim da cena escondê-lo
+            # o grafo COMPLETO (último item) precisa ficar visível >= 2.5 s antes de um clipe escondê-lo (>= 1.5 s antes do fim da cena)
             _ult = max([e[1] for e in EV_G if e[0].startswith(c["id"] + "-")] + [t])
-            _esconde = min([a_ - CFG["LEAD_CLIPE"] for a_, _ in JC.get(c["id"], []) if a_ - CFG["LEAD_CLIPE"] > t] + [t1 - SAIDA])
-            if _esconde - _ult < 2.5:
+            _clipes = [a_ - CFG["LEAD_CLIPE"] for a_, _ in JC.get(c["id"], []) if a_ - CFG["LEAD_CLIPE"] > t]
+            _esconde = min(_clipes + [t1 - SAIDA])
+            _minimo = 2.5 if _clipes and min(_clipes) < t1 - SAIDA else 1.5
+            if _esconde - _ult < _minimo:
                 AVISOS.append(
-                    f"[{c['id']}] grafo de {t:.1f}s não completa: último item em {_ult:.1f}s e some em {_esconde:.1f}s (< 2.5 s completo); "
+                    f"[{c['id']}] grafo de {t:.1f}s não completa: último item em {_ult:.1f}s e some em {_esconde:.1f}s (< {_minimo} s completo); "
                     f"antecipe os itens, encurte o grafo ou mova o clipe (animação 'só de um lado' é proibida)"
                 )
             props = dict(itens=itens_g, arestas=arestas_g, eventos=eventos_g, esc=CFG["ESC_GRAFO"])
@@ -1031,7 +1041,9 @@ def montar_composta(c, t0, t1):
                 cx, cy = (rx0 + rx1) / 2, (ry0 + ry1) / 2  # recentraliza o grafo
                 props["dx"], props["dy"] = round(-cx * e_, 1), round(-cy * e_, 1)
                 x0, x1, y0, y1 = (rx0 - cx) * e_, (rx1 - cx) * e_, (ry0 - cy) * e_, (ry1 - cy) * e_
-                for _k, _g in enumerate(itens_g):  # nenhum elemento pode ser gigante (placa larga de logo cortada na borda)
+                for _k, _g in enumerate(
+                    itens_g
+                ):  # nenhum elemento pode ser gigante (placa larga de logo cortada na borda)
                     _w = max(_g.get("pw") or 0, _g.get("iw") or 0, _g["h"]) * e_
                     _h = max(_g.get("ph") or 0, _g["h"]) * e_
                     if _w > 720 or _h > 520:
@@ -1042,14 +1054,21 @@ def montar_composta(c, t0, t1):
                     AVISOS.append(
                         f"[{c['id']}] grafo só cabe ampliado {e_}x (< 1.2x: pequeno demais, o usuário dá zoom à mão): menos itens/ramos"
                     )
-                if x1 > ZONA_AVATAR[0] and y1 > ZONA_AVATAR[1]:
-                    AVISOS.append(
-                        f"[{c['id']}] grafo invade a zona do avatar (canto inferior direito): {x1:.0f},{y1:.0f}"
-                    )
+                # zona do avatar: só importa se um ITEM (não o canto vazio da caixa) encosta no retângulo do avatar
+                for _k, _it in enumerate(props["itens"]):
+                    if not _it["img"]:
+                        continue
+                    _r = retangulo(_it, itens_g[_k])
+                    _rx0, _rx1 = _r[0] * e_ + props["dx"], _r[2] * e_ + props["dx"]
+                    _ry0, _ry1 = _r[1] * e_ + props["dy"], _r[3] * e_ + props["dy"]
+                    if _rx1 > ZONA_AVATAR[0] and _ry1 > ZONA_AVATAR[1]:
+                        AVISOS.append(
+                            f"[{c['id']}] item {_k + 1} do grafo ({_it['img']}) invade a zona do avatar (canto inferior direito): até {_rx1:.0f},{_ry1:.0f}"
+                        )
                 n_ic = sum(1 for it in props["itens"] if str(it["img"]).startswith("ic-"))
                 if len(props["itens"]) >= 2 and n_ic == len(props["itens"]) and not CFG.get("WEBDOC"):
-                    AVISOS.append(
-                        f"[{c['id']}] grafo só com ícones genéricos: use ao menos uma logo/foto real do assunto"
+                    DICAS.append(
+                        f"[{c['id']}] grafo só com ícones genéricos: se a fala cita produtos/empresas/pessoas, use as logos/fotos reais"
                     )
         if p["tipo"] == "titulo":
             # duração de permanência = o que sobra até o próximo beat (menos entrada digitada, saída e retorno do resto)
@@ -1068,7 +1087,10 @@ def montar_composta(c, t0, t1):
         out.append(dict(slot=p["slot"], tipo=p["tipo"], props=props, beat=nomes[t]))
     VIDA_PECAS[c["id"]] = []
     for _p, _t in zip(pecas, tempos):
-        _some = min([a_ - CFG["LEAD_CLIPE"] for a_, _ in JC.get(c["id"], []) if a_ - CFG["LEAD_CLIPE"] > _t] + [t1 - SAIDA])
+        _some = min(
+            [a_ - CFG["LEAD_CLIPE"] for a_, _ in JC.get(c["id"], []) if a_ - CFG["LEAD_CLIPE"] > _t]
+            + [t1 - SAIDA]
+        )
         if _p["tipo"] != "titulo":
             VIDA_PECAS[c["id"]].append((_t, _some))
     js = dict(tipo="secao" if c["tipo"] == "secao" else "item", id=c["id"], pecas=out)
@@ -1491,8 +1513,14 @@ if __name__ == "__main__":
         if webdoc and item in JANELAS_VIDEO:
             ini = min(a_ for a_, _ in JANELAS_VIDEO[item])
         if not webdoc:
-            _piso = MENU_DURACAO if janelas[item][2] == "item" else (3.0 if janelas[item][2] == "secao" else 0.0)
-            assert t0 >= ini + _piso - 0.05, f"BROLL {item}: comeca antes do fim da cartela/animação inicial ({ini + _piso:.1f}s)"
+            _cena = next(c_ for c_ in CENAS if c_["id"] == item)
+            _tem_cartao = any(
+                p_["tipo"] == "secao" for p_ in _cena.get("pecas", []) or []
+            )  # Secao(...) tem cartão; Bloco(...) não
+            _piso = MENU_DURACAO if janelas[item][2] == "item" else (3.0 if _tem_cartao else 0.0)
+            assert (
+                t0 >= ini + _piso - 0.05
+            ), f"BROLL {item}: comeca antes do fim da cartela/animação inicial ({ini + _piso:.1f}s)"
         else:
             assert t0 >= ini - 0.05, f"BROLL {item}: comeca antes da janela ({ini:.1f}s)"
         assert t0 + dur_tl <= fim + 0.05, f"BROLL {item}: passa do fim do item ({fim:.1f}s)"
@@ -1500,7 +1528,9 @@ if __name__ == "__main__":
             1.0 <= vel <= 2.0
         ), f"BROLL {item}: velocidade {vel} (entre 1.0 e 2.0; o usuário estica o clipe com 1.3-1.9x ao remover animações)"
         assert t0 >= fim_anterior - 0.01, f"BROLL {item}: sobrepoe o clipe anterior"
-        if por_item.get(item):  # vão entre dois clipes da MESMA janela: ou 0 ou uma janela de animação de verdade (>= 4 s)
+        if por_item.get(
+            item
+        ):  # vão entre dois clipes da MESMA janela: ou 0 ou uma janela de animação de verdade (>= 4 s)
             _gap = t0 - por_item[item][-1]["t_fim"]
             if 0.05 < _gap < 4.0:
                 AVISOS.append(
@@ -1522,6 +1552,8 @@ if __name__ == "__main__":
             )
         )
         fim_anterior = t0 + dur_tl
+    for d_ in DICAS:
+        print("DICA:", d_)
     for a_ in AVISOS_BROLL:
         print("AVISO PEÇA×B-ROLL:", a_)
     if broll and not webdoc:
@@ -1536,13 +1568,21 @@ if __name__ == "__main__":
             ]
             if tp_ == "secao" and not VIDA_PECAS.get(it_id):
                 ocupado.append((ini_, ini_ + 3.0))
+            if (
+                PROPAGANDA_T[0] is not None
+            ):  # o silêncio depois do gancho é removido no CapCut (entra a propaganda)
+                ocupado.append((PROPAGANDA_T[0], PROPAGANDA_T[1]))
             cur = a0
             for a, b in sorted(ocupado):
                 if a - cur >= 2.0:
-                    AVISOS.append(f"[{it_id}] {cur:.1f}–{a:.1f}s ({a - cur:.1f}s) só com fundo e fala: falta animação ou B-roll")
+                    AVISOS.append(
+                        f"[{it_id}] {cur:.1f}–{a:.1f}s ({a - cur:.1f}s) só com fundo e fala: falta animação ou B-roll"
+                    )
                 cur = max(cur, b)
             if fim_ - cur >= 2.0:
-                AVISOS.append(f"[{it_id}] {cur:.1f}–{fim_:.1f}s ({fim_ - cur:.1f}s) só com fundo e fala: falta animação ou B-roll")
+                AVISOS.append(
+                    f"[{it_id}] {cur:.1f}–{fim_:.1f}s ({fim_ - cur:.1f}s) só com fundo e fala: falta animação ou B-roll"
+                )
 
         # proporção vídeo × animação (o usuário corta animação e estica B-roll: o padrão é VÍDEO; animação é tempero)
         tot_it = tot_cl = 0.0

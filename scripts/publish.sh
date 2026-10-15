@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Commit + push automático da skill (regra do usuário: TODA alteração na skill é commitada e enviada ao GitHub).
-# Uso: scripts/publicar.sh "mensagem do commit"      (rodar depois de editar qualquer arquivo da skill)
+# Uso: scripts/publish.sh "mensagem do commit"      (rodar depois de editar qualquer arquivo da skill)
 # Antes do commit regenera banco/assets.publico.db a partir de banco/assets.db SEM as transcrições (banco/assets.db fica fora do git).
 set -e
 cd "$(dirname "$0")/.."
