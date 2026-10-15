@@ -63,6 +63,7 @@ import subprocess
 
 
 def file_duration(f):
+    """Duração do arquivo em segundos (0 se o ffprobe não responder)."""
     r = subprocess.run(
         ["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", f],
         capture_output=True,

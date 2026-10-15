@@ -10,6 +10,7 @@ import argparse, bisect, json, sys
 
 
 def main():
+    """Lê a análise (com as notas dadas pelo Claude) e a transcrição e monta o `BROLL` de cada item respeitando as fronteiras de frase."""
     parser = argparse.ArgumentParser()
     parser.add_argument("--analysis", default="broll_analysis.json")
     parser.add_argument("--plan", default="plan.json")
@@ -25,10 +26,12 @@ def main():
     boundaries = sorted({round(x, 2) for s in transcript["segments"] for x in (s["start"], s["end"])})
 
     def next_boundary(t):  # primeira fronteira >= t
+        """Primeira fronteira de frase >= t (até 6 s depois); senão o próprio t."""
         i = bisect.bisect_left(boundaries, t)
         return boundaries[i] if i < len(boundaries) and boundaries[i] - t <= 6 else t
 
     def prev_boundary(t):
+        """Última fronteira de frase <= t (até 3 s antes); senão o próprio t."""
         i = bisect.bisect_right(boundaries, t) - 1
         return boundaries[i] if i >= 0 and t - boundaries[i] <= 3 else t
 

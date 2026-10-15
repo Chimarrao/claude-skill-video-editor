@@ -45,6 +45,7 @@ def _index(draft):
 
 
 def _material_name(material):
+    """Nome do material (o CapCut usa `material_name` ou `name`)."""
     return material.get("material_name") or material.get("name") or ""
 
 
@@ -84,6 +85,7 @@ def extract(ref, ref_ending=None, names=None, output=DEFAULT_PACK):
         sources.append((Path(ref_ending), json.load(open(Path(ref_ending) / "draft_info.json"))))
 
     def find(name, type):
+        """Procura a predefinição pelo nome nos drafts de referência; aborta se não existir."""
         for folder, draft in sources:
             matches = _segments_by_role(draft, name, type)
             if matches:
@@ -174,6 +176,7 @@ def _clone(item, mats, start_us, duration_us, src_start_us=0, volume=None):
 
 
 def _duration(item):
+    """Duração, em µs, do segmento de um item do pacote."""
     return item["segment"]["target_timerange"]["duration"]
 
 

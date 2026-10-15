@@ -23,6 +23,7 @@ used_images = set()
 
 
 def clips_in(start, end):
+    """Clipes de B-roll que começam dentro da janela [start, end)."""
     return [b for b in broll if start - 0.05 <= b["t_start"] < end]
 
 
@@ -101,6 +102,7 @@ for c in scenes.values():
 
 
 def slug(f):
+    """Nome de arquivo → identificador minúsculo com `_` (como o plan.py nomeia `tela_asset_*`)."""
     return re.sub(r"[^a-z0-9]+", "_", os.path.splitext(f)[0].lower()).strip("_")[:40]
 
 

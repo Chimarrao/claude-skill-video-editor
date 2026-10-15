@@ -7,7 +7,7 @@ import json, os, re, subprocess, sys, tempfile, textwrap
 
 SOURCE = json.load(open("codes_source.json"))
 USED = (
-    sorted(set(re.findall(r'Codigo\("([a-z0-9]+)"', open("plan_data.py").read())))
+    sorted(set(re.findall(r'Code\("([a-z0-9]+)"', open("plan_data.py").read())))
     if os.path.exists("plan_data.py")
     else list(SOURCE)
 )
@@ -15,11 +15,13 @@ ids = sys.argv[1:] or USED
 
 
 def sh(cmd, cwd, timeout=900, inp=None):
+    """Roda um comando de shell na pasta `cwd`; devolve `(código de saída, stdout+stderr)`."""
     p = subprocess.run(cmd, shell=True, cwd=cwd, capture_output=True, text=True, timeout=timeout, input=inp)
     return p.returncode, (p.stdout + p.stderr).strip()
 
 
 def docker(img, script, d, timeout=1800):
+    """Roda `script` dentro de um container Docker com a pasta montada em /w."""
     return sh(f"docker run --rm -v '{d}':/w -w /w {img} sh -c \"{script}\"", d, timeout)
 
 
@@ -27,7 +29,9 @@ R = {}
 
 
 def runner(name):
+    """Decorador: registra a função como validador da linguagem `name`."""
     def deco(f):
+        """Guarda a função no registro de runners."""
         R[name] = f
         return f
 
@@ -36,6 +40,7 @@ def runner(name):
 
 @runner("assembly")
 def _(d, file):  # Linux x86-64 em Docker (nasm + ld)
+    """Valida o exemplo de assembly: compila/executa e devolve o resultado e a saída esperada."""
     return (
         docker(
             "ubuntu:24.04",
@@ -48,11 +53,13 @@ def _(d, file):  # Linux x86-64 em Docker (nasm + ld)
 
 @runner("fortran")
 def _(d, file):
+    """Valida o exemplo de fortran: compila/executa e devolve o resultado e a saída esperada."""
     return sh(f"gfortran {file} -o a.out && ./a.out", d), "Area:"
 
 
 @runner("cobol")
 def _(d, file):
+    """Valida o exemplo de cobol: compila/executa e devolve o resultado e a saída esperada."""
     return (
         docker(
             "ubuntu:24.04",
@@ -65,32 +72,38 @@ def _(d, file):
 
 @runner("c")
 def _(d, file):
+    """Valida o exemplo de c: compila/executa e devolve o resultado e a saída esperada."""
     return sh(f"cc {file} -o a.out && ./a.out", d), "42"
 
 
 @runner("php")
 def _(d, file):
+    """Valida o exemplo de php: compila/executa e devolve o resultado e a saída esperada."""
     return sh(f"php {file}", d), "<li>Item 3</li>"
 
 
 @runner("javascript")
 def _(d, file):
+    """Valida o exemplo de javascript: compila/executa e devolve o resultado e a saída esperada."""
     return sh(f"node --check {file} && echo SINTAXE-OK", d), "SINTAXE-OK"
 
 
 @runner("typescript")
 def _(d, file):  # erro intencional: precisa dar TS2345
+    """Valida o exemplo de typescript: compila/executa e devolve o resultado e a saída esperada."""
     rc, out = sh(f"npx --yes -p typescript tsc --noEmit {file}", d)
     return (0 if "TS2345" in out else 1, out), "TS2345"
 
 
 @runner("java")
 def _(d, file):
+    """Valida o exemplo de java: compila/executa e devolve o resultado e a saída esperada."""
     return docker("eclipse-temurin:21-jdk-alpine", "javac Main.java && java Main", d), "Ol"
 
 
 @runner("csharp")
 def _(d, file):
+    """Valida o exemplo de csharp: compila/executa e devolve o resultado e a saída esperada."""
     return (
         docker(
             "mcr.microsoft.com/dotnet/sdk:8.0",
@@ -103,38 +116,45 @@ def _(d, file):
 
 @runner("cpp")
 def _(d, file):
+    """Valida o exemplo de cpp: compila/executa e devolve o resultado e a saída esperada."""
     return sh(f"c++ -std=c++17 {file} -o a.out && ./a.out", d), "3"
 
 
 @runner("rust")
 def _(d, file):  # erro intencional: use after move (E0382)
+    """Valida o exemplo de rust: compila/executa e devolve o resultado e a saída esperada."""
     rc, out = sh(f"rustc {file} -o a.out", d)
     return (0 if "E0382" in out else 1, out), "E0382"
 
 
 @runner("go")
 def _(d, file):
+    """Valida o exemplo de go: compila/executa e devolve o resultado e a saída esperada."""
     return sh(f"go run {file}", d), "goroutine"
 
 
 @runner("python")
 def _(d, file):
+    """Valida o exemplo de python: compila/executa e devolve o resultado e a saída esperada."""
     open(os.path.join(d, "vendas.csv"), "w").write("valor\n10\n20\n30\n")
     return sh(f"uv run --with pandas python {file}", d), "Média: 20.00"
 
 
 @runner("lua")
 def _(d, file):
+    """Valida o exemplo de lua: compila/executa e devolve o resultado e a saída esperada."""
     return docker("alpine:3.20", f"apk add -q lua5.4 && lua5.4 {file}", d), "Olá, mundo"
 
 
 @runner("elixir")
 def _(d, file):
+    """Valida o exemplo de elixir: compila/executa e devolve o resultado e a saída esperada."""
     return docker("elixir:1.16-alpine", f"elixir {file}", d), "Olá, mundo!"
 
 
 @runner("sql")
 def _(d, file):
+    """Valida o exemplo de sql: compila/executa e devolve o resultado e a saída esperada."""
     ddl = "CREATE TABLE usuarios(nome TEXT, cidade TEXT); INSERT INTO usuarios VALUES('Ana','Recife'),('Bia','Lima'),('Caio','Recife');"
     return sh(f'sqlite3 :memory: "{ddl}" < /dev/null; (echo "{ddl}"; cat {file}) | sqlite3', d), "Ana"
 

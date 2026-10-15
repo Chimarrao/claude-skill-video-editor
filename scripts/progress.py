@@ -13,15 +13,18 @@ import argparse, os, re, subprocess, sys, time
 
 
 def format_duration(seconds):
+    """Segundos → `h:mm:ss`."""
     seconds = int(max(0, seconds))
     return f"{seconds//3600:d}:{seconds%3600//60:02d}:{seconds%60:02d}"
 
 
 def file_pct(args):
-    return os.path.getsize(args) / (args.total_mb * 1048576) if os.path.exists(args.target) else 0.0
+    """Progresso pelo tamanho atual do arquivo sobre o tamanho esperado."""
+    return os.path.getsize(args.target) / (args.total_mb * 1048576) if os.path.exists(args.target) else 0.0
 
 
 def frames_pct(args):
+    """Progresso pela duração do arquivo (ffprobe) sobre o total de frames/fps."""
     if not os.path.exists(args.target):
         return 0.0
     r = subprocess.run(
@@ -36,6 +39,7 @@ def frames_pct(args):
 
 
 def log_pct(args):
+    """Progresso pelo último percentual que aparece no log."""
     if not os.path.exists(args.target):
         return 0.0
     txt = open(args.target, errors="ignore").read()[-20000:]
@@ -44,12 +48,14 @@ def log_pct(args):
 
 
 def bar(progress, width=40):
+    """Barra de texto `█░` com o progresso entre 0 e 1."""
     progress = min(max(progress, 0), 1)
     n = int(progress * width)
     return "█" * n + "░" * (width - n)
 
 
 def main():
+    """Lê os argumentos e mostra a barra (uma vez com `--once`, senão atualiza até o fim)."""
     ap = argparse.ArgumentParser()
     ap.add_argument("mode", choices=["file", "frames", "log"])
     ap.add_argument("target")

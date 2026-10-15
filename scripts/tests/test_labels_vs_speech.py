@@ -21,20 +21,24 @@ rows = []
 
 
 def words(text):
+    """Palavras significativas (>= 6 letras) do texto, sem acento e em minúsculas."""
     return [normalize(x) for x in re.findall(r"[A-Za-zÀ-ú0-9]{6,}", text)]
 
 
 def speech(t0, t1):
+    """Fala (palavras normalizadas) entre os instantes t0 e t1."""
     return " ".join(w for w, t in words_index if t0 <= t <= t1)
 
 
 def sentence(t0, t1):
+    """Texto falado entre t0 e t1, como está na transcrição."""
     return " ".join(
         w["word"].strip() for s in transcript["segments"] for w in s.get("words", []) if t0 <= w["start"] <= t1
     )
 
 
 def check(scene_id, label, t, where):
+    """Confere se alguma palavra do rótulo aparece na fala em [t−4, t+12 s] e avisa se não aparece."""
     if t is None:
         return
     label_words = [p for p in words(label)]

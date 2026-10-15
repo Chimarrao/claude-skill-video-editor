@@ -12,6 +12,7 @@ RULES_TEST = HERE / "test_list_broll_rules.py"
 
 
 def setup():
+    """Copia para uma pasta temporária os arquivos que o teste de regras lê."""
     tmp_dir = Path(tempfile.mkdtemp(prefix="mut_"))
     (tmp_dir / "src/scenes").mkdir(parents=True)
     for f in ("scenes.json", "menu.json", "broll.json", "scene1.meta"):
@@ -22,10 +23,12 @@ def setup():
 
 
 def run(tmp_dir):
+    """Roda o teste de regras na cópia mutada."""
     return subprocess.run([sys.executable, str(RULES_TEST)], cwd=tmp_dir, capture_output=True, text=True)
 
 
 def mutate_json(tmp_dir, file, fn):
+    """Aplica a mutação `fn` a um JSON da cópia temporária."""
     p = tmp_dir / file
     doc = json.load(open(p))
     fn(doc)
@@ -33,6 +36,7 @@ def mutate_json(tmp_dir, file, fn):
 
 
 def shift_meta_event(doc, prefix, delta=None, absolute=None):
+    """Desloca (ou fixa) o tempo do primeiro evento do `.meta` cujo nome começa com `prefix`."""
     for e in doc["timeEvents"]:
         if e["name"].startswith(prefix):
             e["targetTime"] = absolute if absolute is not None else e["targetTime"] + delta

@@ -12,6 +12,7 @@ VF = "scale=640:360:force_original_aspect_ratio=increase,crop=640:360,fps=30"
 
 
 def build_proxy(index):
+    """Gera (ou reaproveita, se a assinatura arquivo/in/out não mudou) o proxy 640x360 do clipe `index`."""
     clip = CLIPS[index]
     output = f"src/videos/clip_{index+1:02d}.mp4"
     # a assinatura (arquivo, in, out) evita reaproveitar um proxy antigo quando o plano muda e o índice NN passa a apontar para outro trecho
@@ -53,6 +54,7 @@ def build_proxy(index):
 
 
 def build_filler():
+    """Gera o proxy do vídeo de preenchimento a partir do asset da skill."""
     current = os.path.abspath(".")
     while current != "/":
         asset = os.path.join(

@@ -14,10 +14,12 @@ IMAGE_EXTS = {".jpg", ".jpeg", ".png", ".webp"}
 
 
 def run(cmd, **kw):
+    """Executa um comando capturando saída como texto."""
     return subprocess.run(cmd, capture_output=True, text=True, **kw)
 
 
 def ffprobe(path):
+    """Duração, resolução, fps, codec e se tem áudio do arquivo (via ffprobe)."""
     r = run(
         [
             "ffprobe",
@@ -67,6 +69,7 @@ def single_pass(path, threshold=0.3):
     motion_scores = [float(sc) for t, sc in pairs if float(sc) <= threshold]
 
     def get_intervals(key):
+        """Extrai os intervalos [início, fim] de um detector do ffmpeg (blackdetect/freezedetect)."""
         starts = [float(x) for x in re.findall(key + r"_start: ([\d.]+)", txt)]
         ends = [float(x) for x in re.findall(key + r"_end: ([\d.]+)", txt)]
         return [[round(x, 2), round(y, 2)] for x, y in zip(starts, ends)] + (
@@ -77,17 +80,20 @@ def single_pass(path, threshold=0.3):
 
 
 def mean_volume(path):
+    """Volume médio em dB (volumedetect); −91 se não houver áudio."""
     r = run(["ffmpeg", "-nostats", "-i", str(path), "-af", "volumedetect", "-vn", "-f", "null", "-"])
     m = re.search(r"mean_volume: (-?[\d.]+) dB", r.stderr)
     return float(m.group(1)) if m else -91.0
 
 
 def _db():
+    """Caminho do `assets_db.py` da skill (cache de transcrições)."""
     return Path(__file__).resolve().parent.parent / "assets_db.py"
 
 
 def transcribe(path):
     # cache no banco (SHA-1 do arquivo + modelo)
+    """Transcreve o áudio do clipe reaproveitando o cache do banco (SHA-1 + modelo); salva o resultado novo no banco."""
     model = os.environ.get("MODEL", "small")
     cache = Path(tempfile.mktemp(suffix=".json"))
     if (
@@ -118,6 +124,7 @@ def transcribe(path):
 
 
 def _transcribe(path):
+    """Transcrição propriamente dita com faster-whisper (primeiros `SPEECH_MAX` s); `None` se a lib não estiver instalada."""
     try:
         from faster_whisper import WhisperModel
     except ImportError:
@@ -140,6 +147,7 @@ def _transcribe(path):
 
 
 def contact_sheet(path, duration, cuts, dest, name, step=2.0, per_sheet=24, max_frames=150):
+    """Gera folhas de contato do vídeo (1 quadro a cada ~2 s + 1 por corte, carimbados com o tempo) para o Claude olhar."""
     from PIL import Image, ImageDraw
 
     step = max(
@@ -195,6 +203,7 @@ def contact_sheet(path, duration, cuts, dest, name, step=2.0, per_sheet=24, max_
 
 
 def build_segments(duration, cuts, blacks, frozen, motion):
+    """Divide o vídeo nos cortes de cena, une trechos < 3 s e marca avisos automáticos (tela preta, congelado, sem movimento)."""
     bounds = [0.0] + [c for c in cuts if 0 < c < duration] + [duration]
     segments = [[a, b] for a, b in zip(bounds, bounds[1:])]
     merged = []  # une trechos < 3 s ao vizinho
@@ -210,6 +219,7 @@ def build_segments(duration, cuts, blacks, frozen, motion):
     for a, b in merged:
 
         def covers(items_list):
+            """Fração do trecho [a, b] coberta pelos intervalos detectados."""
             return sum(max(0, min(b, y if y is not None else duration) - max(a, x)) for x, y in items_list) / max(
                 b - a, 0.01
             )
@@ -224,6 +234,7 @@ def build_segments(duration, cuts, blacks, frozen, motion):
 
 
 def suggested_speed(motion, has_speech):
+    """Velocidade sugerida no CapCut: 1x se há fala, 2x se quase não há movimento, senão 1,5x."""
     if has_speech:
         return 1.0
     return 2.0 if motion < 0.012 else 1.5

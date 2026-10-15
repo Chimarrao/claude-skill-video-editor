@@ -19,6 +19,7 @@ draw = ImageDraw.Draw(img)
 
 def load_font(size):
     # procura fonte do sistema para o texto ficar legível
+    """Procura uma fonte do sistema para o texto ficar legível."""
     for f in ("/System/Library/Fonts/Helvetica.ttc", "/System/Library/Fonts/Supplemental/Arial.ttf"):
         if os.path.exists(f):
             return ImageFont.truetype(f, size)

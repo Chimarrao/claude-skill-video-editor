@@ -22,6 +22,7 @@ _source = open("plan_data.py", encoding="utf8").read()
 def read_flag(
     name, default
 ):  # lê "NOME = valor" do plan_data.py sem importá-lo (o import puxa o plan.py inteiro)
+    """Lê `NOME = valor` do plan_data.py sem importá-lo (o import puxaria o plan.py inteiro)."""
     m = re.search(rf"^{name}\s*=\s*([^\s#]+)", _source, re.M)
     return (
         default
@@ -48,6 +49,7 @@ passed = []
 
 
 def rule(rule_id, condition, msg):
+    """Registra o resultado de uma regra (passou ou falhou) com a mensagem."""
     (passed if condition else errors).append(f"{rule_id}: {msg}")
 
 

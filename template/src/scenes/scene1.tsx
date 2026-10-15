@@ -401,6 +401,14 @@ function* composite(view: View2D, c: Scene): ThreadGenerator {
       const k = shown.indexOf(ant.no);
       if (k >= 0) shown.splice(k, 1);
     }
+    // grafo ampliado e centralizado ocupa o quadro todo: o logo solto da esquerda sai antes (senão fica sob os itens do grafo)
+    const leftLogo = current['left'];
+    if (q.p.kind === 'graph' && !c.light && leftLogo) {
+      current['left'] = null;
+      const k = shown.indexOf(leftLogo.no);
+      if (k >= 0) shown.splice(k, 1);
+      yield* leftLogo.exit();
+    }
     current[q.p.slot] = q.piece;
     visible.push(q.piece);
     visibleW.push(q.piece.no.parent() as Node);

@@ -25,6 +25,7 @@ os.makedirs(os.path.dirname(DB), exist_ok=True)
 
 
 def connect():
+    """Abre o banco (criando a tabela `assets` e o índice de categoria se faltar)."""
     c = sqlite3.connect(DB)
     c.execute("""CREATE TABLE IF NOT EXISTS assets(name TEXT PRIMARY KEY, ext TEXT, mime TEXT, bytes INTEGER,
         width INTEGER, height INTEGER, category TEXT, origin TEXT, added TEXT, base64 TEXT)""")
@@ -33,6 +34,7 @@ def connect():
 
 
 def category(name):
+    """Deduz a categoria do asset pelo prefixo do nome (logo_, foto_, tela_, ic-…); o padrão é `object`."""
     for prefix, cat in (
         ("logo_", "logo"),
         ("foto_", "person"),
@@ -46,6 +48,7 @@ def category(name):
 
 
 def dimensions(path, ext):
+    """Largura e altura em px (SVG: lê o viewBox); `(None, None)` se não der para medir."""
     try:
         if ext == "svg":
             m = re.search(
@@ -60,6 +63,7 @@ def dimensions(path, ext):
 
 
 def sync(folders):
+    """Importa para o banco as imagens novas das pastas dadas (sem duplicar por nome; ignora `ic-*` e `*-mono`, que o plan.py gera)."""
     conn = connect()
     new_count = 0
     for folder in folders:
@@ -95,6 +99,7 @@ def sync(folders):
 
 
 def sha1(path):
+    """SHA-1 do arquivo, lido em blocos de 1 MB (chave de cache das transcrições)."""
     import hashlib
 
     h = hashlib.sha1()
@@ -105,6 +110,7 @@ def sha1(path):
 
 
 def ensure_transcript_table(conn):
+    """Cria a tabela de transcrições (uma linha por áudio + modelo + alinhado ou não)."""
     conn.execute(
         """CREATE TABLE IF NOT EXISTS transcripts(sha1 TEXT, model TEXT, aligned INTEGER, file TEXT, bytes INTEGER, duration REAL,
         aligner TEXT, language TEXT, created TEXT, note TEXT, json TEXT, PRIMARY KEY(sha1, model, aligned))"""
@@ -112,6 +118,7 @@ def ensure_transcript_table(conn):
 
 
 def save_transcript(json_path, audio, model="large-v3", aligned=False, note=""):
+    """Grava a transcrição (JSON completo) indexada pelo SHA-1 do áudio, com o modelo e se já está alinhada."""
     c = connect()
     ensure_transcript_table(c)
     d = json.load(open(json_path))
@@ -138,12 +145,13 @@ def save_transcript(json_path, audio, model="large-v3", aligned=False, note=""):
 
 
 def find_transcript(audio, output="transcription.json", only_aligned=False):
+    """Reaproveita uma transcrição salva: grava em `output` e devolve 0 se achou, 3 se não."""
     c = connect()
     ensure_transcript_table(c)
     q = (
         "SELECT json, model, aligned, created FROM transcripts WHERE sha1=?"
-        + (" AND alinhado=1" if only_aligned else "")
-        + " ORDER BY alinhado DESC, criado DESC"
+        + (" AND aligned=1" if only_aligned else "")
+        + " ORDER BY aligned DESC, created DESC"
     )
     r = c.execute(q, (sha1(audio),)).fetchone()
     if not r:
@@ -157,6 +165,7 @@ def find_transcript(audio, output="transcription.json", only_aligned=False):
 
 
 def list_transcripts():
+    """Lista as transcrições salvas (arquivo, modelo, alinhada, duração, data, SHA-1 curto)."""
     c = connect()
     ensure_transcript_table(c)
     for r in c.execute(
@@ -166,6 +175,7 @@ def list_transcripts():
 
 
 def ensure_videos_table(conn):
+    """Cria a tabela de referências a vídeos (só metadados e hash; nunca o vídeo em base64)."""
     conn.execute(
         """CREATE TABLE IF NOT EXISTS videos(name TEXT PRIMARY KEY, path TEXT, category TEXT, duration REAL, width INTEGER, height INTEGER,
         fps REAL, bytes INTEGER, sha256 TEXT, codec TEXT, added TEXT, note TEXT)"""
@@ -173,6 +183,7 @@ def ensure_videos_table(conn):
 
 
 def sha256(path):
+    """SHA-256 do arquivo, lido em blocos de 4 MB."""
     import hashlib
 
     h = hashlib.sha256()
@@ -183,6 +194,7 @@ def sha256(path):
 
 
 def register_video(file, category="video_filler", note=""):
+    """Registra a referência de um vídeo (caminho relativo, duração, resolução, fps, tamanho, hash) lendo os dados com o ffprobe."""
     c = connect()
     ensure_videos_table(c)
     r = subprocess.run(
@@ -227,6 +239,7 @@ def register_video(file, category="video_filler", note=""):
 
 
 def list_videos(cat="%"):
+    """Lista os vídeos registrados, filtrando pela categoria (aceita `%`)."""
     c = connect()
     ensure_videos_table(c)
     for r in c.execute(
@@ -237,6 +250,7 @@ def list_videos(cat="%"):
 
 
 def ensure_variant_tables(conn):
+    """Cria as tabelas do catálogo de variações de lista (código de cada variação + o código-base compartilhado)."""
     conn.execute(
         """CREATE TABLE IF NOT EXISTS list_variations(id TEXT PRIMARY KEY, name TEXT, usage TEXT, description TEXT, code TEXT, thumb_base64 TEXT,
         chosen INTEGER DEFAULT 0, note TEXT, origin TEXT, created TEXT)"""
@@ -245,6 +259,7 @@ def ensure_variant_tables(conn):
 
 
 def save_variant(file, thumbs=None, origin=""):
+    """Lê um `.tsx` de variações (marcadores `// ---------- Vnn: Nome ----------`) e salva o código de cada uma, os helpers e as miniaturas."""
     src = open(file, encoding="utf8").read()
     c = connect()
     ensure_variant_tables(c)
@@ -291,6 +306,7 @@ def save_variant(file, thumbs=None, origin=""):
 
 
 def list_variants():
+    """Lista as variações (★ = escolhida) com nome, uso e nota."""
     c = connect()
     ensure_variant_tables(c)
     for r in c.execute(
@@ -300,6 +316,7 @@ def list_variants():
 
 
 def choose_variant(variant_id, note=""):
+    """Marca uma variação como a escolhida/em uso, com uma nota opcional."""
     c = connect()
     ensure_variant_tables(c)
     c.execute("UPDATE list_variations SET chosen=1, note=? WHERE id=?", (note, variant_id))
@@ -308,6 +325,7 @@ def choose_variant(variant_id, note=""):
 
 
 def export_variant(ids, destination="src/scenes/variations.tsx"):
+    """Remonta um `.tsx` executável só com as variações pedidas (ou `everything`) e exporta as logos que elas usam."""
     c = connect()
     ensure_variant_tables(c)
     sel = (
@@ -342,6 +360,7 @@ def export_variant(ids, destination="src/scenes/variations.tsx"):
 
 
 def list_assets(filter="%"):
+    """Lista os assets do banco (categoria, nome, tipo, dimensões e tamanho) que casam com o filtro."""
     for r in connect().execute(
         "SELECT name, ext, width, height, category, ROUND(bytes/1024.0) FROM assets WHERE name LIKE ? ORDER BY category, name",
         (filter,),
@@ -350,6 +369,7 @@ def list_assets(filter="%"):
 
 
 def export_assets(pattern, destination="src/images"):
+    """Grava em `destination` os arquivos decodificados dos assets que casam com o padrão."""
     os.makedirs(destination, exist_ok=True)
     n = 0
     for name, ext, b64 in connect().execute("SELECT name, ext, base64 FROM assets WHERE name LIKE ?", (pattern,)):

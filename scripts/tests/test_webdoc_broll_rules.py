@@ -19,6 +19,7 @@ errors, passed, warnings = [], [], []
 
 
 def rule(rule_id, condition, msg):
+    """Registra o resultado de uma regra (passou ou falhou) com a mensagem."""
     (passed if condition else errors).append(f"{rule_id}: {msg}")
 
 

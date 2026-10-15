@@ -28,6 +28,30 @@ Cada item abaixo veio de uma correção do usuário e já virou regra no código
 7. **Render: `resolutionScale` do `project.meta` do template é 2 (4K)** — para 1080p ajustar para 1 ANTES de renderizar e conferir com ffprobe nos primeiros 90 s; o plano pode ter reescrito o meta.
 8. **Sempre fazer varredura visual do meio de cada clipe** (gameplay, câmera filmando monitor, jornal) antes de renderizar; os scripts não substituem os olhos.
 
+## CONVENÇÃO DE IDIOMA DO CÓDIGO (decisão do usuário, 2026-10-15)
+Identificadores, nomes de arquivos/pastas, flags de CLI, chaves de JSON e a DSL do `plan_data.py` ficam em **inglês** (`Block`, `Section`, `Graph`, `Item`, `Facts`, `FreeLogo`, `ShortList`, `Phrase`, `Anchor`…). **Comentários, docstrings, mensagens ao usuário e esta documentação ficam em pt-br.** Exceção deliberada: a pasta do projeto gerado continua `animacao/` e a skill continua `animacao-narracao`. Ao criar código novo, siga isso; nunca reintroduza nomes em português em identificadores.
+
+## APRENDIZADOS DA 2ª REVISÃO DA LISTA COM B-ROLL (2026-10-15/16) — já viraram regra no motor/testes
+1. **Alinhar pelo ÍCONE, não pelo texto**: irmãos de um grafo têm passo uniforme entre os centros dos ícones (rótulos longos não empurram vizinhos).
+2. **Terminal `ls`**: coluna de detalhes e título da cartela alinhados (mesma margem esquerda/direita); conferir com o nome mais longo e o mais curto.
+3. **Sem frestas entre clipes**: o intervalo entre um clipe e o seguinte/animação é **0 ou ≥ 4 s** (o plano avisa `gap`); animação sem sentido sai e o vídeo é estendido.
+4. **Foto de pessoa da ÉPOCA do fato** (ex.: o fundador no ano da aquisição), não uma foto atual.
+5. **Produto com versões (Win95/98/…)**: quando a fala nomeia as versões, mostre a animação com a logo de CADA versão (linha/grafo com as logos oficiais), não um ícone genérico.
+6. **Nada gigante**: nenhum item do grafo passa de 720×520 px depois da ampliação (placa larga de logo cortada na borda); o plano avisa `gigante`. Prefira o ícone quadrado da logo.
+7. **Nenhuma janela só com fundo + fala**, nem na abertura: toda janela tem animação ou B-roll. O gancho (primeiros ~30 s) precisa prender: ritmo, animações grandes e um clipe curto de apoio antes da propaganda.
+8. **Material único** (ex.: só existe um vídeo do assunto): mostre-o e complete o resto com animação — não invente B-roll de outro assunto.
+9. **Filtro de vídeos super editados** (texto grande na tela, jogos, rostos, câmera filmando monitor): rode `scripts/broll/classify_frames.py --video ARQ.mp4 --step 5 --min-clean 12` (CLIP + OCR + Haar + cortes/min) para listar trechos limpos e `--clips` para reprovar os clipes do plano. **O classificador não vê tudo** (janela de jogo ou página de vídeo dentro do desktop, quadro preto): sempre gere uma folha de contato dos clipes escolhidos (5 quadros por clipe) e olhe.
+10. **Animação sempre com alvo**: grafo só com um lado (origem sem destino) é proibido; todo item aponta para algo ou recebe seta.
+11. **Logo solto à esquerda não convive com grafo centralizado**: o motor tira o `FreeLogo` quando entra um `Graph` ampliado.
+12. **Prévia no navegador (porta 9000)**: depois do clique na timeline espere **≥ 6 s** antes do screenshot — itens recém-criados carregam a imagem depois e a captura rápida parece "item faltando".
+13. **Proxies de B-roll** são regerados por assinatura (arquivo, in, out): mudar o plano não reaproveita proxy velho do mesmo índice.
+
+## PACOTE DE MARCA NOS PROJETOS DO CAPCUT (música · avatar · propaganda · vinheta final)
+- Extração (uma vez, de projetos já editados à mão): `python scripts/capcut/extract_brand_pack.py --ref <draft_com_marca> --ref-ending <draft_com_vinheta>` → `private/brand_pack/` (ignorado pelo git; nunca publicar).
+- No `plan_data.py`: `PROMO_AFTER = Phrase("…")` define onde a propaganda entra (fronteira de cena depois do gancho); `FINAL_BEFORE_END` (padrão 6,9 s) é onde a vinheta final começa. `spec_from_plan.py` leva isso para o spec (`--no-branding` desliga).
+- Regras de montagem (`brand.py`, testadas por `test_capcut_brand.py` M1–M7): avatar no canto o vídeo todo, **menos** na propaganda e na vinheta final; música cobre tudo até o fim com loudness normalizado (música e propaganda); o B-roll continua até o fim e a vinheta final entra **por cima** do B-roll; o silêncio da narração é removido no ponto da propaganda e a timeline desloca pela duração da propaganda.
+- Ao entregar: avisar que o projeto leva marca e o tempo total (narração + propaganda).
+
 ## MODELO PADRÃO DE RETORNO AO USUÁRIO (pedido do usuário — usar SEMPRE em atualizações de status)
 Quando o usuário perguntar "como estamos?/e agora?" ou em qualquer atualização de projeto longo, responder neste formato (curto, em português, com tempo aproximado em TODAS as tarefas):
 1. Título: **Status das tarefas** (tempos aproximados, com a carga atual da máquina).

@@ -86,11 +86,13 @@ def ensure_icon(name, color):
 
 
 def norm(s):
+    """Normaliza texto para comparar palavras: minúsculas, sem acento e só letras/dígitos."""
     s = unicodedata.normalize("NFD", s.lower())
     return re.sub(r"[^a-z0-9]", "", "".join(c for c in s if unicodedata.category(c) != "Mn"))
 
 
 def Anchor(approx, word, side="start"):
+    """Âncora por palavra: devolve o tempo real (da transcrição) da palavra mais próxima de `approx` s, adiantado pelo LEAD."""
     p = norm(word)
     cands = [w for w in WORDS if norm(w["word"]).startswith(p) and abs(w["start"] - approx) < 6]
     if not cands:
@@ -158,6 +160,7 @@ def Phrase(phrase):
 
 
 def resolve_phrase(phrase, after):
+    """Resolve uma âncora por FRASE: tempo da primeira ocorrência das palavras seguidas depois de `after` s (menos o LEAD)."""
     toks = [norm(t) for t in phrase.split()]
     for i in range(len(WORDS)):
         if WORDS[i]["start"] < after + 0.05:
@@ -171,6 +174,7 @@ def resolve_phrase(phrase, after):
 
 # --- peças das cenas compostas (item de lista / seção / linha do tempo) ---
 def Logo(logo, name, year, color, acronym=None, at=None):
+    """Peça de logo com nome, ano e cor (ou sigla quando não há logo oficial)."""
     return dict(
         slot="logo", kind="logo", at=at, props=dict(logo=logo, name=name, year=year, color=color, acronym=acronym)
     )
@@ -194,10 +198,12 @@ def People(people, at=None, group=False):
 
 
 def Code(id, at=None):
+    """Peça de janela de código (trecho `id` de codes_source.json), região da direita."""
     return dict(slot="dir", kind="code", at=at, props=dict(id=id))
 
 
 def Stat(value, label, color="#a6e22e", pct=None, at=None, logo=None):
+    """Número grande com rótulo (valor <= 9 caracteres, rótulo <= 38); recebe o logo do assunto à esquerda."""
     if len(str(value)) > 9 or len(label) > 38:
         raise SystemExit(
             f"Stat '{value}' / '{label}': valor <= 9 caracteres e rotulo <= 38 (menos texto, mais imagem)"
@@ -221,10 +227,10 @@ def Facts(lines, at=None, logo=None):
 
 
 def Graph(items, dir="LR", links=(), at=None):
+    """Peça de grafo/árvore dentro de um item de lista (região da direita, ~1060x640); os itens aparecem em sequência."""
     for _it in items:
         if _it.get("label") and len(_it["label"]) > 26:
             raise SystemExit(f"Grafo: rotulo '{_it['label']}' > 26 caracteres (sobrepoe o vizinho); encurte")
-    """Peça de grafo/árvore dentro de um item de lista (região da direita, ~1060x640); os itens aparecem em sequência."""
     return dict(slot="dir", kind="graph", at=at, props=dict(items=items, dir=dir, links=list(links)))
 
 
@@ -298,6 +304,7 @@ def expand_logos(scenes):
 
 
 def Section(id, entry, tag, title, sub, logos=()):
+    """Cena de seção/cartela de parte, com logos pequenos e do mesmo tamanho."""
     return dict(
         kind="section",
         id=id,
@@ -402,6 +409,7 @@ def Impact(id, entry, lines, tag="atenção", style=None):
 
 # ---------- layout ----------
 def _library():
+    """Pasta `assets/` da skill (sobe os diretórios até achar `.claude/skills/animacao-narracao`)."""
     d = os.path.abspath(".")
     while d != "/":
         c = os.path.join(d, ".claude", "skills", "animacao-narracao", "assets")
@@ -465,6 +473,7 @@ def needs_plate(img):
 
 
 def aspect(img):
+    """Proporção largura/altura da imagem do projeto (copia da biblioteca da skill se faltar)."""
     if not any(os.path.exists(f"src/images/{img}.{e}") for e in ("png", "jpg", "webp", "svg")):
         pull_asset(img)
     for ext in ("png", "jpg", "webp"):
@@ -516,11 +525,13 @@ def geom(it):
 
 
 def box(it):
+    """Largura e altura da caixa do item (placa/imagem + rótulo)."""
     g = geom(it)
     return g["w"], g["h"]
 
 
 def scale_geom(it, s):
+    """Geometria (placa e imagem) do item multiplicada por `s`."""
     if not it["img"]:
         return {}
     g = geom(it)
@@ -528,6 +539,7 @@ def scale_geom(it, s):
 
 
 def rectangle(it, o):
+    """Retângulo (x0, y0, x1, y1) ocupado pelo item já posicionado em `o`."""
     g = geom(it)
     s = o["h"] / it["h"] if it["h"] else 1
     w, h = g["w"] * s, g["h"] * s
@@ -569,6 +581,7 @@ EMPTIES = set()
 
 
 def layout(items, dir_, W=1760, H=940, smax=1.5):
+    """Layout automático do grafo em camadas (LR ou TB): posiciona pelos CENTROS dos ícones, com passo uniforme entre irmãos, e amplia até `smax` para caber em WxH."""
     idx = {it["id"]: i for i, it in enumerate(items) if it["id"]}
     n = len(items)
     base = [i for i, it in enumerate(items) if not it["over"] and it["img"]]
@@ -588,6 +601,7 @@ def layout(items, dir_, W=1760, H=940, smax=1.5):
     pos = {}
 
     def spread(level, desired):
+        """Espalha os itens de um nível sem sobreposição (distância mínima entre centros) e recentraliza o grupo."""
         order = sorted(level, key=lambda i: (desired[i], i))
         for k, i in enumerate(order):
             pos[i] = desired[i]
@@ -674,6 +688,7 @@ def ensure_mono(img):
 
 
 def resolve_image(it):
+    """Resolve a imagem do item: ícone Tabler recolorido, versão mono da logo ou arquivo existente."""
     it["bezel"] = False
     if it["img"] and it["img"].startswith("ic:"):
         parts = it["img"][3:].split(":")
@@ -705,6 +720,7 @@ def bus_edges(items, out, pairs, LR):
 
 
 def build_graph(c, t0, t1):
+    """Monta a cena de grafo: layout, setas, tempos de cada item pelas âncoras e eventos para o `.meta`."""
     items = c["items"]
     for it in items:
         resolve_image(it)
@@ -872,6 +888,7 @@ def graph_static(items, dir_, links, W, H):
 
 
 def build_text(c, t0, t1):
+    """Monta a cena de título de impacto (tamanho do texto, tempos de digitação e permanência)."""
     lines = c["lines"]
     mx = max(len(re.sub(r"\*([a-z]:)?", "", l)) for l in lines) + 2
     style = c.get("style") or TITLE_STYLE[0]
@@ -937,6 +954,7 @@ def resolve_times_pieces(c, pieces, t0, t1, piso):
 
 
 def build_composite(c, t0, t1):
+    """Monta uma cena composta (item de lista, seção ou bloco): menu/cartela, peças por slot, tempos, ampliação do grafo, checagens de clipe/avatar/gigante."""
     pieces = c["pieces"]
     piso = t0 + (MENU_DURATION if c.get("menu") else 0)
     times, names = resolve_times_pieces(c, pieces, t0, t1, piso)
@@ -1243,6 +1261,7 @@ def build_broll(c, t0, t1):
 
 
 def build_time(c, t0, t1):
+    """Monta a cena de linha do tempo (marcos ancorados na fala)."""
     times = []
     cur = t0
     for i, at in c["milestones"]:
@@ -1297,10 +1316,12 @@ def resolve_icon(ref):
 
 
 def fmt(t):
+    """Segundos → `mm:ss.cc`."""
     return f"{int(t//60):02d}:{t%60:05.2f}"
 
 
 def phrase(begin, end):
+    """Texto falado entre `begin` e `end` (para o PLAN.md)."""
     return " ".join(w["word"].strip() for w in WORDS if w["start"] >= begin - 0.05 and w["end"] <= end + 0.3)
 
 

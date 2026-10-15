@@ -52,10 +52,12 @@ FPS = 30
 
 
 def to_frames(t):  # segundos -> frames inteiros
+    """Segundos → frames inteiros."""
     return int(round(float(t) * FPS))
 
 
 def frames_to_us(n):  # frames -> microssegundos
+    """Frames → microssegundos (a unidade de tempo do CapCut)."""
     return int(round(n * 1_000_000 / FPS))
 
 
@@ -97,6 +99,7 @@ def build_sections(spec, total_s):
 
 
 def probe(p):
+    """Resolução e duração do vídeo (ffprobe)."""
     r = subprocess.run(
         [
             "ffprobe",
@@ -123,6 +126,7 @@ def probe(p):
 
 
 def audio_duration(p):
+    """Duração do áudio em segundos (ffprobe)."""
     r = subprocess.run(
         ["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", str(p)],
         capture_output=True,
@@ -132,6 +136,7 @@ def audio_duration(p):
 
 
 def mat_by_id(materials, mid):
+    """Acha um material pelo id em qualquer lista de `materials` do draft; devolve `(lista, material)`."""
     for key, items in materials.items():
         if isinstance(items, list):
             for it in items:
@@ -141,6 +146,7 @@ def mat_by_id(materials, mid):
 
 
 def clone_extras(refs, old_mats, out, speed=None):
+    """Clona os materiais extras de um segmento (velocidade, canvas, som…) com ids novos, ajustando a velocidade."""
     new_ids = []
     for rid in refs or []:
         key, it = mat_by_id(old_mats, rid)
@@ -163,6 +169,7 @@ def copy_media(src, dst):
 
 
 def _copy(src, dst):
+    """Copia a mídia para o draft sem ocupar espaço extra (clonefile do APFS); no modo de teste usa link simbólico."""
     if dst.exists():
         return
     if os.environ.get("CAPCUT_TEST") == "1":
@@ -182,6 +189,7 @@ def cover_scale(w, h):
 
 
 def make_cover(spec, voice_dur, dest, tmp_dir):
+    """Gera a capa do draft (frame de 640x360) a partir do frame pedido ou do início do primeiro clipe."""
     f = spec.get("cover_frame")
     if not f:
         overlay_src = spec.get("overlay")
@@ -221,6 +229,7 @@ def make_cover(spec, voice_dur, dest, tmp_dir):
 
 
 def build(spec, backup=True, force=False):
+    """Monta o draft do CapCut a partir do spec: trilhas filler, clips, overlay, narração (+ marca) e registra o projeto."""
     capcut_running = subprocess.run(["pgrep", "-x", "CapCut"], capture_output=True).returncode == 0
     if capcut_running and not force:
         sys.exit("O CapCut está aberto (ele reescreve drafts abertos). Feche-o ou use --force.")
@@ -274,6 +283,7 @@ def build(spec, backup=True, force=False):
     copy_media(filler_p, media_dir / filler_p.name)
 
     def new_video_seg(src_path, dest_name, file_dur, w, h, src_start_us, src_dur_us, tl_start_us, tl_dur_us, speed, mat_name):
+        """Cria um segmento de vídeo novo (material + extras) apontando para o trecho da fonte e a posição na timeline."""
         mat = deepcopy(vmat_t)
         mid = uid()
         mat.update(

@@ -10,6 +10,7 @@ RULES_TEST = HERE / "test_webdoc_broll_rules.py"
 
 
 def setup():
+    """Copia para uma pasta temporária os arquivos que o teste de regras lê."""
     tmp_dir = Path(tempfile.mkdtemp(prefix="mutw_"))
     (tmp_dir / "src/scenes").mkdir(parents=True)
     (tmp_dir / "src").joinpath("images").symlink_to(cwd / "src/images")
@@ -20,10 +21,12 @@ def setup():
 
 
 def run(tmp_dir):
+    """Roda o teste de regras na cópia mutada."""
     return subprocess.run([sys.executable, str(RULES_TEST)], cwd=tmp_dir, capture_output=True, text=True)
 
 
 def mutate_json(tmp_dir, file, fn):
+    """Aplica a mutação `fn` a um JSON da cópia temporária."""
     p = tmp_dir / file
     doc = json.load(open(p))
     fn(doc)
@@ -31,6 +34,7 @@ def mutate_json(tmp_dir, file, fn):
 
 
 def shift_event(doc, name, delta=None, absolute=None):
+    """Desloca (ou fixa) o tempo do evento `name` no `.meta`."""
     for e in doc["timeEvents"]:
         if e["name"] == name:
             e["targetTime"] = absolute if absolute is not None else e["targetTime"] + delta
@@ -39,12 +43,14 @@ def shift_event(doc, name, delta=None, absolute=None):
 
 
 def event_time(scene_idx, k):
+    """Tempo do evento `<cena>-i<k>` (k-ésimo item) lido do `.meta` do projeto."""
     return [
         e for e in json.load(open(cwd / "src/scenes/scene1.meta"))["timeEvents"] if e["name"] == f"{scene_idx}-i{k}"
     ][0]["targetTime"]
 
 
 def find_short_list(doc):
+    """Primeira cena de lista curta do `scenes.json`."""
     return next(c for c in doc if c["kind"] == "shortlist")
 
 

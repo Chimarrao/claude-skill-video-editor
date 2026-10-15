@@ -45,6 +45,7 @@ narration.sort()
 
 
 def to_original(t):
+    """Converte um tempo da timeline editada pelo usuário para o tempo original da narração (`None` se cair numa inserção dele)."""
     for start, t1, s0 in narration:
         if start - 1e-3 <= t <= t1 + 1e-3:
             return round(s0 + (t - start), 3)

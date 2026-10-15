@@ -58,6 +58,7 @@ with torch.no_grad():
 
 
 def classify(images):
+    """Pontua cada imagem por categoria com CLIP zero-shot (desktop, jogo, pessoa, texto editado, câmera filmando monitor, preto)."""
     with torch.no_grad():
         image_features = model.get_image_features(**processor(images=images, return_tensors="pt"))
         image_features = image_features / image_features.norm(dim=-1, keepdim=True)
@@ -82,6 +83,7 @@ def has_face(path):
 
 
 def count_large_text(path):
+    """Conta palavras GRANDES no quadro (OCR): texto de edição costuma ser grande, texto de interface é pequeno."""
     if args.skip_ocr:
         return 0
     result = subprocess.run(
@@ -103,6 +105,7 @@ def count_large_text(path):
 
 
 def sample(file, start, end, step):
+    """Extrai quadros de `file` entre `start` e `end` a cada `step` s (arquivos JPEG numa pasta temporária)."""
     tmp_dir = tempfile.mkdtemp()
     samples = []
     current = start
@@ -132,6 +135,7 @@ def sample(file, start, end, step):
 
 
 def analyze(file, start, end, step):
+    """Classifica os quadros amostrados (CLIP + OCR + rostos) e devolve uma linha por quadro."""
     samples = sample(file, start, end, step)
     frames = []
     for i in range(0, len(samples), 16):
@@ -153,6 +157,7 @@ def analyze(file, start, end, step):
 
 
 def summarize(frames):
+    """Fração de quadros em cada categoria."""
     total = max(1, len(frames))
     fractions = {category: sum(1 for frame in frames if frame["cat"] == category) / total for category in names}
     return fractions
@@ -186,6 +191,7 @@ def cuts_per_minute(file, start, end):
 
 
 def should_reject(fractions, cpm=0.0):
+    """Regra de reprovação: jogo/pessoa > 15%, texto editado > 25%, câmera filmando monitor > 40%, preto > 30% ou > 14 cortes/min."""
     return (
         fractions["game"] > 0.15
         or fractions["person"] > 0.15

@@ -49,11 +49,13 @@ T = json.load(open("transcription_raw.json"))
 
 
 def chars(w):
+    """Caracteres da palavra que o modelo CTC conhece (sem o separador `|`)."""
     w = unicodedata.normalize("NFC", w.lower().strip())
     return [c for c in w if c in vocab and c not in "|"]
 
 
 def emissions(a, b):
+    """Probabilidades (log-softmax) do wav2vec2 para o trecho de áudio [a, b] s."""
     x = wav[int(a * SR) : int(b * SR)]
     x = (x - x.mean()) / (x.std() + 1e-7)
     with torch.inference_mode():
