@@ -1,24 +1,24 @@
 #!/usr/bin/env python3
 """Proxies leves (640x360, sem áudio, corte "cobrir" 16:9) SÓ dos trechos escolhidos, para a prévia do B-roll no editor do Motion Canvas.
-Uso (na pasta animacao/): python gerar_proxies.py   (lê src/scenes/broll.json; grava src/videos/clip_NN.mp4 e src/videos/preenchimento.mp4)
+Uso (na pasta animacao/): python generate_proxies.py   (lê src/scenes/broll.json; grava src/videos/clip_NN.mp4 e src/videos/preenchimento.mp4)
 Não mexe nos vídeos originais nem na montagem do CapCut."""
 
 import json, os, subprocess, sys
 from concurrent.futures import ThreadPoolExecutor
 
-B = json.load(open("src/scenes/broll.json"))
+CLIPS = json.load(open("src/scenes/broll.json"))
 os.makedirs("src/videos", exist_ok=True)
 VF = "scale=640:360:force_original_aspect_ratio=increase,crop=640:360,fps=30"
 
 
-def go(i):
-    c = B[i]
-    out = f"src/videos/clip_{i+1:02d}.mp4"
+def build_proxy(index):
+    clip = CLIPS[index]
+    output = f"src/videos/clip_{index+1:02d}.mp4"
     # a assinatura (arquivo, in, out) evita reaproveitar um proxy antigo quando o plano muda e o índice NN passa a apontar para outro trecho
-    assinatura = f"{c['arquivo']}|{c['in']}|{c['out']}"
-    marca = out + ".src"
-    if os.path.exists(out) and os.path.exists(marca) and open(marca).read() == assinatura:
-        return out
+    signature = f"{clip['arquivo']}|{clip['in']}|{clip['out']}"
+    sig_file = output + ".src"
+    if os.path.exists(output) and os.path.exists(sig_file) and open(sig_file).read() == signature:
+        return output
     subprocess.run(
         [
             "ffmpeg",
@@ -26,11 +26,11 @@ def go(i):
             "-v",
             "error",
             "-ss",
-            str(c["in"]),
+            str(clip["in"]),
             "-t",
-            str(round(c["out"] - c["in"], 3)),
+            str(round(clip["out"] - clip["in"], 3)),
             "-i",
-            c["arquivo"],
+            clip["arquivo"],
             "-an",
             "-vf",
             VF,
@@ -44,23 +44,25 @@ def go(i):
             "yuv420p",
             "-g",
             "30",
-            out,
+            output,
         ],
         check=True,
     )
-    open(marca, "w").write(assinatura)
-    return out
+    open(sig_file, "w").write(signature)
+    return output
 
 
-def filler():
-    d = os.path.abspath(".")
-    while d != "/":
-        f = os.path.join(d, ".claude", "skills", "animacao-narracao", "assets", "fundo_preenchimento.mp4")
-        if os.path.exists(f):
+def build_filler():
+    current = os.path.abspath(".")
+    while current != "/":
+        asset = os.path.join(
+            current, ".claude", "skills", "animacao-narracao", "assets", "fundo_preenchimento.mp4"
+        )
+        if os.path.exists(asset):
             break
-        d = os.path.dirname(d)
-    out = "src/videos/preenchimento.mp4"
-    if not os.path.exists(out):
+        current = os.path.dirname(current)
+    output = "src/videos/preenchimento.mp4"
+    if not os.path.exists(output):
         subprocess.run(
             [
                 "ffmpeg",
@@ -68,7 +70,7 @@ def filler():
                 "-v",
                 "error",
                 "-i",
-                f,
+                asset,
                 "-an",
                 "-vf",
                 VF,
@@ -82,15 +84,15 @@ def filler():
                 "yuv420p",
                 "-g",
                 "30",
-                out,
+                output,
             ],
             check=True,
         )
 
 
-with ThreadPoolExecutor(4) as ex:
-    list(ex.map(go, range(len(B))))
-filler()
+with ThreadPoolExecutor(4) as executor:
+    list(executor.map(build_proxy, range(len(CLIPS))))
+build_filler()
 print(
-    f"{len(B)} proxies + preenchimento em src/videos/ ({sum(os.path.getsize('src/videos/'+f) for f in os.listdir('src/videos'))/1e6:.0f} MB)"
+    f"{len(CLIPS)} proxies + preenchimento em src/videos/ ({sum(os.path.getsize('src/videos/'+f) for f in os.listdir('src/videos'))/1e6:.0f} MB)"
 )
