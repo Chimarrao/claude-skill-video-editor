@@ -173,34 +173,87 @@ def load_catalog(shard=None):
     return cat
 
 
-def save_catalog(cat, shard=None):
+def save_catalog(cat, shard=None, base=None):
+    """Grava o catálogo. Com `shard`, grava SÓ o que este worker acrescentou em relação ao principal (`base`): nunca copia o principal
+    para o arquivo do worker (isso fez o merge apagar imagens boas)."""
     os.makedirs(os.path.dirname(CATALOG), exist_ok=True)
     path = shard_path(shard)
+    if shard and base is not None:
+        cat = dict(
+            images={k: v for k, v in cat["images"].items() if k not in base["images"]},
+            subjects={k: v for k, v in cat["subjects"].items() if k not in base["subjects"] or base["subjects"][k] != v},
+        )
     tmp = path + ".tmp"
     json.dump(cat, open(tmp, "w", encoding="utf8"), ensure_ascii=False, indent=1, sort_keys=True)
     os.replace(tmp, path)
 
 
 def merge_shards():
-    """Junta os catálogos dos workers no principal (descarta imagens repetidas pelo SHA-1 e apaga os arquivos extras)."""
+    """Junta os catálogos dos workers no principal. Duplicata por SHA-1 só é descartada se for outro NOME de arquivo (nunca apaga o arquivo de um nome já catalogado)."""
     cat = load_catalog()
-    vistos = {v["sha1"] for v in cat["images"].values()}
+    vistos = {v["sha1"]: k for k, v in cat["images"].items()}
     base = os.path.dirname(CATALOG)
     for f in sorted(os.listdir(base)):
         if re.match(r"image_catalog\.\d+\.json$", f):
             extra = json.load(open(os.path.join(base, f), encoding="utf8"))
             for k, v in extra["images"].items():
+                if k in cat["images"]:
+                    continue
                 if v["sha1"] in vistos:
                     for g in os.listdir(LIB):
-                        if g.startswith(k + "."):
+                        if g.startswith(k + ".") and k != vistos[v["sha1"]]:
                             os.remove(os.path.join(LIB, g))
                     continue
-                vistos.add(v["sha1"])
+                vistos[v["sha1"]] = k
                 cat["images"][k] = v
-            cat["subjects"].update(extra["subjects"])
+            for k, v in extra["subjects"].items():
+                cat["subjects"][k] = v
             os.remove(os.path.join(base, f))
     save_catalog(cat)
     print(f"catálogo unido: {len(cat['images'])} imagens, {len(cat['subjects'])} assuntos")
+
+
+def repair(shard_k=0, shard_n=1):
+    """Rebaixa os arquivos que estão no catálogo mas não existem em `library/` (por título do arquivo, em lotes de 40), conferindo o SHA-1."""
+    cat = load_catalog()
+    files = set(os.listdir(LIB)) if os.path.isdir(LIB) else set()
+    faltam = sorted(k for k, v in cat["images"].items() if v["file"] not in files)
+    faltam = faltam[shard_k::shard_n]
+    print(f"{len(faltam)} arquivos a rebaixar (worker {shard_k}/{shard_n})", flush=True)
+    os.makedirs(LIB, exist_ok=True)
+    por_host = {}
+    for k in faltam:
+        host, _, title = cat["images"][k]["source_key"].partition(":")
+        por_host.setdefault(host, []).append((k, title))
+    ok = ruins = 0
+    for host, itens in por_host.items():
+        for i in range(0, len(itens), 40):
+            lote = itens[i : i + 40]
+            d = api(host, action="query", titles="|".join(t for _, t in lote), prop="imageinfo", iiprop="url|size|mime|extmetadata", iiurlwidth=1280)
+            infos = {}
+            for p in (d.get("query", {}).get("pages") or []):
+                it = info_to_item(p, host)
+                if it:
+                    infos[it["title"]] = it
+            for k, t in lote:
+                v = cat["images"][k]
+                it = infos.get(t)
+                if not it:
+                    ruins += 1
+                    print(f"   ? sem info: {t}", flush=True)
+                    continue
+                data, ext = download(it)
+                if not data:
+                    ruins += 1
+                    continue
+                name = f"{k}.{v['file'].rsplit('.', 1)[1]}"
+                open(os.path.join(LIB, name), "wb").write(data)
+                ok += 1
+                if hashlib.sha1(data).hexdigest() != v["sha1"]:
+                    print(f"   ~ {name}: conteúdo mudou na fonte (SHA-1 diferente)", flush=True)
+                if ok % 25 == 0:
+                    print(f"   {ok} rebaixados", flush=True)
+    print(f"reparo: {ok} rebaixados, {ruins} falharam")
 
 
 def aspect_class(w, h):
@@ -301,6 +354,7 @@ def main():
     ap.add_argument("--refresh", help="slug a recolher do zero")
     ap.add_argument("--shard", help="K/N: este worker colhe os assuntos de índice K (mod N); use vários em paralelo e depois --merge")
     ap.add_argument("--merge", action="store_true", help="junta os catálogos dos workers")
+    ap.add_argument("--repair", action="store_true", help="rebaixa arquivos do catálogo que faltam em library/ (use com --shard K/N para paralelizar)")
     ap.add_argument("--max-logo", type=int, default=3)
     ap.add_argument("--max-tela", type=int, default=4)
     ap.add_argument("--max-foto", type=int, default=2)
@@ -316,6 +370,10 @@ def main():
     if args.shard:
         k, n = (int(x) for x in args.shard.split("/"))
         shard = str(k)
+    if args.repair:
+        repair(k, n)
+        return
+    base = load_catalog()
     cat = load_catalog(shard)
     if args.list:
         for s in SUBJECTS:
@@ -341,7 +399,7 @@ def main():
             harvest(s, cat, quotas)
         except Exception as e:  # um assunto ruim não derruba a colheita
             print(f"   ! erro em {s['slug']}: {e}", flush=True)
-        save_catalog(cat, shard)
+        save_catalog(cat, shard, base)
     print(f"catálogo: {len(cat['images'])} imagens, {len(cat['subjects'])} assuntos")
 
 

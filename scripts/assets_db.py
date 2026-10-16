@@ -24,13 +24,29 @@ DB = os.path.join(ROOT, "database", "assets.db")
 os.makedirs(os.path.dirname(DB), exist_ok=True)
 
 
+NEW_COLUMNS = dict(subject="TEXT", kind="TEXT", tags="TEXT", license="TEXT", source_url="TEXT", aspect="REAL", nonfree="INTEGER", quality="TEXT")
+CATALOG = os.path.join(ROOT, "database", "image_catalog.json")
+KIND_CATEGORY = dict(logo="logo", tela="screen", foto="photo", obj="object")
+
+
 def connect():
-    """Abre o banco (criando a tabela `assets` e o índice de categoria se faltar)."""
+    """Abre o banco (criando a tabela `assets`, o índice e as colunas de catálogo se faltarem)."""
     c = sqlite3.connect(DB)
     c.execute("""CREATE TABLE IF NOT EXISTS assets(name TEXT PRIMARY KEY, ext TEXT, mime TEXT, bytes INTEGER,
         width INTEGER, height INTEGER, category TEXT, origin TEXT, added TEXT, base64 TEXT)""")
     c.execute("CREATE INDEX IF NOT EXISTS i_cat ON assets(category)")
+    have = {r[1] for r in c.execute("PRAGMA table_info(assets)")}
+    for col, typ in NEW_COLUMNS.items():
+        if col not in have:
+            c.execute(f"ALTER TABLE assets ADD COLUMN {col} {typ}")
     return c
+
+
+def catalog_meta():
+    """Metadados da colheita (assunto, tipo, tags, licença, fonte…) por nome de arquivo, de database/image_catalog.json."""
+    if not os.path.exists(CATALOG):
+        return {}
+    return json.load(open(CATALOG, encoding="utf8")).get("images", {})
 
 
 def category(name):
@@ -63,8 +79,10 @@ def dimensions(path, ext):
 
 
 def sync(folders):
-    """Importa para o banco as imagens novas das pastas dadas (sem duplicar por nome; ignora `ic-*` e `*-mono`, que o plan.py gera)."""
+    """Importa para o banco as imagens novas das pastas dadas (sem duplicar por nome; ignora `ic-*` e `*-mono`, que o plan.py gera)
+    e grava os metadados do catálogo (assunto, tipo, tags, licença, fonte, proporção, qualidade) quando existirem."""
     conn = connect()
+    meta = catalog_meta()
     new_count = 0
     for folder in folders:
         for file_path in sorted(glob.glob(os.path.join(folder, "*"))):
@@ -75,11 +93,19 @@ def sync(folders):
                 continue
             if name.endswith("-mono") or name.startswith("ic-"):
                 continue  # gerados automaticamente pelo plan.py
+            m = meta.get(name)
+            extra = (
+                (m["subject"], m["kind"], " ".join(m.get("tags", [])), m.get("license", ""), m.get("source_url", ""), m.get("aspect"), int(bool(m.get("nonfree"))), m.get("quality", "ok"))
+                if m
+                else (None, None, None, None, None, None, None, None)
+            )
             if conn.execute("SELECT 1 FROM assets WHERE name=?", (name,)).fetchone():
+                if m:
+                    conn.execute("UPDATE assets SET subject=?, kind=?, tags=?, license=?, source_url=?, aspect=?, nonfree=?, quality=? WHERE name=?", extra + (name,))
                 continue
             w, h = dimensions(file_path, ext)
             conn.execute(
-                "INSERT INTO assets VALUES(?,?,?,?,?,?,?,?,?,?)",
+                "INSERT INTO assets(name, ext, mime, bytes, width, height, category, origin, added, base64, subject, kind, tags, license, source_url, aspect, nonfree, quality) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                 (
                     name,
                     ext,
@@ -87,11 +113,12 @@ def sync(folders):
                     os.path.getsize(file_path),
                     w,
                     h,
-                    category(name),
+                    KIND_CATEGORY.get(m["kind"]) if m else category(name),
                     os.path.relpath(folder),
                     time.strftime("%Y-%m-%d"),
                     base64.b64encode(open(file_path, "rb").read()).decode(),
-                ),
+                )
+                + extra,
             )
             new_count += 1
     conn.commit()

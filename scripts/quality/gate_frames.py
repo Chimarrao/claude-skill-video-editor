@@ -12,6 +12,7 @@ Verificações automáticas por quadro:
  F5 janela vazia       sem overlay e sem clipe onde o plano diz que há animação
  F6 base preta/lisa    clipe de B-roll preto ou sem informação
  F7 entrada brusca     item que já está 100% visível 0,04 s depois do evento (pop-in sem animação)
+ F8 último item        o ÚLTIMO item de cada grafo precisa realmente aparecer (bug do Motion Canvas: filho cancelado quando enter() termina)
 Saída: qa/frames/*.png (composites 1280x720), qa/sheet_NN.png (folhas 4x3 com o tempo), qa/gate_frames.json. Sai com 1 se houver ERRO.
 AGORA OLHE AS FOLHAS (Read nas PNGs): os números não substituem os olhos — recomece do zero se a edição estiver ruim.
 Uso: python gate_frames.py [--overlay output/project.mov] [--spec capcut_spec.json] [--step 20] [--max-frames 400]
@@ -188,6 +189,33 @@ for n, t in amostra_ev:
         aviso(t, f"F7 entrada brusca (pop-in sem animação) em {n}")
 if pops > 6:
     erro(0, f"F7 {pops} entradas bruscas (sem animação de entrada)")
+
+# F8: o último item de cada grafo aparece de verdade? (compara a área do overlay antes e depois do evento do último item)
+def ultimos_eventos():
+    for sid, c in scenes.items():
+        if c["kind"] == "graph":
+            beats = [i.get("beat") for i in c["items"] if i.get("beat")]
+            if len(beats) >= 2 and f"{sid}-{beats[-1]}" in events:
+                yield sid, events[f"{sid}-{beats[-1]}"], plan["windows"].get(sid, [0, 0])[1]
+        for p in c.get("pieces", []):
+            if p["kind"] == "graph":
+                evs = [e for e in (p["props"].get("events") or []) if e]
+                if len(evs) >= 2 and evs[-1] in events:
+                    yield sid + "/graph", events[evs[-1]], plan["windows"].get(sid, [0, 0])[1]
+
+
+falta = 0
+for sid, te, fim in ultimos_eventos():
+    if te + 1.2 > fim or clip_at(te + 1.2) or clip_at(te):
+        continue
+    o1, o2 = ff_frame(args.overlay, te - 0.15, rgba=True), ff_frame(args.overlay, te + 1.2, rgba=True)
+    if o1 is None or o2 is None:
+        continue
+    a1, a2 = int((np.asarray(o1)[:, :, 3] > 16).sum()), int((np.asarray(o2)[:, :, 3] > 16).sum())
+    if a2 - a1 < 600:
+        falta += 1
+        erro(te, f"F8 o último item de {sid} não apareceu (área do overlay {a1}→{a2}px): item/seta cancelados")
+print(f"F8: {falta} grafos com último item ausente")
 
 # folhas de contato
 fr = sorted((OUT / "frames").glob("f_*.png"))

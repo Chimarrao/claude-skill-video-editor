@@ -25,7 +25,9 @@ export function figure(
   {height = 280, plate = false, circular = false, bezel = false, label, pw, ph, iw, ih, ...props}: FigureOptions = {},
 ): Rect {
   const size = 36;
-  if (label) label = label.charAt(0).toUpperCase() + label.slice(1); // primeira letra sempre maiúscula
+  const linhas = label ? label.split('\n').length : 1; // o plan.py envia rótulos longos já quebrados em 2 linhas (\n)
+  // primeira letra maiúscula, menos nas marcas em camelCase (iPad, iOS, webOS, macOS): "IPad" estaria errado
+  if (label && !/^[a-z]+[A-Z]/.test(label)) label = label.charAt(0).toUpperCase() + label.slice(1);
   const text = (extra: TxtProps = {}) =>
     (
       <Txt
@@ -45,7 +47,7 @@ export function figure(
   // Nos nós sem coluna (disco de ícone / foto redonda) o rótulo fica ABAIXO da caixa do nó: `labelDrop` diz às setas que saem
   // por baixo até onde o texto termina, para a seta nunca atravessar o rótulo.
   const comRotulo = (no: Rect) => {
-    (no as any).labelDrop = label ? 80 : 0;
+    (no as any).labelDrop = label ? 80 + (linhas - 1) * 36 : 0;
     return no;
   };
   if (bezel) {
@@ -61,7 +63,7 @@ export function figure(
         >
           <Img src={image} size={height * 0.56} />
         </Rect>
-        {label ? text({layout: false, y: height / 2 + 46}) : null}
+        {label ? text({layout: false, y: height / 2 + 46 + (linhas - 1) * 18}) : null}
       </Rect> as Rect,
     );
   }
@@ -71,13 +73,13 @@ export function figure(
         <Rect size={height} radius={height / 2} clip stroke={WHITE} lineWidth={10} {...SHADOW}>
           <Img src={image} size={height} />
         </Rect>
-        {label ? text({layout: false, y: height / 2 + 46}) : null}
+        {label ? text({layout: false, y: height / 2 + 46 + (linhas - 1) * 18}) : null}
       </Rect> as Rect,
     );
   }
   // Rótulo abaixo da imagem; um espaçador invisível simétrico em cima mantém o centro da imagem/placa no centro
   // do nó (as setas ligam no meio). Placa: tamanho fixo calculado no plan.py (nada de caixas desproporcionais).
-  const reserve = size * 1.35;
+  const reserve = size * 1.35 * linhas;
   const core =
     plate && pw && ph ? (
       <Rect
@@ -93,7 +95,7 @@ export function figure(
     ) : (
       <Img src={image} width={iw ?? undefined} height={ih ?? height} {...SHADOW} />
     );
-  return (
+  const column = (
     <Rect layout direction="column" alignItems="center" gap={8} opacity={0} {...props}>
       {label ? <Rect height={reserve} /> : null}
       {core}
@@ -104,4 +106,8 @@ export function figure(
       ) : null}
     </Rect>
   ) as Rect;
+  // Tamanho do miolo (placa/imagem): as setas encostam NELE, não na caixa da coluna (que inclui a reserva do rótulo, mais larga/alta).
+  if (plate && pw && ph) (column as any).core = [pw, ph];
+  else if (iw && ih) (column as any).core = [iw, ih];
+  return column;
 }

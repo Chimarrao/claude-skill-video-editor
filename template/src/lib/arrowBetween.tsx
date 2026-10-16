@@ -7,6 +7,23 @@ export type StyleArrow = 'straight' | 'elbow';
 
 const THICKNESS = 11;
 
+const TIP_GAP = 4; // vão entre a ponta da seta e a borda do miolo (espelha geometry.TIP_GAP)
+
+/**
+ * Ponto de ligação de `n` no lado `side`. Colunas (placa/logo com rótulo) expõem `core` = [largura, altura] do miolo: a seta
+ * encosta na placa/imagem e não na caixa da coluna, que é mais larga/alta por causa do rótulo. Sem `core` (disco, foto redonda): borda do nó.
+ * Saída por baixo (`bottom`) continua na borda da coluna, depois do rótulo.
+ */
+function anchor(n: Layout, side: Side): Vector2 {
+  const core = (n as any).core as [number, number] | undefined;
+  if (!core || side === 'bottom') return n[side]();
+  const c = n.position();
+  const [w, h] = core;
+  if (side === 'left') return c.addX(-w / 2 - TIP_GAP);
+  if (side === 'right') return c.addX(w / 2 + TIP_GAP);
+  return c.addY(-h / 2 - TIP_GAP);
+}
+
 /**
  * Seta grossa (Line com endArrow) ligando as bordas de `a` e `b`; começa com end=0.
  * Os pontos são funções dos nodes, então a seta acompanha se eles se moverem.
@@ -23,8 +40,8 @@ export function arrowBetween(
 ): Reference<Line> {
   const ref = createRef<Line>();
   const drop = sideA === 'bottom' ? ((a as any).labelDrop as number | undefined) ?? 0 : 0; // saída por baixo começa depois do rótulo
-  const p0 = () => (drop ? a[sideA]().addY(drop) : a[sideA]());
-  const p3 = () => b[sideB]();
+  const p0 = () => (drop ? anchor(a, sideA).addY(drop) : anchor(a, sideA));
+  const p3 = () => anchor(b, sideB);
   const horizontal = sideA === 'right' || sideA === 'left';
   const middle = () => (bus != null ? bus : horizontal ? (p0().x + p3().x) / 2 : (p0().y + p3().y) / 2);
   const p1 = () => (horizontal ? new Vector2(middle(), p0().y) : new Vector2(p0().x, middle()));

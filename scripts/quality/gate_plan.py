@@ -9,6 +9,7 @@ Roda em animacao/ depois de `plan.py`. Sai com 1 se houver ERRO; AVISO pede olha
  P5 imagens      rótulo que cita um assunto do catálogo (BeOS, NeXTSTEP, Windows XP…) com ícone genérico = ERRO: use a logo/foto
  P6 janelas vazias  trecho > 4 s sem animação NEM clipe (só fundo + fala) = ERRO (abertura inclusa), exceto `Empty` declarado
  P7 rótulos      <= 26 caracteres, primeira letra maiúscula, sem rótulo repetido no mesmo grafo
+ P8 clipes       dois clipes nunca repetem o mesmo trecho do mesmo vídeo-fonte, nem se sobrepõem na linha do tempo
 Grava qa/gate_plan.json. Uso: python gate_plan.py [--gap 0.9] [--allow-empty id1,id2]
 """
 
@@ -52,7 +53,8 @@ if cat_path.exists():
 assets = {p.stem for p in (ROOT / "assets").glob("*") if p.is_file()}
 subjects = {}  # slug -> melhor nome de arquivo de logo/foto
 for name, v in catalog.items():
-    subjects.setdefault(v["subject"], []).append(name)
+    if v.get("quality", "ok") == "ok":  # só sugere imagem verificada (check/low ficam de fora)
+        subjects.setdefault(v["subject"], []).append(name)
 for a in assets:
     if a.startswith(("logo_", "foto_")):
         subjects.setdefault(a.split("_", 1)[1], []).append(a)
@@ -172,6 +174,17 @@ for a, b in vazios:
     if ids and all(i in permitidos for i in ids):
         continue
     erro("P6 janela vazia", f"{a:.1f}–{b:.1f}s ({b - a:.1f}s, cena {','.join(ids) or '?'}) só com fundo e fala: coloque animação/B-roll")
+
+# P8 clipes: trecho repetido do mesmo arquivo (o espectador vê a mesma cena duas vezes) ou clipes sobrepostos no tempo
+por_arquivo = {}
+for k, b in enumerate(broll, 1):
+    for k2, a0, a1 in por_arquivo.get(b["file"], []):
+        if min(a1, b["out"]) - max(a0, b["in"]) > 0.5:
+            erro("P8 clipes", f"clip {k} ({b['in']:.0f}–{b['out']:.0f}s) repete o trecho do clip {k2} ({a0:.0f}–{a1:.0f}s) de {os.path.basename(b['file'])}")
+    por_arquivo.setdefault(b["file"], []).append((k, b["in"], b["out"]))
+for k, (a, b) in enumerate(zip(broll, broll[1:]), 1):
+    if b["t_start"] < a["t_end"] - 0.05:
+        erro("P8 clipes", f"clip {k + 1} começa em {b['t_start']:.1f}s antes de o clip {k} terminar ({a['t_end']:.1f}s)")
 
 os.makedirs(cwd / "qa", exist_ok=True)
 json.dump(dict(errors=errors, warnings=warns, gap=GAP), open(cwd / "qa/gate_plan.json", "w"), ensure_ascii=False, indent=1)

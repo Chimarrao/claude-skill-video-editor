@@ -4,6 +4,10 @@
  E1 ligação única = seta RETA e alinhada (nada de S torto)           E2 enumeração sem ligações = FILEIRA lado a lado, nunca coluna
  E3 estilo da seta: reta para até 2 ramos, cotovelo só em leque 3+   E4 a seta nunca corta o rótulo do próprio nó (geometry.problems)
  E5 itens do mesmo grafo entram com pelo menos ITEM_GAP s            E6 a geometria detecta a seta que atravessa texto (teste do teste)
+ E7 o último item do grafo realmente entra (a thread de enter() fica viva até a animação terminar)
+ E8 rótulo com separador isolado ("PalmOS 6 · Cobalt") quebra no separador, sem "·" pendurado   E9 marcas em camelCase (iPad, iOS) não viram "IPad"
+ E10 a ponta da seta encosta no miolo da placa mesmo com rótulo de 2 linhas; seta solta é acusada (teste do teste)
+ E11 o nome da cartela do item encolhe para caber na largura (nada vaza da tela: "Palm OS Cobalt" passava de 800 px)
 Uso: python test_engine_geometry.py   (de qualquer pasta)
 """
 
@@ -89,6 +93,41 @@ js, ev = plan.build_graph(sc, 0.5, 12.0)
 bs = sorted({t for n, t in ev if not n.endswith("-in")})
 difs = [round(b - a, 2) for a, b in zip(bs, bs[1:])]
 teste("E5 itens espaçados pelo ritmo mínimo", len(bs) == 4 and all(d >= 0.85 for d in difs), f"tempos={bs} difs={difs}")
+
+# E7: o enter() do grafo mantém a thread viva até o último item terminar (senão o último item e sua seta nunca aparecem)
+gp = (TEMPLATE / "src/lib/graphPiece.tsx").read_text(encoding="utf8")
+fim_loop = gp.split("*enter()")[1].split("*exit()")[0]
+teste("E7 graphPiece.enter espera o último item", "waitFor(0.8)" in fim_loop.split("if (!ev) yield* waitFor(0.55);")[-1], "falta o waitFor final")
+
+
+# E8: separador isolado some na quebra de linha (nada de "PalmOS 6 ·" / "· Cobalt")
+for lab in ("PalmOS 6 · Cobalt", "Android 3 · Honeycomb", "Android 3.0 · fev/2011"):
+    w = geometry.wrap_label(lab)
+    teste(f"E8 rótulo '{lab}' sem separador pendurado", "\n" in w and not any(l.strip().startswith(("·", "-", "•")) or l.strip().endswith(("·", "-", "•")) for l in w.split("\n")), repr(w))
+teste("E8 rótulo curto com separador continua em 1 linha", geometry.wrap_label("iOS · watchOS") == "iOS · watchOS")
+
+# E9: o figure.tsx não coloca "I" maiúsculo em iPad/iOS
+fig = (TEMPLATE / "src/lib/figure.tsx").read_text(encoding="utf8")
+teste("E9 figure.tsx preserva camelCase (iPad/iOS/webOS)", "[a-z]+[A-Z]" in fig and "toUpperCase" in fig, "falta o teste de camelCase antes do toUpperCase")
+
+# E10: placa larga com rótulo de 2 linhas: a seta de cima chega a ~TIP_GAP do miolo (não 100 px acima, na reserva do rótulo)
+pai10 = dict(img="x", x=0, y=0, h=130, plate=False, bezel=True, circular=False, label="Palm", iw=130, ih=130, pw=None, ph=None)
+placa = dict(img="y", x=0, y=300, h=110, plate=True, bezel=False, circular=False, label="PalmSource: software", iw=250, ih=70, pw=290, ph=100)
+ed = [dict(src=0, dst=1, sides=["bottom", "top"], style="straight", bus=None)]
+teste("E10 ponta da seta encosta na placa (rótulo de 2 linhas)", geometry.problems([pai10, placa], ed) == [], f"{geometry.problems([pai10, placa], ed)}")
+antigo_gap = geometry.TIP_GAP
+geometry.TIP_GAP = 120
+try:
+    teste("E10 seta solta é acusada (teste do teste)", any("seta solta" in p for p in geometry.problems([pai10, placa], ed)))
+finally:
+    geometry.TIP_GAP = antigo_gap
+arrow = (TEMPLATE / "src/lib/arrowBetween.tsx").read_text(encoding="utf8")
+teste("E10 arrowBetween usa o miolo (core) das colunas", "(n as any).core" in arrow and "(column as any).core" in fig)
+
+
+# E11: nome da cartela cabe na largura da cartela (fonte proporcional ao tamanho do nome)
+cards = (TEMPLATE / "src/lib/cards.tsx").read_text(encoding="utf8")
+teste("E11 cartela do item ajusta a fonte ao tamanho do nome", "Math.floor(780 / (0.55 * name.length))" in cards, "falta o ajuste de fonte em titleItem")
 
 print("\n".join(f"  ok    {n}" for n in ok))
 if falhas:

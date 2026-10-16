@@ -15,6 +15,8 @@ Uma **skill de edição de vídeo completa**: a partir de uma narração (`.wav`
 | 5. Render | Overlay `.mov` ProRes 4444 com transparência (1080p ou 4K), com barra de progresso | `scripts/render.mjs`, `scripts/progress.py` |
 | 6. Montagem | Projeto novo no CapCut: preenchimento → B-roll (com buracos) → overlay recortado → narração (+ música, avatar, vinhetas via pacote de marca privado) | `scripts/capcut/` |
 | 7. Testes | Regras estáticas, "teste dos testes" (mutações), overlay alpha por render de fatia, rótulos × fala, clipes sem pessoas, montagem do CapCut | `scripts/tests/` |
+| 7b. Controle de qualidade | **Quality gates**: plano (ritmo, setas, imagens, janelas vazias), frames reais do render compostos sobre o B-roll com folhas de contato, folhas dos clipes, testes do motor | `scripts/quality/`, `scripts/tests/test_engine_geometry.py` |
+| 7c. Biblioteca de imagens | Colheita da Wikipédia/Commons de **431 assuntos** (versões do Windows/Mac/Android, distros Linux, BSD, apps, empresas, pessoas, hardware) com várias proporções por assunto, catálogo com fonte/licença e busca | `scripts/images/`, `database/image_catalog.json` |
 | 8. Memória | Banco SQLite de logos/ícones/variações de lista; transcrições e vídeos ficam só no banco local | `database/`, `scripts/assets_db.py` |
 
 Tipos de vídeo suportados: **Lista sem B-roll · Webdoc sem B-roll · Lista de argumentos sem B-roll · Lista com B-roll · Webdoc com B-roll**, mais um catálogo de **14 estilos de lista** (pódio, terminal `ls`, metrô, tier list…).
@@ -53,7 +55,8 @@ Depois, no Claude Code, peça: *"crie as animações e o projeto do CapCut para 
 | `scripts/` | transcrição, B-roll, CapCut, testes, banco (`assets_db.py`), requisitos (`check_install.sh`), publicação (`publish.sh`) |
 | `examples/` | modelos de `plan_data.py` e código das 14 variações de lista |
 | `assets/` | logos e fundos de preenchimento (o de 20 min **não** vai para o repositório) |
-| `database/` | `assets.publico.db` (SQLite em base64: logos, ícones, variações) |
+| `database/` | `assets.publico.db` (SQLite em base64: logos, ícones, variações) e `image_catalog.json` (fonte, licença e proporção de cada imagem colhida) |
+| `library/` | **ignorada pelo git**: imagens colhidas (recriáveis com `scripts/images/harvest_images.py`) |
 | `references/` | aprendizados de edições reais |
 | `private/` | **ignorado pelo git**: pacote de marca do CapCut, assets de vídeos específicos |
 
@@ -72,6 +75,10 @@ python scripts/tests/test_capcut_overlay.py        # monta o draft em pasta temp
 python scripts/tests/test_overlay_alpha.py         # render de uma fatia e checagem do alfa
 python scripts/tests/test_labels_vs_speech.py       # rótulos das animações × fala
 python scripts/tests/test_clips_without_people.py    # clips de B-roll sem rostos
+python scripts/tests/test_engine_geometry.py         # motor: ritmo, setas retas, fileira, último item, rótulos, ponta da seta (sem projeto)
+python scripts/tests/test_gate_plan.py               # gate 1: P8 (clipe repetido/sobreposto) numa cópia do projeto
+python scripts/tests/test_harvest_catalog.py         # colheita de imagens: merge nunca apaga arquivo catalogado
+scripts/quality/run_gates.sh [--frames]               # todos os gates em sequência (em animacao/)
 ```
 (rodar dentro de `animacao/`, a pasta do projeto gerado)
 

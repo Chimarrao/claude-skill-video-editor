@@ -412,28 +412,36 @@ def Impact(id, entry, lines, tag="atenção", style=None):
 
 # ---------- layout ----------
 def _library():
-    """Pasta `assets/` da skill (sobe os diretórios até achar `.claude/skills/animacao-narracao`)."""
+    """Pastas de imagens da skill: `assets/` (logos curadas) e `library/` (colheita da Wikipédia/Commons, ignorada pelo git).
+    Sobe os diretórios até achar `.claude/skills/animacao-narracao`."""
     d = os.path.abspath(".")
     while d != "/":
-        c = os.path.join(d, ".claude", "skills", "animacao-narracao", "assets")
-        if os.path.isdir(c):
-            return c
+        base = os.path.join(d, ".claude", "skills", "animacao-narracao")
+        pastas = [os.path.join(base, n) for n in ("assets", "library") if os.path.isdir(os.path.join(base, n))]
+        if pastas:
+            return pastas
         d = os.path.dirname(d)
-    return None
+    return []
 
 
 def pull_asset(name):
-    """Reaproveita imagens entre projetos: se src/images/<nome>.* não existe, copia da biblioteca da skill (assets/)."""
-    lib = _library()
-    if not lib:
-        return False
-    for ext in ("png", "jpg", "webp", "svg"):
-        f = os.path.join(lib, f"{name}.{ext}")
-        if os.path.exists(f):
-            import shutil
+    """Reaproveita imagens entre projetos: se src/images/<nome>.* não existe, copia da biblioteca da skill (assets/, depois library/);
+    imagens da colheita maiores que 1600 px são reduzidas (o Motion Canvas não precisa de 4K para um logo de 200 px)."""
+    for lib in _library():
+        for ext in ("png", "jpg", "webp", "svg"):
+            f = os.path.join(lib, f"{name}.{ext}")
+            if os.path.exists(f):
+                import shutil
 
-            shutil.copy(f, f"src/images/{name}.{ext}")
-            return True
+                dst = f"src/images/{name}.{ext}"
+                if ext != "svg" and os.path.getsize(f) > 600_000:
+                    im = Image.open(f)
+                    if max(im.size) > 1600:
+                        im.thumbnail((1600, 1600))
+                        im.save(dst)
+                        return True
+                shutil.copy(f, dst)
+                return True
     return False
 
 
@@ -521,8 +529,9 @@ def geom(it):
         g = dict(pw=None, ph=None, iw=h * a, ih=h)
         w_, h_ = h * a, h
     if it["label"]:
-        h_ += 2 * (SIZE_LABEL * 1.35) + 8  # espaçador simétrico + rótulo
-        w_ = max(w_, len(it["label"]) * SIZE_LABEL * 0.58)
+        _lab = geometry.wrap_label(it["label"])
+        h_ += 2 * (SIZE_LABEL * 1.35 * geometry.n_lines(_lab)) + 8  # espaçador simétrico + rótulo (1 ou 2 linhas)
+        w_ = max(w_, geometry.text_width(_lab) * 0.58 / 0.56)
     g["w"], g["h"] = w_, h_
     return g
 
@@ -827,7 +836,7 @@ def build_graph(c, t0, t1):
                 plate=it["plate"],
                 bezel=it["bezel"],
                 circular=it["circular"],
-                label=it["label"],
+                label=geometry.wrap_label(it["label"]),
                 beat=names[times[i]],
                 highlight=it["highlight"],
                 target=idx[it["target"]] if it["target"] else None,
@@ -899,7 +908,7 @@ def graph_static(items, dir_, links, W, H):
                 plate=it["plate"],
                 bezel=it["bezel"],
                 circular=it["circular"],
-                label=it["label"],
+                label=geometry.wrap_label(it["label"]),
                 highlight=False,
                 target=None,
                 **scale_geom(it, s),

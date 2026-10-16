@@ -413,7 +413,7 @@ export function titleItem(
         text={name}
         fontFamily={FONT}
         fontWeight={800}
-        fontSize={name.length > 15 ? 84 : name.length > 9 ? 120 : 170}
+        fontSize={Math.min(name.length > 15 ? 84 : name.length > 9 ? 120 : 170, Math.floor(780 / (0.55 * name.length)))} // nunca passa da largura da cartela (800)
         fill={WHITE}
         stroke="#0b0b10"
         lineWidth={14}

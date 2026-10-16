@@ -7,8 +7,8 @@ cd "$(dirname "$0")/.."
 MSG="${1:-atualização da skill}"
 if [ -f database/assets.db ]; then
   cp database/assets.db /tmp/_assets_pub.db
-  # banco PÚBLICO: sem transcrições, sem referências de vídeos, sem fotos de pessoas/telas/objetos de vídeos específicos
-  sqlite3 /tmp/_assets_pub.db "DELETE FROM transcripts; DROP TABLE IF EXISTS videos; DELETE FROM assets WHERE category IN ('person','screen','object'); VACUUM;" 2>/dev/null || true
+  # banco PÚBLICO: só logos pequenas (<= 250 KB, livres e de boa qualidade); sem transcrições, vídeos, fotos de pessoas, telas ou objetos
+  sqlite3 /tmp/_assets_pub.db "DELETE FROM transcripts; DROP TABLE IF EXISTS videos; DELETE FROM assets WHERE category IN ('person','screen','object','photo') OR bytes > 250000 OR COALESCE(quality,'ok') != 'ok' OR COALESCE(nonfree,0) = 1; VACUUM;" 2>/dev/null || true
   cp /tmp/_assets_pub.db database/assets.publico.db
 fi
 git add -A

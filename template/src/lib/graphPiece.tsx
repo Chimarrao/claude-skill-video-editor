@@ -68,6 +68,9 @@ export function graphPiece(
         yield all(...entering.map(k => drawArrow(arrows[k], 0.35)), delay(entering.length ? 0.2 : 0, appear(n)));
         if (!ev) yield* waitFor(0.55);
       }
+      // BUG CLÁSSICO do Motion Canvas: o `yield all(...)` do ÚLTIMO item é filho desta thread; se `enter()` termina logo em seguida, o filho
+      // é cancelado e o último item (e sua seta) NUNCA aparece. Manter a thread viva até a animação acabar (gate_frames.py F8 confere).
+      yield* waitFor(0.8);
     },
     *exit() {
       yield* no.opacity(0, 0.3);

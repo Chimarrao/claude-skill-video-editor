@@ -11,11 +11,15 @@ passo() { local nome="$1"; shift; echo; echo "=== $nome"; if "$@"; then echo "  
 passo "plan.py (STRICT)" env STRICT=1 $PY plan.py
 passo "tsc" npx tsc --noEmit
 passo "motor: geometria/ritmo/alinhamento" $PY "$SK/scripts/tests/test_engine_geometry.py"
+passo "gate 1: testes do próprio gate (P8)" $PY "$SK/scripts/tests/test_gate_plan.py"
 passo "regras da lista com B-roll" $PY "$SK/scripts/tests/test_list_broll_rules.py"
 passo "clipes sem pessoas" $PY "$SK/scripts/tests/test_clips_without_people.py"
 passo "clipes: filtro CLIP+OCR" env TOKENIZERS_PARALLELISM=false $PYA "$SK/scripts/broll/classify_frames.py" --clips
+passo "folhas dos clipes (OLHAR!)" $PY "$SK/scripts/quality/clip_sheets.py"
 passo "gate 1: plano (ritmo, setas, imagens, janelas vazias)" $PY "$SK/scripts/quality/gate_plan.py"
 if [ "$1" = "--frames" ]; then
+  passo "montagem do CapCut: marca" $PY "$SK/scripts/tests/test_capcut_brand.py"
+  passo "montagem do CapCut: overlay recortado" $PY "$SK/scripts/tests/test_capcut_overlay.py"
   passo "gate 2: frames reais" $PY "$SK/scripts/quality/gate_frames.py"
 fi
 echo

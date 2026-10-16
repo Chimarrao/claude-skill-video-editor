@@ -5,7 +5,37 @@ As constantes espelham src/lib/figure.tsx e src/lib/arrowBetween.tsx: se mudar o
 scripts/tests/test_engine_geometry.py).
 """
 
+import re
+
 SIZE_LABEL = 36  # fonte do rótulo (px)
+WRAP = 16  # rótulos com mais de WRAP caracteres e um espaço quebram em 2 linhas (mais ícone, menos largura de texto)
+
+SEPARATORS = ("·", "•", "|", "–", "—", "-", "/")  # token isolado entre espaços ("Android 3 · Honeycomb"): some na quebra de linha
+
+
+def wrap_label(label):
+    """Quebra o rótulo em 2 linhas no espaço mais próximo do meio quando passa de WRAP caracteres (o plan.py envia o texto já quebrado com \\n).
+    Separador isolado ("·", "-"...) vira a própria quebra e não sobra pendurado no fim/início de uma linha."""
+    if not label or "\n" in label or len(label) <= WRAP or " " not in label:
+        return label
+    meio = len(label) / 2
+    seps = [m.start() for m in re.finditer(r" (?:" + "|".join(re.escape(x) for x in SEPARATORS) + r") ", label)]
+    if seps:
+        pos = min(seps, key=lambda i: abs(i + 1 - meio))
+        return label[:pos] + "\n" + label[pos + 3 :]
+    pos = min((i for i, c in enumerate(label) if c == " "), key=lambda i: abs(i - meio))
+    return label[:pos] + "\n" + label[pos + 1 :]
+
+
+def n_lines(label):
+    """Quantas linhas o rótulo ocupa."""
+    return (label or "").count("\n") + 1 if label else 0
+
+
+def text_width(label):
+    """Largura aproximada do texto do rótulo (maior linha), em px."""
+    return max(40.0, max(len(l) for l in (label or " ").split("\n")) * SIZE_LABEL * 0.56)
+TIP_GAP = 4  # vão entre a ponta da seta e o miolo da coluna (arrowBetween.tsx)
 LABEL_DROP = 80  # seta que sai por baixo de um disco/foto redonda com rótulo começa depois do texto (figure.tsx → labelDrop)
 
 
@@ -22,10 +52,11 @@ def label_rect(o):
     if not o.get("label"):
         return None
     cw, ch = _core(o)
-    w = max(40.0, len(o["label"]) * SIZE_LABEL * 0.56)
+    w = text_width(o["label"])
+    n = n_lines(o["label"])
     solto = o.get("bezel") or o.get("circular")
-    cy = o["y"] + ch / 2 + (46 if solto else 8 + SIZE_LABEL * 1.35 / 2)
-    return (o["x"] - w / 2, cy - 20, o["x"] + w / 2, cy + 20)
+    cy = o["y"] + ch / 2 + (46 + (n - 1) * 18 if solto else 8 + SIZE_LABEL * 1.35 * n / 2)
+    return (o["x"] - w / 2, cy - 20 - (n - 1) * 18, o["x"] + w / 2, cy + 20 + (n - 1) * 18)
 
 
 def image_rect(o):
@@ -42,14 +73,16 @@ def edge_points(a, b, e):
     def borda(o, side, drop):
         cw, ch = _core(o)
         solto = o.get("bezel") or o.get("circular")
-        col_extra = 0 if solto else (8 + SIZE_LABEL * 1.35 if o.get("label") else 0)  # reserva (e vão) abaixo/acima do miolo nas colunas
+        n = n_lines(o.get("label"))
+        col_extra = 0 if solto else (8 + SIZE_LABEL * 1.35 * n if o.get("label") else 0)  # reserva (e vão) abaixo/acima do miolo nas colunas
+        gap = 0 if solto else TIP_GAP  # colunas: a seta encosta no miolo (figure.tsx → core; arrowBetween.tsx → anchor)
         if side == "bottom":
-            return (o["x"], o["y"] + ch / 2 + col_extra + (LABEL_DROP if (solto and o.get("label") and drop) else 0))
+            return (o["x"], o["y"] + ch / 2 + col_extra + (LABEL_DROP + (n - 1) * 36 if (solto and o.get("label") and drop) else 0))
         if side == "top":
-            return (o["x"], o["y"] - ch / 2 - (col_extra if o.get("label") else 0))
+            return (o["x"], o["y"] - ch / 2 - gap)
         if side == "right":
-            return (o["x"] + cw / 2, o["y"])
-        return (o["x"] - cw / 2, o["y"])
+            return (o["x"] + cw / 2 + gap, o["y"])
+        return (o["x"] - cw / 2 - gap, o["y"])
 
     p0, p3 = borda(a, sa, True), borda(b, sb, False)
     if e["style"] == "straight":
@@ -86,6 +119,13 @@ def _seg_hits_rect(p, q, r, tol=3.0):
     return t0 <= t1
 
 
+def _dist_rect(p, r):
+    """Distância do ponto p ao retângulo r (0 se estiver dentro)."""
+    dx = max(r[0] - p[0], 0, p[0] - r[2])
+    dy = max(r[1] - p[1], 0, p[1] - r[3])
+    return (dx * dx + dy * dy) ** 0.5
+
+
 def problems(items, edges):
     """Lista de problemas geométricos: seta cortando rótulo/ícone de qualquer item, ou rótulos/ícones sobrepostos."""
     erros = []
@@ -101,6 +141,9 @@ def problems(items, edges):
             for nome, r in rects:
                 if r and any(_seg_hits_rect(p, q, r) for p, q in zip(pts, pts[1:])):
                     erros.append(f"seta {e['src'] + 1}→{e['dst'] + 1} corta o {nome} do item {k + 1} ({it.get('label') or it['img']})")
+        d = _dist_rect(pts[-1], image_rect(b))
+        if d > 14:
+            erros.append(f"ponta da seta {e['src'] + 1}→{e['dst'] + 1} fica a {d:.0f}px do ícone do item {e['dst'] + 1} (seta solta)")
     rs = [(k, label_rect(it), image_rect(it)) for k, it in enumerate(items) if it.get("img")]
     for i, (k1, l1, im1) in enumerate(rs):
         for k2, l2, im2 in rs[i + 1 :]:
