@@ -8,6 +8,8 @@
  E8 rótulo com separador isolado ("PalmOS 6 · Cobalt") quebra no separador, sem "·" pendurado   E9 marcas em camelCase (iPad, iOS) não viram "IPad"
  E10 a ponta da seta encosta no miolo da placa mesmo com rótulo de 2 linhas; seta solta é acusada (teste do teste)
  E11 o nome da cartela do item encolhe para caber na largura (nada vaza da tela: "Palm OS Cobalt" passava de 800 px)
+ E12 rótulo cortado na borda do quadro / dentro da zona do avatar é acusado; o ajuste automático desloca o grafo para dentro
+ E13 o título respeita os itens de grafo ancorados depois dele (plan.py)
 Uso: python test_engine_geometry.py   (de qualquer pasta)
 """
 
@@ -128,6 +130,26 @@ teste("E10 arrowBetween usa o miolo (core) das colunas", "(n as any).core" in ar
 # E11: nome da cartela cabe na largura da cartela (fonte proporcional ao tamanho do nome)
 cards = (TEMPLATE / "src/lib/cards.tsx").read_text(encoding="utf8")
 teste("E11 cartela do item ajusta a fonte ao tamanho do nome", "Math.floor(780 / (0.55 * name.length))" in cards, "falta o ajuste de fonte em titleItem")
+
+
+# E12: rótulo de 2 linhas colado na borda de baixo (Steve Jobs (NeXT) saía do quadro) e rótulo dentro da zona do avatar (Sistemas tão ruins)
+def it12(y, x=0, label="Steve Jobs\n(NeXT)"):
+    return dict(img="f", x=x, y=y, h=90, plate=False, bezel=False, circular=True, label=label, iw=90, ih=90, pw=None, ph=None)
+
+
+corte = [it12(0), it12(400)]
+teste("E12 rótulo de 2 linhas encostando embaixo é acusado", any("área segura" in p for p in geometry.frame_problems(corte)), f"{geometry.frame_problems(corte)}")
+av = [it12(0), it12(300, x=655, label="Sistemas\ntão ruins")]
+teste("E12 rótulo na zona do avatar é acusado", any("avatar" in p for p in geometry.frame_problems(av)), f"{geometry.frame_problems(av)}")
+sh = geometry.fit_shift(av)
+teste("E12 fit_shift tira o grafo da zona do avatar", sh is not None and not geometry.frame_problems(av, 1.0, sh[0], sh[1]), f"{sh}")
+teste("E12 grafo bem posicionado não tem problema", geometry.frame_problems([it12(-200), it12(100, x=-300)]) == [])
+bb = geometry.visible_bbox([it12(0)])
+teste("E12 bbox visível inclui o rótulo (embaixo do disco)", bb[3] > 45 + 90, f"{bb}")
+
+# E13: o título encolhe para terminar antes do item de grafo ancorado depois dele
+src_plan = (TEMPLATE / "plan.py").read_text(encoding="utf8")
+teste("E13 plan.py limita o título pelos itens de grafo da cena", "if isinstance(_at, tuple) and Anchor(_at[1], _at[0]) > t + 0.05" in src_plan, "falta o limite do título")
 
 print("\n".join(f"  ok    {n}" for n in ok))
 if falhas:

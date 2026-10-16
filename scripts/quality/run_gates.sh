@@ -8,9 +8,12 @@ PY=venv/bin/python; [ -x "$PY" ] || PY=python3
 PYA=venv_align/bin/python; [ -x "$PYA" ] || PYA=$PY
 FALHAS=()
 passo() { local nome="$1"; shift; echo; echo "=== $nome"; if "$@"; then echo "    ✅ $nome"; else echo "    ❌ $nome"; FALHAS+=("$nome"); fi; }
+# o editor (render.mjs) reescreve src/scenes/scene1.meta quando o render termina: com ele aberto, plan.py e testes leem um meta incompleto (R5 falso)
+if pgrep -f "render.mjs" > /dev/null; then echo "render.mjs ainda aberto: feche-o (touch /tmp/pp/render.stop) e espere sair antes de rodar os gates"; exit 2; fi
 passo "plan.py (STRICT)" env STRICT=1 $PY plan.py
 passo "tsc" npx tsc --noEmit
 passo "motor: geometria/ritmo/alinhamento" $PY "$SK/scripts/tests/test_engine_geometry.py"
+passo "gate 2: regras de frame (testes sintéticos)" $PY "$SK/scripts/tests/test_frame_rules.py"
 passo "gate 1: testes do próprio gate (P8)" $PY "$SK/scripts/tests/test_gate_plan.py"
 passo "regras da lista com B-roll" $PY "$SK/scripts/tests/test_list_broll_rules.py"
 passo "clipes sem pessoas" $PY "$SK/scripts/tests/test_clips_without_people.py"

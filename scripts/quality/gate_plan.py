@@ -10,6 +10,8 @@ Roda em animacao/ depois de `plan.py`. Sai com 1 se houver ERRO; AVISO pede olha
  P6 janelas vazias  trecho > 4 s sem animação NEM clipe (só fundo + fala) = ERRO (abertura inclusa), exceto `Empty` declarado
  P7 rótulos      <= 26 caracteres, primeira letra maiúscula, sem rótulo repetido no mesmo grafo
  P8 clipes       dois clipes nunca repetem o mesmo trecho do mesmo vídeo-fonte, nem se sobrepõem na linha do tempo
+ P9 título×grafo item de grafo NUNCA entra enquanto um título cobre o palco (o resto escurece: os itens "aparecem do nada" depois)
+ P10 quadro      ícone ou RÓTULO a < 60 px da borda do quadro ou dentro da zona do avatar (canto inferior direito), já com ampliação/deslocamento
 Grava qa/gate_plan.json. Uso: python gate_plan.py [--gap 0.9] [--allow-empty id1,id2]
 """
 
@@ -82,15 +84,18 @@ def sugestao(label):
 def grafos():
     for c in scenes:
         if c["kind"] == "graph":
-            yield c["id"], c["items"], c["edges"], None
+            yield c["id"], c["items"], c["edges"], None, (1.0, 0.0, 0.0)
         for p in c.get("pieces", []):
             if p["kind"] == "graph":
                 pr = p["props"]
-                yield c["id"] + "/graph", pr["items"], pr["edges"], pr.get("events")
+                yield c["id"] + "/graph", pr["items"], pr["edges"], pr.get("events"), (pr.get("zoom", 1.0), pr.get("dx", 0.0), pr.get("dy", 0.0))
 
 
-for gid, items, edges, evs in grafos():
+for gid, items, edges, evs, (zoom, gdx, gdy) in grafos():
     base = gid.split("/")[0]
+    # P10 quadro: nada (ícone nem rótulo) na borda ou na zona do avatar
+    for pb in geometry.frame_problems(items, zoom, gdx, gdy):
+        erro("P10 quadro", f"[{gid}] {pb}")
     # P2 geometria
     for pb in geometry.problems(items, edges):
         erro("P2 setas", f"[{gid}] {pb}")
@@ -174,6 +179,26 @@ for a, b in vazios:
     if ids and all(i in permitidos for i in ids):
         continue
     erro("P6 janela vazia", f"{a:.1f}–{b:.1f}s ({b - a:.1f}s, cena {','.join(ids) or '?'}) só com fundo e fala: coloque animação/B-roll")
+
+# P9 título×grafo: o título cobre o palco (o resto escurece) de `início` até `início + 0,25 + 0,4 + digitação + dur + 0,35`;
+# item de grafo que entra nesse intervalo fica invisível e "aparece do nada" quando o título sai
+for c in scenes:
+    for p in c.get("pieces", []):
+        if p["slot"] != "overlay" or p["kind"] != "title":
+            continue
+        t_ini = events.get(f"{c['id']}-{p['beat']}")
+        if t_ini is None:
+            continue
+        palavras = [w for l in p["props"]["lines"] for w in re.sub(r"\*([a-z]:)?", "", l).split()]
+        digitacao = sum(max(0.07, len(w) * 0.028) + 0.04 for w in palavras)
+        t_fim = t_ini + 0.25 + 0.4 + digitacao + p["props"]["dur"] + 0.35
+        for q in c.get("pieces", []):
+            if q["kind"] != "graph":
+                continue
+            for ev in q["props"].get("events") or []:
+                te = events.get(ev)
+                if te is not None and t_ini + 0.05 < te < t_fim - 0.3:
+                    erro("P9 título×grafo", f"[{c['id']}] item de grafo em {te:.1f}s entra com o título cobrindo o palco ({t_ini:.1f}–{t_fim:.1f}s): encurte o título (dur) ou ancore o item depois")
 
 # P8 clipes: trecho repetido do mesmo arquivo (o espectador vê a mesma cena duas vezes) ou clipes sobrepostos no tempo
 por_arquivo = {}

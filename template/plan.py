@@ -20,10 +20,7 @@ LEAD = float(
 )  # imagens entram um pouco ANTES da palavra (padrão de edição profissional)
 EXIT_TIME = 0.3  # saída termina quando a próxima cena entra
 LOGOS_PLATE = set()
-AVATAR_ZONE = (
-    720,
-    300,
-)  # (x, y) em coords do centro: canto inferior direito reservado ao avatar do canal (sticker do criador)
+AVATAR_ZONE = geometry.AVATAR  # (x, y) em coords do centro: canto inferior direito reservado ao avatar do canal (sticker do criador)
 MENU_DURATION = 3.7  # tempo ocupado pelo menu na troca de item (as peças só entram depois)
 TIPS = []  # sugestões não bloqueantes (impressas no fim)
 VIDA = {}  # id da cena -> [(de, até)] em que HÁ algo na tela (animação/cartela/título); alimenta o quality gate de janelas vazias
@@ -592,7 +589,7 @@ EV_G = []  # eventos de itens de grafo (palavra a palavra)
 EMPTIES = set()
 
 
-def layout(items, dir_, W=1760, H=940, smax=1.5, links=()):
+def layout(items, dir_, W=1720, H=900, smax=1.5, links=()):
     """Layout automático do grafo em camadas (LR ou TB): posiciona pelos CENTROS dos ícones, com passo uniforme entre irmãos, e amplia até `smax` para caber em WxH."""
     idx = {it["id"]: i for i, it in enumerate(items) if it["id"]}
     n = len(items)
@@ -768,7 +765,6 @@ def build_graph(c, t0, t1):
     for it in items:
         resolve_image(it)
     idx = {it["id"]: i for i, it in enumerate(items) if it["id"]}
-    pos, s, depth = layout(items, c["dir"], links=c["links"])
     # tempos
     cur, names, times = t0, {t0: "in"}, []
     for it in items:
@@ -817,32 +813,43 @@ def build_graph(c, t0, t1):
     for t in times:
         if t not in names:
             names[t] = f"b{len(names)}"
-    out_items = []
-    for i, it in enumerate(items):
-        if not it["img"]:
-            x, y, h = 0, 0, 0
-        elif it["over"]:
-            bx, by = pos[idx[it["over"]]]
-            x, y, h = bx + it["dx"] * s, by + it["dy"] * s, it["h"] * s
-        else:
-            x, y = pos[i]
-            h = it["h"] * s
-        out_items.append(
-            dict(
-                img=it["img"],
-                x=round(x, 1),
-                y=round(y, 1),
-                h=round(h, 1),
-                plate=it["plate"],
-                bezel=it["bezel"],
-                circular=it["circular"],
-                label=geometry.wrap_label(it["label"]),
-                beat=names[times[i]],
-                highlight=it["highlight"],
-                target=idx[it["target"]] if it["target"] else None,
-                **scale_geom(it, s),
+    def make_out(pos, s):
+        """Itens já posicionados (x, y, h, placa/imagem, rótulo quebrado) para um layout (pos, s)."""
+        out_items = []
+        for i, it in enumerate(items):
+            if not it["img"]:
+                x, y, h = 0, 0, 0
+            elif it["over"]:
+                bx, by = pos[idx[it["over"]]]
+                x, y, h = bx + it["dx"] * s, by + it["dy"] * s, it["h"] * s
+            else:
+                x, y = pos[i]
+                h = it["h"] * s
+            out_items.append(
+                dict(
+                    img=it["img"],
+                    x=round(x, 1),
+                    y=round(y, 1),
+                    h=round(h, 1),
+                    plate=it["plate"],
+                    bezel=it["bezel"],
+                    circular=it["circular"],
+                    label=geometry.wrap_label(it["label"]),
+                    beat=names[times[i]],
+                    highlight=it["highlight"],
+                    target=idx[it["target"]] if it["target"] else None,
+                    **scale_geom(it, s),
+                )
             )
-        )
+        return out_items
+
+    # o layout enquadra os CENTROS em W; o rótulo não encolhe junto com `s`, então tenta regiões cada vez mais estreitas até que
+    # ícones e rótulos caibam na área segura (ou só precisem de um pequeno deslocamento)
+    for k_try, W_try in enumerate((1720, 1640, 1560, 1480, 1400, 1320, 1240)):
+        pos, s, depth = layout(items, c["dir"], W=W_try, H=900 - 50 * k_try, links=c["links"])
+        out_items = make_out(pos, s)
+        if not geometry.frame_problems(out_items) or geometry.fit_shift(out_items) is not None:
+            break
     check_proportion(items, out_items, s, c["id"])
     # arestas
     LR = c["dir"] == "LR"
@@ -871,6 +878,17 @@ def build_graph(c, t0, t1):
                 bus=bars[(a, b)],
             )
         )
+    _fp = geometry.frame_problems(out_items)
+    if _fp:  # rótulo/ícone na borda ou na zona do avatar: desloca o grafo inteiro (e a dobra dos cotovelos) o mínimo necessário
+        _sh = geometry.fit_shift(out_items)
+        if _sh and _sh != (0, 0):
+            for o in out_items:
+                o["x"], o["y"] = round(o["x"] + _sh[0], 1), round(o["y"] + _sh[1], 1)
+            for e in edges:
+                if e["bus"] is not None:
+                    e["bus"] = round(e["bus"] + (_sh[1] if sides[0] in ("bottom", "top") else _sh[0]), 1)
+        elif not _sh:
+            WARNINGS.append(f"[{c['id']}] " + "; ".join(_fp))
     check_arrows(c["id"], out_items, edges)
     VIDA[c["id"]] = [(round(min(times), 2), round(t1 - EXIT_TIME, 2))]
     ev = [(f"{c['id']}-{names[t]}", t) for t in sorted(names)]
@@ -1109,11 +1127,19 @@ def build_composite(c, t0, t1):
             # Ampliação automática com o bbox REAL (largura de logos incluída): até GRAPH_SCALE, limitada pelo que cabe no quadro (±900 × ±480),
             # recentralizada, e fora da zona do avatar do canal (canto inferior direito).
             if items_g:
-                rx0, ry0, rx1, ry1 = bbox_g
-                e_ = round(min(CFG["GRAPH_ZOOM"], 1800 / max(rx1 - rx0, 1), 960 / max(ry1 - ry0, 1)), 2)
+                rx0, ry0, rx1, ry1 = geometry.visible_bbox(items_g)  # só o que APARECE (ícones + rótulos), não os espaçadores invisíveis
+                sw, sh = 2 * (geometry.FRAME_HALF[0] - geometry.SAFE - 2), 2 * (geometry.FRAME_HALF[1] - geometry.SAFE - 2)  # 2 px de folga (arredondamento do zoom)
+                e_ = int(min(CFG["GRAPH_ZOOM"], sw / max(rx1 - rx0, 1), sh / max(ry1 - ry0, 1)) * 100) / 100  # para baixo: o arredondamento não pode estourar a margem
                 props["zoom"] = e_
                 cx, cy = (rx0 + rx1) / 2, (ry0 + ry1) / 2  # recentraliza o grafo
                 props["dx"], props["dy"] = round(-cx * e_, 1), round(-cy * e_, 1)
+                _fp = geometry.frame_problems(items_g, e_, props["dx"], props["dy"])
+                if _fp:  # tenta deslocar o grafo para fora da borda/zona do avatar antes de reclamar
+                    _sh = geometry.fit_shift(items_g, e_, props["dx"], props["dy"])
+                    if _sh:
+                        props["dx"], props["dy"] = round(props["dx"] + _sh[0], 1), round(props["dy"] + _sh[1], 1)
+                    else:
+                        WARNINGS.append(f"[{c['id']}] " + "; ".join(_fp))
                 x0, x1, y0, y1 = (rx0 - cx) * e_, (rx1 - cx) * e_, (ry0 - cy) * e_, (ry1 - cy) * e_
                 for _k, _g in enumerate(
                     items_g
@@ -1128,17 +1154,6 @@ def build_composite(c, t0, t1):
                     WARNINGS.append(
                         f"[{c['id']}] grafo só cabe ampliado {e_}x (< 1.2x: pequeno demais, o usuário dá zoom à mão): menos itens/ramos"
                     )
-                # zona do avatar: só importa se um ITEM (não o canto vazio da caixa) encosta no retângulo do avatar
-                for _k, _it in enumerate(props["items"]):
-                    if not _it["img"]:
-                        continue
-                    _r = rectangle(_it, items_g[_k])
-                    _rx0, _rx1 = _r[0] * e_ + props["dx"], _r[2] * e_ + props["dx"]
-                    _ry0, _ry1 = _r[1] * e_ + props["dy"], _r[3] * e_ + props["dy"]
-                    if _rx1 > AVATAR_ZONE[0] and _ry1 > AVATAR_ZONE[1]:
-                        WARNINGS.append(
-                            f"[{c['id']}] item {_k + 1} do grafo ({_it['img']}) invade a zona do avatar (canto inferior direito): até {_rx1:.0f},{_ry1:.0f}"
-                        )
                 n_ic = sum(1 for it in props["items"] if str(it["img"]).startswith("ic-"))
                 if len(props["items"]) >= 2 and n_ic == len(props["items"]) and not CFG.get("WEBDOC"):
                     TIPS.append(
@@ -1149,6 +1164,13 @@ def build_composite(c, t0, t1):
             words_t = [w for l in props["lines"] for w in re.sub(r"\*([a-z]:)?", "", l).split()]
             typing = 0.7 + sum(max(0.07, len(w) * 0.028) + 0.04 for w in words_t)
             next_ = [x for x in times if x > t + 0.05] + [t1 - EXIT_TIME]
+            # itens de grafo da cena que entram DEPOIS do título começar: o título cobre o palco (o resto escurece), então o título termina antes deles
+            for _q in pieces:
+                if _q["kind"] == "graph":
+                    for _it in _q["props"]["items"]:
+                        _at = _it.get("at")
+                        if isinstance(_at, tuple) and Anchor(_at[1], _at[0]) > t + 0.05:
+                            next_.append(Anchor(_at[1], _at[0]))
             margin = min(next_) - t - typing - 0.8
             props["dur"] = round(max(0.6, min(props["dur"], margin)), 2)
             if margin < 0.6:

@@ -38,7 +38,7 @@ def confere(nome, ok, detalhe=""):
 
 # G1 projeto limpo não dispara P8
 tmp = copia()
-confere("G1 projeto limpo sem erro P8", "P8 clipes" not in roda(tmp))
+confere("G1 projeto limpo sem erro P8/P9/P10", all(k not in roda(tmp) for k in ("P8 clipes", "P9 título", "P10 quadro")))
 
 # G2 trecho repetido do mesmo vídeo
 broll = json.load(open(tmp / "src/scenes/broll.json"))
@@ -53,6 +53,36 @@ b2 = json.load(open(tmp2 / "src/scenes/broll.json"))
 b2[1]["t_start"] = b2[0]["t_end"] - 2
 json.dump(b2, open(tmp2 / "src/scenes/broll.json", "w"))
 confere("G3 P8 pega clipes sobrepostos no tempo", "antes de o clip" in roda(tmp2))
+
+# G4 P9: item de grafo entrando com o título cobrindo o palco; G5 P10: rótulo cortado na borda
+tmp3 = copia()
+sc = json.load(open(tmp3 / "src/scenes/scenes.json"))
+meta = json.load(open(tmp3 / "src/scenes/scene1.meta"))
+ev = {e["name"]: e for e in meta["timeEvents"]}
+alvo = None
+for c in sc:
+    pcs = c.get("pieces", [])
+    titulo = next((q for q in pcs if q["slot"] == "overlay" and q["kind"] == "title"), None)
+    grafo = next((q for q in pcs if q["kind"] == "graph" and q["props"].get("events")), None)
+    if titulo and grafo and f"{c['id']}-{titulo['beat']}" in ev:
+        alvo = (c, titulo, grafo)
+        break
+confere("G4 projeto tem cena com título + grafo para o teste", alvo is not None)
+if alvo:
+    c, titulo, grafo = alvo
+    ev[grafo["props"]["events"][-1]]["targetTime"] = ev[f"{c['id']}-{titulo['beat']}"]["targetTime"] + 0.8
+    json.dump(meta, open(tmp3 / "src/scenes/scene1.meta", "w"))
+    confere("G4 P9 pega item de grafo entrando sob o título", "P9 título×grafo" in roda(tmp3))
+tmp4 = copia()
+sc4 = json.load(open(tmp4 / "src/scenes/scenes.json"))
+for c in sc4:
+    if c["kind"] == "graph":
+        c["items"][0]["x"] = 930  # rótulo/ícone para fora da área segura
+        break
+json.dump(sc4, open(tmp4 / "src/scenes/scenes.json", "w"))
+confere("G5 P10 pega item fora da área segura do quadro", "P10 quadro" in roda(tmp4))
+for d in (tmp3, tmp4):
+    shutil.rmtree(d, ignore_errors=True)
 
 shutil.rmtree(tmp, ignore_errors=True)
 shutil.rmtree(tmp2, ignore_errors=True)

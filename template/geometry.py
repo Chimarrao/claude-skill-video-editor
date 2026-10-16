@@ -35,6 +35,10 @@ def n_lines(label):
 def text_width(label):
     """Largura aproximada do texto do rótulo (maior linha), em px."""
     return max(40.0, max(len(l) for l in (label or " ").split("\n")) * SIZE_LABEL * 0.56)
+LINE_H = 45  # altura de cada linha do rótulo (px), medida no render
+FRAME_HALF = (960, 540)  # meio quadro 1920x1080, em coords do centro
+SAFE = 60  # margem de segurança: nada (ícone ou rótulo) a menos de 60 px da borda (~3%)
+AVATAR = (720, 300)  # (x, y): canto inferior direito reservado ao avatar do canal (== AVATAR_ZONE do plan.py)
 TIP_GAP = 4  # vão entre a ponta da seta e o miolo da coluna (arrowBetween.tsx)
 LABEL_DROP = 80  # seta que sai por baixo de um disco/foto redonda com rótulo começa depois do texto (figure.tsx → labelDrop)
 
@@ -56,7 +60,8 @@ def label_rect(o):
     n = n_lines(o["label"])
     solto = o.get("bezel") or o.get("circular")
     cy = o["y"] + ch / 2 + (46 + (n - 1) * 18 if solto else 8 + SIZE_LABEL * 1.35 * n / 2)
-    return (o["x"] - w / 2, cy - 20 - (n - 1) * 18, o["x"] + w / 2, cy + 20 + (n - 1) * 18)
+    meia = LINE_H * n / 2 + 2  # n linhas de LINE_H px (a fonte de 36 px usa entrelinha ~1,25) + folga do contorno
+    return (o["x"] - w / 2, cy - meia, o["x"] + w / 2, cy + meia)
 
 
 def image_rect(o):
@@ -152,3 +157,42 @@ def problems(items, edges):
                     if r1 and r2 and r1[0] < r2[2] - 2 and r2[0] < r1[2] - 2 and r1[1] < r2[3] - 2 and r2[1] < r1[3] - 2 and (n1, n2) != ("ícone", "ícone"):
                         erros.append(f"{n1} do item {k1 + 1} sobrepõe o {n2} do item {k2 + 1}")
     return list(dict.fromkeys(erros))
+
+
+def visible_rects(items):
+    """Retângulos VISÍVEIS de cada item (ícone/placa e texto do rótulo), sem os espaçadores invisíveis das colunas: (k, nome, rect)."""
+    for k, o in enumerate(items):
+        if not o.get("img"):
+            continue
+        yield k, "ícone", image_rect(o)
+        lr = label_rect(o)
+        if lr:
+            yield k, "rótulo", lr
+
+
+def visible_bbox(items):
+    """Caixa que envolve só o que aparece na tela (ícones + rótulos): (x0, y0, x1, y1). Centralizar/ampliar por ela evita grafo torto no quadro."""
+    rs = [r for _, _, r in visible_rects(items)]
+    return (min(r[0] for r in rs), min(r[1] for r in rs), max(r[2] for r in rs), max(r[3] for r in rs))
+
+
+def frame_problems(items, zoom=1.0, dx=0.0, dy=0.0, margin=SAFE):
+    """Itens/rótulos fora da área segura do quadro (margem de `margin` px) ou dentro da zona do avatar, depois de ampliar por `zoom` e deslocar (dx, dy)."""
+    erros = []
+    for k, nome, r in visible_rects(items):
+        x0, y0, x1, y1 = r[0] * zoom + dx, r[1] * zoom + dy, r[2] * zoom + dx, r[3] * zoom + dy
+        quem = f"{nome} do item {k + 1} ({(items[k].get('label') or items[k]['img'])!r})".replace("\n", " ")
+        if x0 < -FRAME_HALF[0] + margin or x1 > FRAME_HALF[0] - margin or y0 < -FRAME_HALF[1] + margin or y1 > FRAME_HALF[1] - margin:
+            erros.append(f"{quem} sai da área segura do quadro ({x0:.0f},{y0:.0f})–({x1:.0f},{y1:.0f}; margem {margin}px)")
+        if x1 > AVATAR[0] and y1 > AVATAR[1]:
+            erros.append(f"{quem} invade a zona do avatar (canto inferior direito: até {x1:.0f},{y1:.0f})")
+    return erros
+
+
+def fit_shift(items, zoom=1.0, dx=0.0, dy=0.0, passo=20, maximo=200):
+    """Menor deslocamento extra (ddx, ddy) que tira tudo da borda/zona do avatar; None se não houver. (0, 0) se já está tudo certo."""
+    cands = sorted(((a, b) for a in range(-maximo, maximo + 1, passo) for b in range(-maximo, maximo + 1, passo)), key=lambda t: (t[0] ** 2 + t[1] ** 2, t))
+    for a, b in cands:
+        if not frame_problems(items, zoom, dx + a, dy + b):
+            return a, b
+    return None

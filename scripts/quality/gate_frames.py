@@ -10,7 +10,7 @@ Verificações automáticas por quadro:
  F3 zona do avatar     conteúdo > 200 px no canto inferior direito (reservado ao avatar)
  F4 animação sobre clipe  overlay visível (> 0,5%) dentro de um clipe de B-roll (salvo rótulo leve)
  F5 janela vazia       sem overlay e sem clipe onde o plano diz que há animação
- F6 base preta/lisa    clipe de B-roll preto ou sem informação
+ F6 base preta/lisa    clipe de B-roll preto ou sem informação (interface escura COM texto passa; ver frame_rules.py)
  F7 entrada brusca     item que já está 100% visível 0,04 s depois do evento (pop-in sem animação)
  F8 último item        o ÚLTIMO item de cada grafo precisa realmente aparecer (bug do Motion Canvas: filho cancelado quando enter() termina)
 Saída: qa/frames/*.png (composites 1280x720), qa/sheet_NN.png (folhas 4x3 com o tempo), qa/gate_frames.json. Sai com 1 se houver ERRO.
@@ -95,6 +95,9 @@ if len(ts) > args.max_frames:
     ts = [ts[int(i * passo)] for i in range(args.max_frames)]
 print(f"{len(ts)} quadros para analisar…", flush=True)
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+from frame_rules import base_vazia, cartela_do_item  # noqa: E402
+
 errors, warns, rows = [], [], []
 erro = lambda t, m: errors.append(f"{t:7.1f}s  {m}")
 aviso = lambda t, m: warns.append(f"{t:7.1f}s  {m}")
@@ -122,6 +125,11 @@ def kind_at(t):
         if w[0] <= t < w[1] + 0.3:
             return i, w[2]
     return None, None
+
+
+def cartela_at(t, tipo):
+    """Instante dentro da cartela de abertura de um item (F2 não vale ali)."""
+    return any(cartela_do_item(t, w, tipo, plan.get("menu_duration", 3.7)) for w in plan["windows"].values() if w[0] <= t < w[1] + 0.3)
 
 
 for k, t in enumerate(ts):
@@ -152,7 +160,7 @@ for k, t in enumerate(ts):
         if tipo not in ("impact", "section", "broll") and (x0 < 6 or y0 < 6 or x1 > W - 7 or y1 > H - 7) and cover < 0.6:
             erro(t, f"F1 conteúdo encostando/cortado na borda do quadro (cena {cena}, bbox {x0},{y0}-{x1},{y1})")
         cw, ch, area = comps(vis)
-        if tipo not in ("impact", "section", "broll") and area > 0.22:
+        if tipo not in ("impact", "section", "broll") and area > 0.22 and not cartela_at(t, tipo):
             erro(t, f"F2 componente gigante: um elemento ocupa {area * 100:.0f}% do quadro ({cw}x{ch}px; cena {cena})")
         n_av = int(vis[AV[1] : AV[3], AV[0] : AV[2]].sum())
         if n_av > 200:
@@ -167,7 +175,7 @@ for k, t in enumerate(ts):
     # F6 base preta/lisa em clipe
     if clip:
         g = np.asarray(base.convert("L").resize((192, 108)), dtype=np.float32)
-        if g.mean() < 10 or g.std() < 4:
+        if base_vazia(g):
             erro(t, f"F6 clipe com quadro preto/liso ({os.path.basename(clip['file'])[:30]}, média {g.mean():.0f}, desvio {g.std():.1f})")
     rows.append(dict(t=t, why=amostras.get(t, ""), cover=round(cover, 4), cena=cena, clip=bool(clip)))
     comp.resize((1280, 720)).save(OUT / "frames" / f"f_{t:08.2f}.png")

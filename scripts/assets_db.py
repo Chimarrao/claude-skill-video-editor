@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Banco SQLite de assets (base64) da skill: database/assets.db
 Comandos:
-  assets_db.py sync [pasta ...]   importa imagens (default: assets/ + ./src/images do projeto atual) sem duplicar (por name)
+  assets_db.py sync [pasta ...]   importa imagens (default: assets/ + ./src/images do projeto atual) sem duplicar (por name); raster > 1600 px é reduzido no banco
   assets_db.py list [filtro]            lista name, tipo, dimensões, categoria
   assets_db.py export <name|%pattern> [destino=src/images]   grava os arquivos decodificados
   assets_db.py open                      abre o sqlite3 interativo
@@ -78,6 +78,42 @@ def dimensions(path, ext):
         return (None, None)
 
 
+DB_MAX_SIDE = 1600  # no banco, imagens maiores que isso são reduzidas (o arquivo original continua em library/); evita um .db de vários GB
+
+
+def compact_for_db(path, ext):
+    """Bytes a guardar no banco: raster > DB_MAX_SIDE px (ou > 600 KB) é reduzido e recomprimido (PNG otimizado / JPEG q85);
+    SVG/GIF e arquivos pequenos entram como estão. Se a versão reduzida não for menor, guarda o original."""
+    raw = open(path, "rb").read()
+    if ext in ("svg", "gif") or len(raw) <= 600_000:
+        im_size = None
+        try:
+            from PIL import Image
+
+            im_size = max(Image.open(io.BytesIO(raw)).size) if ext != "svg" else 0
+        except Exception:
+            return raw
+        if ext in ("svg", "gif") or im_size <= DB_MAX_SIDE:
+            return raw
+    try:
+        from PIL import Image
+
+        im = Image.open(io.BytesIO(raw))
+        im.load()
+        if max(im.size) > DB_MAX_SIDE:
+            im.thumbnail((DB_MAX_SIDE, DB_MAX_SIDE), Image.LANCZOS)
+        out = io.BytesIO()
+        if ext in ("jpg", "jpeg"):
+            im.convert("RGB").save(out, "JPEG", quality=85, optimize=True)
+        elif ext == "webp":
+            im.save(out, "WEBP", quality=85)
+        else:
+            im.save(out, "PNG", optimize=True)
+        return out.getvalue() if len(out.getvalue()) < len(raw) else raw
+    except Exception:
+        return raw
+
+
 def sync(folders):
     """Importa para o banco as imagens novas das pastas dadas (sem duplicar por nome; ignora `ic-*` e `*-mono`, que o plan.py gera)
     e grava os metadados do catálogo (assunto, tipo, tags, licença, fonte, proporção, qualidade) quando existirem."""
@@ -104,19 +140,20 @@ def sync(folders):
                     conn.execute("UPDATE assets SET subject=?, kind=?, tags=?, license=?, source_url=?, aspect=?, nonfree=?, quality=? WHERE name=?", extra + (name,))
                 continue
             w, h = dimensions(file_path, ext)
+            data = compact_for_db(file_path, ext)
             conn.execute(
                 "INSERT INTO assets(name, ext, mime, bytes, width, height, category, origin, added, base64, subject, kind, tags, license, source_url, aspect, nonfree, quality) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                 (
                     name,
                     ext,
                     mimetypes.guess_type(basename)[0] or "image/" + ext,
-                    os.path.getsize(file_path),
+                    len(data),
                     w,
                     h,
                     KIND_CATEGORY.get(m["kind"]) if m else category(name),
                     os.path.relpath(folder),
                     time.strftime("%Y-%m-%d"),
-                    base64.b64encode(open(file_path, "rb").read()).decode(),
+                    base64.b64encode(data).decode(),
                 )
                 + extra,
             )
