@@ -11,3 +11,8 @@ venv_align/
 
 # material privado (marca do canal, assets de vídeos específicos, pacote de marca do CapCut)
 private/
+
+# biblioteca de imagens colhidas (grande; o catálogo com as fontes fica em database/image_catalog.json)
+library/
+database/image_catalog.[0-9]*.json
+database/image_catalog.json.tmp

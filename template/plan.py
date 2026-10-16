@@ -9,6 +9,7 @@ import warnings
 
 warnings.filterwarnings("ignore")
 import glob, json, os, re, unicodedata, urllib.request
+import geometry
 from PIL import Image
 
 T = json.load(open(os.environ.get("TRANSCRIPTION", "transcription.json")))
@@ -25,6 +26,7 @@ AVATAR_ZONE = (
 )  # (x, y) em coords do centro: canto inferior direito reservado ao avatar do canal (sticker do criador)
 MENU_DURATION = 3.7  # tempo ocupado pelo menu na troca de item (as peças só entram depois)
 TIPS = []  # sugestões não bloqueantes (impressas no fim)
+VIDA = {}  # id da cena -> [(de, até)] em que HÁ algo na tela (animação/cartela/título); alimenta o quality gate de janelas vazias
 LIFE_PIECES = {}  # id da cena -> [(entra, some)] das peças (para checar cobertura)
 PROMO_T = [
     None,
@@ -43,6 +45,7 @@ CFG = dict(
     ANIM_MAX=0.35,
     CLIP_LEAD=0.4,
     CLIP_MARGIN=0.15,
+    ITEM_GAP=0.9,  # intervalo mínimo (s) entre itens consecutivos de um mesmo grafo: nada de itens aparecendo juntos/rápido demais
     GRAPH_ZOOM=1.5,
     REQUIRE_LOGO=False,
 )  # sobrescrito por plan_data.py
@@ -580,12 +583,14 @@ EV_G = []  # eventos de itens de grafo (palavra a palavra)
 EMPTIES = set()
 
 
-def layout(items, dir_, W=1760, H=940, smax=1.5):
+def layout(items, dir_, W=1760, H=940, smax=1.5, links=()):
     """Layout automático do grafo em camadas (LR ou TB): posiciona pelos CENTROS dos ícones, com passo uniforme entre irmãos, e amplia até `smax` para caber em WxH."""
     idx = {it["id"]: i for i, it in enumerate(items) if it["id"]}
     n = len(items)
     base = [i for i, it in enumerate(items) if not it["over"] and it["img"]]
     parents = {i: [idx[p] for p in items[i]["parents"]] for i in base}
+    if not links and not any(parents.values()):
+        dir_ = "TB"  # enumeração sem ligações (bugs, instabilidade, desempenho…) = FILEIRA LADO A LADO, nunca coluna
     depth = {}
     for _ in range(n + 1):
         for i in base:
@@ -653,6 +658,21 @@ def layout(items, dir_, W=1760, H=940, smax=1.5):
             center = sum(pos[i] for i in level) / len(level)
             for k, i in enumerate(sorted(level, key=lambda i: pos[i])):
                 pos[i] = center + (k - (len(level) - 1) / 2) * step
+    # LIGAÇÃO ÚNICA = SETA RETA: pai com um só filho (e filho com um só pai) ficam alinhados na coordenada transversal,
+    # desde que o filho caiba na posição do pai sem encostar nos vizinhos do nível (senão tenta mover o pai).
+    def livre(i, valor):
+        return all(abs(valor - pos[j]) >= (width(i) + width(j)) / 2 + GAPB - 1e-6 for j in levels[depth[i]] if j != i)
+
+    for _ in range(3):
+        for i in base:
+            if len(parents[i]) == 1 and len(children[parents[i][0]]) == 1:
+                p_ = parents[i][0]
+                if abs(pos[i] - pos[p_]) < 1:
+                    continue
+                if livre(i, pos[p_]):
+                    pos[i] = pos[p_]
+                elif livre(p_, pos[i]):
+                    pos[p_] = pos[i]
     # coordenada de profundidade
     thickness = {d: max(along(i) for i in levels[d]) for d in levels}
     cd, c = {}, 0
@@ -698,6 +718,20 @@ def resolve_image(it):
         it["img"] = ensure_mono(it["img"])
 
 
+def check_arrows(where, items, edges):
+    """Falha de qualidade (WARNINGS → erro em STRICT) se uma seta cortar rótulo/ícone ou houver sobreposição; ver geometry.py."""
+    erros = geometry.problems(items, edges)
+    if erros:
+        WARNINGS.append(f"[{where}] " + "; ".join(erros))
+
+
+def edge_style(pairs, a, b, dy):
+    """Estilo da seta: RETA para ligação única, alinhada ou com até 2 ramos (V); cotovelo/barramento só para leques de 3+ ramos ou 3+ pais."""
+    kids = sum(1 for x, _ in pairs if x == a)
+    pais = sum(1 for _, y in pairs if y == b)
+    return "straight" if dy < 8 or (kids <= 2 and pais <= 2) else "elbow"
+
+
 def bus_edges(items, out, pairs, LR):
     """Coordenada comum da dobra dos conectores em cotovelo: leques/convergências usam o mesmo 'barramento' (nada de setas cruzando)."""
     rects = {i: rectangle(items[i], out[i]) for i in {x for p in pairs for x in p}}
@@ -725,7 +759,7 @@ def build_graph(c, t0, t1):
     for it in items:
         resolve_image(it)
     idx = {it["id"]: i for i, it in enumerate(items) if it["id"]}
-    pos, s, depth = layout(items, c["dir"])
+    pos, s, depth = layout(items, c["dir"], links=c["links"])
     # tempos
     cur, names, times = t0, {t0: "in"}, []
     for it in items:
@@ -746,6 +780,10 @@ def build_graph(c, t0, t1):
                     raise SystemExit(f"{c['id']}: palavra '{at}' nao achada entre {cur:.1f} e {t1:.1f}")
                 t = round(cand[0]["start"] - LEAD, 2)
         t = max(t, cur)
+        # RITMO: itens com âncora própria entram com pelo menos ITEM_GAP s de intervalo (nada de 2 em 2 / rápido demais);
+        # itens sem `at` (ou sobrepostos) continuam entrando junto do anterior
+        if times and at is not None and not it["over"]:
+            t = max(t, times[-1] + CFG["ITEM_GAP"])
         times.append(t)
         cur = t
     # permanência mínima: antecipa os últimos beats (de trás para frente) para nada "piscar"
@@ -754,12 +792,18 @@ def build_graph(c, t0, t1):
     new, ceiling = {}, out_t - MIN_DWELL
     for b in reversed(beats):
         new[b] = min(b, ceiling)
-        ceiling = new[b] - MIN_INTERVAL
+        ceiling = new[b] - max(MIN_INTERVAL, CFG["ITEM_GAP"])
     ant = t0
     for b in beats:  # piso: nunca antes do início da cena; mantém ordem
         new[b] = max(new[b], ant)
         ant = new[b]
     times = [round(new[t], 2) for t in times]
+    _bs = sorted(set(times))
+    if len(_bs) > 1 and min(b2 - b1 for b1, b2 in zip(_bs, _bs[1:])) < CFG["ITEM_GAP"] - 0.06:
+        WARNINGS.append(
+            f"[{c['id']}] ritmo rápido demais: itens a {min(b2 - b1 for b1, b2 in zip(_bs, _bs[1:])):.1f}s um do outro (mínimo {CFG['ITEM_GAP']}s): "
+            f"a cena ({t1 - t0:.1f}s) é curta para {len(_bs)} entradas — tire itens, junte-os ou ancore-os em palavras mais espaçadas"
+        )
     names = {t0: "in"}
     for t in times:
         if t not in names:
@@ -814,10 +858,12 @@ def build_graph(c, t0, t1):
                 dst=b,
                 when=when,
                 sides=list(sides),
-                style="straight" if dy < 8 else "elbow",
+                style=edge_style(pairs, a, b, dy),
                 bus=bars[(a, b)],
             )
         )
+    check_arrows(c["id"], out_items, edges)
+    VIDA[c["id"]] = [(round(min(times), 2), round(t1 - EXIT_TIME, 2))]
     ev = [(f"{c['id']}-{names[t]}", t) for t in sorted(names)]
     return dict(kind="graph", id=c["id"], items=out_items, edges=edges), ev
 
@@ -834,7 +880,7 @@ def graph_static(items, dir_, links, W, H):
         resolve_image(it)
     idx = {it["id"]: i for i, it in enumerate(items) if it["id"]}
     pos, s, depth = layout(
-        items, dir_, W, H, smax=1.0
+        items, dir_, W, H, smax=1.0, links=links
     )  # a ampliação final (GRAPH_SCALE) é feita depois, com o bbox real
     out = []
     for i, it in enumerate(items):
@@ -879,7 +925,7 @@ def graph_static(items, dir_, links, W, H):
                 dst=b,
                 when=max(a, b),
                 sides=list(sides),
-                style="straight" if dy < 8 else "elbow",
+                style=edge_style(pairs, a, b, dy),
                 bus=bars[(a, b)],
             )
         )
@@ -1008,6 +1054,7 @@ def build_composite(c, t0, t1):
             items_g, edges_g, bbox_g = graph_static(
                 props["items"], props["dir"], props["links"], 1700, 800
             )
+            check_arrows(c["id"] + "/graph", items_g, edges_g)
             events_g, search_g = [], t
             for k_, at_ in enumerate(ats):
                 if at_ is None:
@@ -1028,7 +1075,7 @@ def build_composite(c, t0, t1):
                             f"{c['id']}: palavra de item de grafo '{at_}' nao achada apos {search_g:.1f}s"
                         )
                     tg = round(cand[0]["start"] - LEAD, 2)
-                tg = max(tg, search_g + 0.05)
+                tg = max(tg, search_g + (CFG["ITEM_GAP"] if k_ > 0 and not props["items"][k_].get("over") else 0.05))
                 for a_, b_ in JC.get(c["id"], []):
                     if a_ - CFG["CLIP_LEAD"] - 0.05 <= tg < b_ + CFG["CLIP_MARGIN"]:
                         WARNINGS.append(
@@ -1341,6 +1388,7 @@ if __name__ == "__main__":
         GRAPH_ZOOM=float(getattr(_pd, "GRAPH_SCALE", 1.5)),
         CLIP_LEAD=float(getattr(_pd, "CLIP_LEAD", 0.4)),
         CLIP_MARGIN=float(getattr(_pd, "CLIP_MARGIN", 0.15)),
+        ITEM_GAP=float(getattr(_pd, "ITEM_GAP", 0.9)),
     )
     for _c in SCENES:
         if _c.get("kind") == "item" and CFG["LOGO_TITLECARD"] and not _c.get("logo"):
@@ -1445,6 +1493,16 @@ if __name__ == "__main__":
         assert all(t < out_t for _, t in ev), f"{c['id']}: evento depois da saida"
         events += ev + [(f"{c['id']}-out", out_t)]
         scenes_json.append(js)
+        if c["kind"] in ("impact", "timeline", "shortlist"):
+            VIDA[c["id"]] = [(round(t0, 2), out_t)]
+        elif c["kind"] in ("item", "section"):
+            VIDA[c["id"]] = [(round(a, 2), round(b, 2)) for a, b in LIFE_PIECES.get(c["id"], [])]
+            if c.get("menu"):
+                VIDA[c["id"]].append((round(t0, 2), round(t0 + MENU_DURATION, 2)))
+            if c["kind"] == "section" and not VIDA[c["id"]]:
+                VIDA[c["id"]] = [(round(t0, 2), out_t)]
+        elif c["kind"] == "broll":
+            VIDA[c["id"]] = []
         if c["kind"] == "impact":
             tot_txt += t1 - t0
             first_title = t0 if first_title is None else first_title
@@ -1728,6 +1786,7 @@ if __name__ == "__main__":
                 ]
                 for k, c in enumerate(SCENES)
             },
+            "life": {k: [list(x) for x in v] for k, v in VIDA.items()},
             "menu_duration": MENU_DURATION,
             "promo_t": PROMO_T[0],
             "promo_resume": PROMO_T[1],

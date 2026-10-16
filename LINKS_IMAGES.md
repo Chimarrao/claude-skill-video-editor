@@ -18,3 +18,7 @@ c, cplusplus, dotnet, php, javascript, typescript, python, rust, go, lua, elixir
 ## Ícones de linha
 - Tabler (MIT): `https://raw.githubusercontent.com/tabler/tabler-icons/main/icons/outline/<name>.svg` (usado automaticamente via `ic:name`).
 - Fluent Emoji 3D (MIT, tom leve): `download_icons.sh`.
+
+## Sistemas operacionais clássicos (Wikipédia, `Special:FilePath/<arquivo>?width=700`)
+- `logo_beos.png` ← `BeOS_logo.svg` · `logo_nextstep.png` ← `NeXTSTEP_logo.svg` (letras escuras: usar em placa branca) · `logo_next.png` ← `NeXT_logo.svg` (cubo da NeXT).
+- Outros arquivos úteis no mesmo padrão: `Be_Inc._logo.svg`, `BeOS_Desktop.png`, `NeXTSTEP_desktop.png`.

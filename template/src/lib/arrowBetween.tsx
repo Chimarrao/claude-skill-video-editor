@@ -22,7 +22,8 @@ export function arrowBetween(
   bus?: number | null,
 ): Reference<Line> {
   const ref = createRef<Line>();
-  const p0 = () => a[sideA]();
+  const drop = sideA === 'bottom' ? ((a as any).labelDrop as number | undefined) ?? 0 : 0; // saída por baixo começa depois do rótulo
+  const p0 = () => (drop ? a[sideA]().addY(drop) : a[sideA]());
   const p3 = () => b[sideB]();
   const horizontal = sideA === 'right' || sideA === 'left';
   const middle = () => (bus != null ? bus : horizontal ? (p0().x + p3().x) / 2 : (p0().y + p3().y) / 2);

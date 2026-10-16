@@ -42,8 +42,14 @@ export function figure(
         {...SHADOW_TEXT}
       />
     ) as Txt;
+  // Nos nós sem coluna (disco de ícone / foto redonda) o rótulo fica ABAIXO da caixa do nó: `labelDrop` diz às setas que saem
+  // por baixo até onde o texto termina, para a seta nunca atravessar o rótulo.
+  const comRotulo = (no: Rect) => {
+    (no as any).labelDrop = label ? 80 : 0;
+    return no;
+  };
   if (bezel) {
-    return (
+    return comRotulo(
       <Rect opacity={0} size={height} {...props}>
         <Rect
           size={height}
@@ -56,18 +62,18 @@ export function figure(
           <Img src={image} size={height * 0.56} />
         </Rect>
         {label ? text({layout: false, y: height / 2 + 46}) : null}
-      </Rect>
-    ) as Rect;
+      </Rect> as Rect,
+    );
   }
   if (circular) {
-    return (
+    return comRotulo(
       <Rect opacity={0} size={height} {...props}>
         <Rect size={height} radius={height / 2} clip stroke={WHITE} lineWidth={10} {...SHADOW}>
           <Img src={image} size={height} />
         </Rect>
         {label ? text({layout: false, y: height / 2 + 46}) : null}
-      </Rect>
-    ) as Rect;
+      </Rect> as Rect,
+    );
   }
   // Rótulo abaixo da imagem; um espaçador invisível simétrico em cima mantém o centro da imagem/placa no centro
   // do nó (as setas ligam no meio). Placa: tamanho fixo calculado no plan.py (nada de caixas desproporcionais).
