@@ -12,7 +12,7 @@ Uma **skill de edição de vídeo completa**: a partir de uma narração (`.wav`
 | 2. Plano | Você (ou o Claude) escreve `plan_data.py`; o motor resolve âncoras por frase falada, valida proporção, sobreposição, zonas proibidas e sincronia | `template/plan.py` |
 | 3. Animações | Motion Canvas (TypeScript): grafos/árvores, logos, fotos, estatísticas, comparativos, linhas do tempo, listas curtas, menus de lista (explorador ou terminal `ls`) | `template/src/` |
 | 4. B-roll | Análise de vídeos (cortes, movimento, OCR, CLIP, rostos), folhas de contato, escolha de trechos limpos, proxies de prévia | `scripts/broll/` |
-| 5. Render | Overlay `.mov` ProRes 4444 com transparência (1080p ou 4K), com barra de progresso | `scripts/render.mjs`, `scripts/progress.py` |
+| 5. Render | Overlay `.mov` ProRes 4444 com transparência (1080p ou 4K), com barra de progresso | `scripts/render.mjs`, `scripts/render_slices.sh` (em trechos, resiste a queda do Chrome), `scripts/progress.py` |
 | 6. Montagem | Projeto novo no CapCut: preenchimento → B-roll (com buracos) → overlay recortado → narração (+ música, avatar, vinhetas via pacote de marca privado) | `scripts/capcut/` |
 | 7. Testes | Regras estáticas, "teste dos testes" (mutações), overlay alpha por render de fatia, rótulos × fala, clipes sem pessoas, montagem do CapCut | `scripts/tests/` |
 | 7b. Controle de qualidade | **Quality gates**: plano (ritmo, setas, imagens, janelas vazias), frames reais do render compostos sobre o B-roll com folhas de contato, folhas dos clipes, testes do motor | `scripts/quality/`, `scripts/tests/test_engine_geometry.py` |
