@@ -17,6 +17,7 @@ Uma **skill de edição de vídeo completa**: a partir de uma narração (`.wav`
 | 7. Testes | Regras estáticas, "teste dos testes" (mutações), overlay alpha por render de fatia, rótulos × fala, clipes sem pessoas, montagem do CapCut | `scripts/tests/` |
 | 7b. Controle de qualidade | **Quality gates**: plano (ritmo, setas, imagens, janelas vazias), frames reais do render compostos sobre o B-roll com folhas de contato, folhas dos clipes, testes do motor | `scripts/quality/`, `scripts/tests/test_engine_geometry.py` |
 | 7c. Biblioteca de imagens | Colheita da Wikipédia/Commons de **431 assuntos** (versões do Windows/Mac/Android, distros Linux, BSD, apps, empresas, pessoas, hardware) com várias proporções por assunto, catálogo com fonte/licença e busca | `scripts/images/`, `database/image_catalog.json` |
+| 7d. Tipo NEWS (só cortes) | "faça o news NN": funde o áudio tratado no vídeo bruto (GCC-PHAT, loudnorm), transcreve, decide os cortes (regravação, falso começo, comando, explicação refeita, pausas, início/fim) com revisão do agente, gera projeto CapCut de UMA trilha, prévia `PRONTO_auto.mp4` e `cortes.md`; validação de sincronia/corte limpo/repetido/perdido/tela; calibração contra cortes reais | `scripts/news/`, `scripts/tests/test_news.py` |
 | 8. Memória | Banco SQLite de logos/ícones/variações de lista; transcrições e vídeos ficam só no banco local | `database/`, `scripts/assets_db.py` |
 
 Tipos de vídeo suportados: **Lista sem B-roll · Webdoc sem B-roll · Lista de argumentos sem B-roll · Lista com B-roll · Webdoc com B-roll**, mais um catálogo de **14 estilos de lista** (pódio, terminal `ls`, metrô, tier list…).
@@ -78,6 +79,7 @@ python scripts/tests/test_clips_without_people.py    # clips de B-roll sem rosto
 python scripts/tests/test_engine_geometry.py         # motor: ritmo, setas retas, fileira, último item, rótulos, ponta da seta (sem projeto)
 python scripts/tests/test_gate_plan.py               # gate 1: P8 (clipe repetido/sobreposto) numa cópia do projeto
 python scripts/tests/test_harvest_catalog.py         # colheita de imagens: merge nunca apaga arquivo catalogado
+python scripts/tests/test_news.py                    # tipo NEWS: regras de corte com transcrição sintética (sem vídeo/rede)
 scripts/quality/run_gates.sh [--frames]               # todos os gates em sequência (em animacao/)
 ```
 (rodar dentro de `animacao/`, a pasta do projeto gerado)
