@@ -74,7 +74,11 @@ for k, (a, b) in enumerate(kept[:-1]):
         dmin = min((0.0 if w["s"] <= t <= w["e"] else min(abs(t - w["s"]), abs(t - w["e"]))) for w in words)
         margem_min = min(margem_min, dmin)
         if dmin < 0.08:
-            falha("2 corte limpo", f"corte em {t:.2f}s a {dmin * 1000:.0f} ms de uma palavra (< 80 ms)")
+            tight = any(r.get("apertado") and (abs(r["start"] - t) < 1e-3 or abs(r["end"] - t) < 1e-3) for r in removed)
+            if tight:  # corte apertado já avisado no cortes.md (fala colada, sem pausa entre as palavras): só aviso — conferir de ouvido
+                avisos.append(f"2 corte limpo: corte apertado em {t:.2f}s a {dmin * 1000:.0f} ms de palavra (fala colada; conferir de ouvido)")
+            else:
+                falha("2 corte limpo", f"corte em {t:.2f}s a {dmin * 1000:.0f} ms de uma palavra (< 80 ms)")
 # estalo: salto de amplitude nas emendas da prévia
 pos = 0
 dif = np.abs(np.diff(prev))

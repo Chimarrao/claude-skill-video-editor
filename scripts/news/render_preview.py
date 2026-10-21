@@ -13,7 +13,7 @@ ap.add_argument("fundido")
 ap.add_argument("cuts")
 ap.add_argument("saida")
 ap.add_argument("--encoder", default="hevc_videotoolbox")
-ap.add_argument("--bitrate", default="14M")
+ap.add_argument("--bitrate", default="8M")
 ap.add_argument("--crf", default="20")
 args = ap.parse_args()
 kept = json.load(open(args.cuts))["kept"]

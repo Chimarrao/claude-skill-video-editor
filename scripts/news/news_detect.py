@@ -17,21 +17,44 @@ def _ratio(a, b):
 
 
 def comandos(words, utts, P):
-    """Regra 5: comando falado ("corta", "de novo", "errei", "vou repetir", "pera"…). Só vale quando o comando é (quase) o enunciado inteiro
-    (<= command_max_utt_words palavras): "a empresa corta custos" é conteúdo, "corta." sozinho é comando. Sai do início da tentativa que falhou
-    (enunciado anterior) até o fim do comando."""
+    """Regra 5: comando falado ("corta", "de novo", "errei", "vou repetir", "pera"…). Vale quando o comando é uma FRASE própria — a palavra vem com
+    pontuação ("Corta.", "corta...", "corta,"), ou fecha o enunciado, ou o enunciado tem <= command_max_utt_words palavras. Sem isso "a empresa corta custos" é conteúdo.
+    Sai da tentativa que falhou até o fim do comando: se a palavra antes do comando NÃO fecha frase (termina em "...", vírgula ou nada), volta até o fim da
+    frase anterior (. ? !); se a frase anterior estava completa, sai só o comando (a regravação que vem depois é tratada pelas regras de repetição)."""
     cmds = [[_n(t) for t in c.split()] for c in P["command_words"]]
-    out = []
+    fecha = lambda w: w["w"].rstrip().endswith((".", "?", "!")) and not w["w"].rstrip().endswith("...")
+    uid = {}
     for u, (a, b) in enumerate(utts):
-        if b - a > P["command_max_utt_words"]:
-            continue
-        toks = [w["n"] for w in words[a:b]]
+        for k in range(a, b):
+            uid[k] = u
+    out, n = [], len(words)
+    for i in range(n):
         for c in cmds:
-            for i in range(0, len(toks) - len(c) + 1):
-                if toks[i : i + len(c)] == c:
-                    ini = a if (i > 0 or u == 0) else utts[u - 1][0]
-                    out.append(Remocao(ini, b, "comando", nota=f"«{texto(words, a, b)}»"))
-                    break
+            L = len(c)
+            if [w["n"] for w in words[i : i + L]] != c:
+                continue
+            u = uid[i]
+            a, b = utts[u]
+            ultimo = words[i + L - 1]
+            frase_propria = ultimo["w"].rstrip().endswith((".", "...", "…", ",", "!", "?")) or i + L >= b or (b - a) <= P["command_max_utt_words"]
+            if not frase_propria:
+                continue
+            ini = i
+            # 1) a tentativa que falhou começa onde as PRIMEIRAS palavras do reinício (logo depois do comando) já tinham sido ditas antes do comando
+            depois = [w["n"] for w in words[i + L : i + L + 4] if w["n"]][:3]
+            if len(depois) >= 2:
+                for k in range(i - 1, max(-1, i - P["command_back_words"]), -1):
+                    if [w["n"] for w in words[k : k + 2]] == depois[:2]:
+                        ini = k
+                        break
+            # 2) sem reinício igual: volta até o fim da frase anterior (se a palavra antes do comando não fecha frase)
+            if ini == i and i > 0 and not fecha(words[i - 1]):
+                k = i - 1
+                while k >= 0 and i - k <= P["command_back_words"] and not fecha(words[k]):
+                    k -= 1
+                ini = k + 1
+            out.append(Remocao(ini, i + L, "comando", nota=f"«{texto(words, ini, i + L)}»"))
+            break
     return out
 
 
@@ -142,6 +165,10 @@ def fragmentos(words, utts, P):
             continue
         ultima = words[b - 1]["w"]
         if ultima.endswith((".", "?", "!")) and not ultima.endswith("..."):
+            continue
+        if P.get("fragment_prev_punct") and a > 0 and not words[a - 1]["w"].rstrip().endswith((".", "?", "!", ",", ";", ":", "...", "…")):
+            continue  # o enunciado anterior parou NO MEIO da frase ("…como | fonte de conhecimento,"): o fragmento é continuação, não falso começo
+        if words[b]["s"] - words[b - 1]["e"] < P.get("fragment_post_gap_s", 0.0):
             continue
         out.append(Remocao(a, b, "falso começo", nota=f"«{texto(words, a, b)}»"))
     return out

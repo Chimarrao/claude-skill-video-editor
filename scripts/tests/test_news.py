@@ -89,6 +89,15 @@ w, r, _ = roda([(2.0, "Então a empresa disse que o erro foi".split(), 0.25), (8
 txt = " ".join(x["w"] for x in w if any(a <= x["s"] < b for a, b in r["kept"]))
 teste("N6 comando remove a tentativa que falhou e o próprio comando", "corta" not in txt and "erro" not in txt and "informou" in txt, txt)
 
+
+# N6b "Corta." como frase própria no meio de enunciado longo: sai a tentativa abandonada (até o fim da frase anterior) + o comando; "corta" como verbo fica
+w, r, _ = roda([(2.0, "Isso é importante.".split(), 0.25), (6.0, "E para evitar processos eles fazem esse... Corta. E para evitar qualquer complicação legal eles fazem a sala limpa.".split(), 0.25)], margin_tiers=[0.08, 0.04])
+txt = " ".join(x["w"] for x in w if any(a <= x["s"] < b for a, b in r["kept"]))
+teste("N6b comando 'Corta.' remove a tentativa abandonada inteira", "processos" not in txt and "Corta." not in txt and "sala limpa" in txt, txt)
+w, r, _ = roda([(2.0, "A empresa corta custos todo ano.".split(), 0.25)])
+txt = " ".join(x["w"] for x in w if any(a <= x["s"] < b for a, b in r["kept"]))
+teste("N6c 'corta' como verbo no meio da frase não é comando", "corta" in txt, txt)
+
 # N7/N8/N9 invariantes
 k = r["kept"]
 teste("N7 trechos mantidos em ordem e sem sobreposição", all(k[i][1] <= k[i + 1][0] + 1e-9 for i in range(len(k) - 1)) and all(a < b for a, b in k), str(k))

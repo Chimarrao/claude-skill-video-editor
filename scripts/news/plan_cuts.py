@@ -70,7 +70,7 @@ def main():
     ap.add_argument("--params", default=os.path.join(HERE, "news_params.json"))
     ap.add_argument("--out")
     ap.add_argument("--features")
-    ap.add_argument("--edits", help="JSON do REVISOR (o agente): {remove:[{t0,t1,motivo,confira,nota}], keep:[{t0,t1}]} em segundos do bruto; padrão work/edits.json se existir")
+    ap.add_argument("--edits", help="JSON do REVISOR (o agente): {remove:[{t0,t1,motivo,confira,nota}] (por PALAVRAS no intervalo), cut:[{t0,t1,motivo,nota}] (por TEMPO exato), keep:[{t0,t1}]} em segundos do bruto; padrão work/edits.json se existir")
     args = ap.parse_args()
     P = json.load(open(args.params))
     pasta = os.path.abspath(args.pasta)
@@ -80,7 +80,7 @@ def main():
     z = np.load(args.features or os.path.join(work, "features.npz"))
     feats = {k: z[k] for k in z.files}  # carrega UMA vez (npz relê e descomprime a cada acesso)
     from news_detect import detecta  # regras de detecção (arquivo separado)
-    from news_cuts import constroi  # transforma remoções em intervalos mantidos
+    from news_cuts import constroi, aplica_cortes_tempo  # transforma remoções em intervalos mantidos
 
     utts = enunciados(words, P["utterance_gap_s"])
     rem = detecta(words, utts, feats, P)
@@ -97,6 +97,10 @@ def main():
                 rem.append(Remocao(ix[0], ix[-1] + 1, e.get("motivo", "revisão"), confira=e.get("confira", False), nota=e.get("nota", "")))
         rem.sort(key=lambda r: (r.i0, r.i1))
     res = constroi(words, rem, feats, P)
+    if os.path.exists(edits_path):
+        tempos = json.load(open(edits_path)).get("cut", [])
+        if tempos:
+            res = aplica_cortes_tempo(res, tempos, feats, P)
     out = args.out or os.path.join(work, "cuts.json")
     json.dump(res, open(out, "w"), ensure_ascii=False, indent=1)
     k = res["stats"]
