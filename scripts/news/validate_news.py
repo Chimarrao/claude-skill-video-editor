@@ -27,7 +27,11 @@ work = os.path.join(pasta, "work")
 cuts = json.load(open(os.path.join(work, "cuts.json")))
 kept, removed = cuts["kept"], cuts["removed"]
 tr = json.load(open(os.path.join(work, "transcription.json")))
-words = [dict(w=w["word"].strip(), s=w["start"], e=w["end"]) for sg in tr["segments"] for w in sg["words"] if w["word"].strip()]
+import plan_cuts as _pc  # noqa: E402
+
+# mesmas palavras do editor: tempos monotônicos e palavras esticadas sobre o silêncio já encurtadas (senão um corte em silêncio "cai dentro" da palavra esticada)
+_z = np.load(os.path.join(work, "features.npz"))
+words = _pc.ajusta_palavras(_pc.carrega_palavras(tr), {k: _z[k] for k in _z.files}, json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "news_params.json"))))
 res, falhas, avisos = {}, [], []
 
 

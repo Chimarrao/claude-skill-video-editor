@@ -22,6 +22,7 @@ def main():
     ap.add_argument("fundido")
     ap.add_argument("cuts")
     ap.add_argument("nome")
+    ap.add_argument("--denoise", type=float, default=0.85, help="redução de ruído do CapCut em todos os trechos (denoise_rate; o usuário aplicou 0,85 nos eps. 03 e 05); 0 desliga")
     ap.add_argument("--force", action="store_true", help="roda mesmo com o CapCut aberto (ele reescreve drafts abertos: feche e reabra)")
     args = ap.parse_args()
     if subprocess.run(["pgrep", "-x", "CapCut"], capture_output=True).returncode == 0 and not args.force:
@@ -61,6 +62,14 @@ def main():
         mat.update({"id": mid, "duration": bd.us(dur), "path": f"{bd.PH}/media/{media.name}", "material_name": media.name, "width": w, "height": h, "has_audio": True, "type": "video"})
         mats["videos"].append(mat)
         refs = bd.clone_extras(vseg_t.get("extra_material_refs"), old_mats, mats, speed=1.0)
+        if args.denoise > 0:  # mesma estrutura que o CapCut grava ao ligar "Reduzir ruído" no clipe (copiada do projeto do usuário)
+            did = bd.uid()
+            mats.setdefault("realtime_denoises", []).append(
+                {"id": did, "type": "realtime_denoise", "is_denoise": True, "denoise_mode": 1.0, "denoise_rate": args.denoise,
+                 "path": "/Applications/CapCut.app/Contents/MacOS/../Resources/audiosami/unet_denoise_44k_music_model_v1.0.model",
+                 "sami_name": "denoise_v2", "sami_version": "1.0", "sami_type": 2, "is_from_hd_sounds": False}
+            )
+            refs.append(did)
         seg = deepcopy(vseg_t)
         seg["clip"] = deepcopy(seg.get("clip") or {})
         e = bd.cover_scale(w, h)

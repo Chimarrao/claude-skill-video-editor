@@ -18,7 +18,8 @@ def carrega(pasta):
     work = os.path.join(pasta, "work")
     tr = json.load(open(os.path.join(work, "transcription.json")))
     z = np.load(os.path.join(work, "features.npz"))
-    return pc.carrega_palavras(tr), {k: z[k] for k in z.files}
+    words, feats = pc.carrega_palavras(tr), {k: z[k] for k in z.files}
+    return words, feats
 
 
 def gabarito(draft, dur):
@@ -29,6 +30,8 @@ def gabarito(draft, dur):
 
 def roda(words, feats, P):
     """Cortes automáticos [(a, b)] + resultado completo."""
+    import copy
+    words = pc.ajusta_palavras(copy.deepcopy(words), feats, P)
     utts = pc.enunciados(words, P["utterance_gap_s"])
     res = constroi(words, detecta(words, utts, feats, P), feats, P)
     return [(r["start"], r["end"]) for r in res["removed"]], res

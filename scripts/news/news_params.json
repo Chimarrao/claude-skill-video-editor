@@ -3,7 +3,7 @@
   "utterance_gap_s": 0.45,
   "pause_max_s": 0.6,
   "breath_after_s": 0.3,
-  "breath_before_s": 0.3,
+  "breath_before_s": 0.25,
   "min_cut_s": 0.2,
   "word_margin_s": 0.1,
   "start_preroll_s": 0.15,
@@ -47,6 +47,7 @@
     0.0,
     -0.03
   ],
-  "fragment_prev_punct": true,
-  "fragment_post_gap_s": 0.6
+  "fragment_prev_punct": false,
+  "fragment_post_gap_s": 0.7,
+  "word_max_s": 0.9
 }

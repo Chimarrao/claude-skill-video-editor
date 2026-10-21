@@ -123,6 +123,16 @@ def repeticao_interna(words, utts, P):
     return out
 
 
+def particula_repetida(words, utts, P):
+    """Regra 3: palavrinha curta dita 2× seguidas ("tá? tá?", "né né"): sai a 1ª."""
+    out = []
+    curtas = {"ta", "ne", "entao", "e", "ai", "bom", "tipo", "ou", "mas"}
+    for k in range(len(words) - 1):
+        if words[k]["n"] in curtas and words[k]["n"] == words[k + 1]["n"] and words[k + 1]["s"] - words[k]["e"] <= 1.5:
+            out.append(Remocao(k, k + 1, "regravação", nota=f"«{words[k]['w']}» dito 2×"))
+    return out
+
+
 def reticencias(words, utts, P):
     """Regra 4: enunciado que termina em "..." (a fala morreu no meio) e continua depois = frase abandonada."""
     out = []
@@ -219,6 +229,7 @@ def detecta(words, utts, feats, P):
     rem += repeticoes(words, utts, P)
     rem += blocos_repetidos(words, utts, P)
     rem += repeticao_interna(words, utts, P)
+    rem += particula_repetida(words, utts, P)
     rem += reticencias(words, utts, P)
     rem += sufixo_repetido(words, utts, P)
     rem += fragmentos(words, utts, P)

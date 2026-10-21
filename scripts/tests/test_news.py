@@ -4,7 +4,7 @@
  N3 sufixo repetido ("É uma | É uma plataforma") sai do enunciado anterior                      N4 reticências ("...") = frase abandonada sai
  N5 fragmento curto sem pontuação final sai; frase curta com ponto final fica                   N6 comando falado remove a tentativa que falhou
  N7 a ORDEM nunca muda e os trechos mantidos não se sobrepõem                                   N8 início/fim: corta antes da 1ª fala e depois da última
- N9 tudo cai na grade de 60 fps"""
+ N9 tudo cai na grade de 60 fps  N10 palavrinha repetida  N11 palavra esticada sobre o silêncio (alinhamento)"""
 
 import sys
 from pathlib import Path
@@ -44,6 +44,7 @@ def monta(frases, dur):
 def roda(frases, dur=40.0, **over):
     Q = dict(P, **over)
     words, feats = monta(frases, dur)
+    pc.ajusta_palavras(words, feats, Q)
     utts = pc.enunciados(words, Q["utterance_gap_s"])
     rem = detecta(words, utts, feats, Q)
     return words, constroi(words, rem, feats, Q), rem
@@ -97,6 +98,24 @@ teste("N6b comando 'Corta.' remove a tentativa abandonada inteira", "processos" 
 w, r, _ = roda([(2.0, "A empresa corta custos todo ano.".split(), 0.25)])
 txt = " ".join(x["w"] for x in w if any(a <= x["s"] < b for a, b in r["kept"]))
 teste("N6c 'corta' como verbo no meio da frase não é comando", "corta" in txt, txt)
+
+
+# N10 palavrinha dita 2× seguidas ("tá? tá?"): sai a 1ª
+w, r, _ = roda([(2.0, "Então é relativamente recente tá?".split(), 0.25), (5.0, "tá? Entrou justamente nesse projeto.".split(), 0.25)])
+txt = " ".join(x["w"] for x in w if any(a <= x["s"] < b for a, b in r["kept"]))
+teste("N10 'tá? tá?' vira um só", txt.count("tá?") == 1, txt)
+
+# N11 o alinhador estica uma palavra sobre o silêncio (ela = 8 s): a pausa tem que aparecer e ser cortada
+words_, feats_ = monta([(2.0, "no Linux a implementação do NTFS".split(), 0.25), (14.0, "só entrou no kernel".split(), 0.25)], 40.0)
+words_.insert(6, dict(w="ela", n="ela", s=3.9, e=13.9, p=0.9))  # 'ela' falada em 0,25 s mas alinhada até a próxima frase
+words_[6]["e"] = 13.95
+feats_["energy_db"][int(3.9 / 0.01) : int(13.95 / 0.01)] = -68.0
+feats_["energy_db"][int(3.9 / 0.01) : int(4.15 / 0.01)] = -30.0  # fala real só no começo
+pc.ajusta_palavras(words_, feats_, P)
+teste("N11 palavra esticada sobre o silêncio é encurtada (end <= 4,6 s)", words_[6]["e"] <= 4.6, f"{words_[6]['e']}")
+utts_ = pc.enunciados(words_, P["utterance_gap_s"])
+res_ = constroi(words_, detecta(words_, utts_, feats_, P), feats_, P)
+teste("N11 a pausa de ~9 s agora é cortada", any(x["reason"] == "pausa" and x["end"] - x["start"] > 5 for x in res_["removed"]), str(res_["removed"][:3]))
 
 # N7/N8/N9 invariantes
 k = r["kept"]

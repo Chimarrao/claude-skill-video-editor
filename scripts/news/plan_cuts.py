@@ -41,6 +41,31 @@ def carrega_palavras(tr):
     return out
 
 
+def ajusta_palavras(words, feats, P):
+    """O alinhamento forçado ESTICA uma palavra sobre o silêncio vizinho ("ela" com 7,8 s no ep. 05): palavra longa (> word_max_s) é encurtada para o trecho
+    onde há fala de verdade (energia > piso + 25 dB). Sem isso a pausa some dos dados e o corte do silêncio nunca é feito."""
+    e = feats["energy_db"]
+    thr = float(np.percentile(e, 5)) + 25.0
+    for w in words:
+        if w["e"] - w["s"] <= P.get("word_max_s", 0.9):
+            continue
+        i0, i1 = int(w["s"] / 0.01), min(int(w["e"] / 0.01), len(e))
+        fala = np.where(e[i0:i1] > thr)[0]
+        if len(fala) == 0:
+            w["e"] = w["s"] + 0.05
+            continue
+        # a palavra é a PRIMEIRA rajada de fala (lacunas <= 0,3 s dentro dela); rajadas depois do silêncio pertencem às palavras seguintes (alinhadas errado)
+        k = 0
+        while k + 1 < len(fala) and fala[k + 1] - fala[k] <= 30:
+            k += 1
+        a, b = i0 + fala[0], i0 + fala[k]
+        if a * 0.01 - w["s"] > 0.4:
+            w["s"] = max(w["s"], a * 0.01 - 0.03)
+        if w["e"] - b * 0.01 > 0.4:
+            w["e"] = min(w["e"], b * 0.01 + 0.05)
+    return words
+
+
 def enunciados(words, gap):
     """Agrupa palavras em enunciados: nova quebra quando a pausa antes da palavra >= gap. Devolve lista de (i0, i1) com i1 exclusivo."""
     utts, i0 = [], 0
@@ -79,6 +104,7 @@ def main():
     words = carrega_palavras(tr)
     z = np.load(args.features or os.path.join(work, "features.npz"))
     feats = {k: z[k] for k in z.files}  # carrega UMA vez (npz relê e descomprime a cada acesso)
+    ajusta_palavras(words, feats, P)
     from news_detect import detecta  # regras de detecção (arquivo separado)
     from news_cuts import constroi, aplica_cortes_tempo  # transforma remoções em intervalos mantidos
 

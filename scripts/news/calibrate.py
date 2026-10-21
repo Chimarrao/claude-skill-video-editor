@@ -6,6 +6,8 @@ Mostra: % dos pontos do usuário reproduzidos; remoções iguais / só do usuár
 
 import argparse, json, os, sys
 
+import numpy as np
+
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from read_draft_cuts import kept_segments, removed as rem_from_kept
 
@@ -19,7 +21,11 @@ args = ap.parse_args()
 work = os.path.join(os.path.abspath(args.pasta), "work")
 mine = json.load(open(os.path.join(work, "cuts.json")))
 tr = json.load(open(os.path.join(work, "transcription.json")))
-words = [(w["start"], w["end"], w["word"].strip()) for sg in tr["segments"] for w in sg["words"] if w["word"].strip()]
+import plan_cuts as _pc
+
+_z = np.load(os.path.join(work, "features.npz"))
+_P = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "news_params.json")))
+words = [(w["s"], w["e"], w["w"]) for w in _pc.ajusta_palavras(_pc.carrega_palavras(tr), {k: _z[k] for k in _z.files}, _P)]
 dur = mine["stats"]["dur_s"]
 gk, d = kept_segments(args.draft)
 G = rem_from_kept(gk, max(m["duration"] for m in d["materials"]["videos"]) / 1e6)
