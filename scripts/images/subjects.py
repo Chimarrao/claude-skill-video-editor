@@ -637,6 +637,21 @@ EXTRA = [
     ("game_boy", "Game Boy", "hardware jogos"),
     ("nes", "Nintendo Entertainment System", "hardware jogos"),
     ("playstation_2", "PlayStation 2", "hardware jogos"),
+    # --- Webdoc comparativo de edições de uma distro (2026-10-26): ferramentas do ecossistema Mint e contexto de desempenho ---
+    ("nemo_file_manager", "Nemo (file manager)", "linux mint cinnamon arquivos"),
+    ("thunar", "Thunar", "xfce arquivos"),
+    ("timeshift", "Timeshift (software)", "linux backup restauracao"),
+    ("xorg_server", "X.Org Server", "linux desktop"),
+    ("ubuntu_24_04", "Ubuntu 24.04", "ubuntu lts"),
+    ("ubuntu_26_04", "Ubuntu 26.04", "ubuntu lts"),
+    ("linux_mint_22", "Linux Mint 22", "linux mint"),
+    ("gnome_2", "GNOME 2", "mate desktop"),
+    ("swap_space", "Paging", "memoria swap"),
+    ("ram_memory_module", "DIMM", "hardware memoria ram"),
+    ("old_netbook", "Netbook", "hardware pc antigo"),
+    ("live_usb", "Live USB", "linux pendrive"),
+    ("chimarrao", "Mate (drink)", "chimarrao bebida cuia erva mate gaucho"),
+    ("rio_grande_do_sul", "Rio Grande do Sul", "mapa estado brasil gaucho"),
 ]
 SUBJECTS = []
 PROFUNDOS = {id(WINDOWS), id(APPLE), id(MOBILE), id(LINUX), id(UNIX)}  # grupos com buscas extras (mais variedade por assunto)

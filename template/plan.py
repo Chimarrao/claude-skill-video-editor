@@ -215,14 +215,14 @@ def Stat(value, label, color="#a6e22e", pct=None, at=None, logo=None):
 
 def Facts(lines, at=None, logo=None):
     """linhas: [('ic:nome', 'texto curto')]"""
-    if len(lines) > 3 or any(len(t) > 34 for _, t in lines):
+    if len(lines) > 3 or any(len(l[1]) > 34 for l in lines):
         raise SystemExit(f"Fatos {lines}: no maximo 3 linhas de ate 34 caracteres (muito texto)")
     return dict(
         slot="dir",
         kind="facts",
         at=at,
         logo=logo,
-        props=dict(lines=[dict(icon=i, text=t) for i, t in lines]),
+        props=dict(lines=[dict(icon=l[0], text=l[1], **({"color": l[2]} if len(l) > 2 else {})) for l in lines]),
     )
 
 
@@ -259,6 +259,77 @@ def Screenshot(img, caption, width=900, at=None):
     if len(caption) > 60:
         raise SystemExit(f"Tela '{img}': legenda > 60 caracteres (curta!)")
     return dict(slot="dir", kind="screen", at=at, props=dict(img=img, caption=caption, width=width))
+
+
+# ---------- Webdoc com ROUNDS (comparativo A × B, estilo ringue/versus) ----------
+COR_A, COR_B = "#ff7b3a", "#3fa3ff"  # lado A quente, lado B frio (troque por lado com Side(..., color=))
+
+
+def Side(name, logo=None, color=COR_A, chips=()):
+    """Um lado do duelo: nome, logo (nome em src/images; proporção medida), cor e até 4 "chips" (traços curtos, <= 34 caracteres)."""
+    if len(chips) > 4 or any(len(c) > 34 for c in chips):
+        raise SystemExit(f"Side '{name}': no máx. 4 chips de 34 caracteres")
+    return dict(name=name, logo=logo, asp=round(aspect(logo), 3) if logo else 1, color=color, chips=list(chips))
+
+
+def Round(n, title, a, b, sub="", at=None):
+    """Cartela "ROUND N": os dois lados (Side) nas pontas, o número grande no meio, o tema embaixo. Vai para o centro e substitui a peça anterior."""
+    if len(title) > 34 or len(sub) > 60:
+        raise SystemExit(f"Round {n}: título <= 34 e sub <= 60 caracteres")
+    return dict(slot="center", kind="round", at=at, props=dict(n=str(n), title=title, sub=sub, a=a, b=b))
+
+
+def Duel(a, b, focus="both", at=None):
+    """Duelo A × B: dois cartões com logo, nome e chips + medalha VS. focus='A'|'B' mantém o painel igual e apaga só o CONTEÚDO do outro lado (ao falar de cada um); 'winA'|'winB' = veredito (os dois inteiros, vencedor com brilho e faixa VENCE)."""
+    if focus not in ("both", "A", "B", "winA", "winB"):
+        raise SystemExit("Duel: focus = both|A|B|winA|winB")
+    return dict(slot="center", kind="duel", at=at, props=dict(a=a, b=b, focus=focus))
+
+
+def Verdict(label, result, color, sub="", logo=None, at=None):
+    """Selo de vencedor do round (carimbo): label='ROUND 2 · DESEMPENHO', result='XFCE VENCE' | 'EMPATE' | 'DEPENDE DO PERFIL', cor do vencedor (ou neutra)."""
+    if len(result) > 26 or len(sub) > 70:
+        raise SystemExit(f"Verdict '{result}': resultado <= 26 e sub <= 70 caracteres")
+    return dict(slot="center", kind="verdict", at=at, props=dict(label=label, result=result, sub=sub, color=color, logo=logo, asp=round(aspect(logo), 3) if logo else 1))
+
+
+def Bars(title, items, unit="", note="", at=None):
+    """Barras horizontais de dados (ex.: RAM em repouso). items = [(rótulo, valor, texto_exibido, cor, logo|None)]; o texto exibido pode ser faixa ("~900 MB – 1 GB")."""
+    if not 2 <= len(items) <= 5:
+        raise SystemExit("Bars: 2 a 5 barras")
+    return dict(
+        slot="center",
+        kind="bars",
+        at=at,
+        props=dict(
+            title=title,
+            unit=unit,
+            note=note,
+            items=[dict(label=l, value=float(v), text=t, color=c, logo=lg, asp=round(aspect(lg), 3) if lg else 1) for l, v, t, c, lg in items],
+        ),
+    )
+
+
+def Profile(n, title, traits, edition, color, logo=None, tag=None, at=None):
+    """Carta de perfil do veredito: PERFIL n, título, 2–3 traços (<= 60 caracteres) e a faixa INSTALE <edição>. `tag` = rótulo curto p/ o resumo (ProfileRow)."""
+    if len(traits) > 3 or any(len(t) > 60 for t in traits):
+        raise SystemExit(f"Profile {n}: até 3 traços de 60 caracteres")
+    return dict(
+        slot="center",
+        kind="profile",
+        at=at,
+        props=dict(n=str(n), profile=dict(title=title, traits=list(traits), edition=edition, color=color, logo=logo, asp=round(aspect(logo), 3) if logo else 1, tag=tag or title)),
+    )
+
+
+def ProfileRow(profiles, at=None):
+    """Resumo final: todas as cartas de perfil lado a lado (passe os mesmos Profile(...) já criados)."""
+    return dict(slot="center", kind="profiles", at=at, props=dict(profiles=[p["props"]["profile"] for p in profiles]))
+
+
+def ScoreStrip(results, at=None):
+    """Placar final sem somar pontos: results = [(tema, resultado, cor)] — um cartão por round."""
+    return dict(slot="center", kind="scorestrip", at=at, props=dict(results=[dict(label=a, result=b, winner="", color=c) for a, b, c in results]))
 
 
 def Title(lines, dur=3.2, tag="", at=None):
@@ -1065,7 +1136,8 @@ def build_composite(c, t0, t1):
             )
         if p["kind"] == "facts":
             props["lines"] = [
-                dict(icon=resolve_icon(l["icon"]), text=l["text"]) for l in props["lines"]
+                dict(icon=resolve_icon(l["icon"]), text=l["text"], **({"color": l["color"]} if l.get("color") else {}))
+                for l in props["lines"]
             ]
         if p["kind"] == "section":
             props["logos"] = list(props["logos"])
@@ -1146,7 +1218,8 @@ def build_composite(c, t0, t1):
                 ):  # nenhum elemento pode ser gigante (placa larga de logo cortada na borda)
                     _w = max(_g.get("pw") or 0, _g.get("iw") or 0, _g["h"]) * e_
                     _h = max(_g.get("ph") or 0, _g["h"]) * e_
-                    if _w > 720 or _h > 520:
+                    _big = (940, 680) if getattr(_pd, "VIDEO_KIND", "") == "webdoc_rounds" else (720, 520)
+                    if _w > _big[0] or _h > _big[1]:
                         WARNINGS.append(
                             f"[{c['id']}] item {_k + 1} do grafo ({_g['img']}) fica gigante ({_w:.0f}x{_h:.0f}px): diminua `h` ou use logo mais compacto"
                         )
@@ -1410,13 +1483,13 @@ if __name__ == "__main__":
     SCENES = _pd.SCENES
     LOGOS_PLATE.update(getattr(_pd, "LOGOS_WITH_PLATE", []))
     CFG.update(
-        WEBDOC=getattr(_pd, "VIDEO_KIND", "") == "webdoc_broll",
+        WEBDOC=getattr(_pd, "VIDEO_KIND", "") in ("webdoc_broll", "webdoc_rounds"),
         HUD=bool(getattr(_pd, "HUD_ITEM", False)),
         EXT=bool(getattr(_pd, "MENU_EXTENSIONS", False)),
         LOGO_TITLECARD=bool(getattr(_pd, "TITLECARD_LOGO_REQUIRED", False)),
         ANIM_MAX=float(getattr(_pd, "ANIM_MAX", 0.35)),
         REQUIRE_LOGO=bool(getattr(_pd, "PIECES_REQUIRE_LOGO", False)),
-        GRAPH_ZOOM=float(getattr(_pd, "GRAPH_SCALE", 1.5)),
+        GRAPH_ZOOM=float(getattr(_pd, "GRAPH_SCALE", 2.6 if getattr(_pd, "VIDEO_KIND", "") == "webdoc_rounds" else 1.5)),  # rounds: grafos grandes (aproveitar a tela)
         CLIP_LEAD=float(getattr(_pd, "CLIP_LEAD", 0.4)),
         CLIP_MARGIN=float(getattr(_pd, "CLIP_MARGIN", 0.15)),
         ITEM_GAP=float(getattr(_pd, "ITEM_GAP", 0.9)),
@@ -1600,7 +1673,7 @@ if __name__ == "__main__":
         for k, c in enumerate(SCENES)
     }
     por_item, end_previous = {}, 0.0
-    webdoc = getattr(_pd, "VIDEO_KIND", "") == "webdoc_broll"
+    webdoc = getattr(_pd, "VIDEO_KIND", "") in ("webdoc_broll", "webdoc_rounds")  # rounds = mesma máquina do webdoc
     for item, file, i0, i1, speed, t0 in sorted(broll, key=lambda b: b[5]):
         if webdoc:
             if item in WINDOWS_VIDEO:

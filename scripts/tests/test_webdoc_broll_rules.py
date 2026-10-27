@@ -23,7 +23,7 @@ def rule(rule_id, condition, msg):
     (passed if condition else errors).append(f"{rule_id}: {msg}")
 
 
-if plan.get("video_kind") != "webdoc_broll":
+if plan.get("video_kind") not in ("webdoc_broll", "webdoc_rounds"):
     warnings.append("plan.json sem video_kind=webdoc_broll (VIDEO_KIND no plan_data.py)")
 for b in broll:
     t0, t1 = b["t_start"], b["t_end"]

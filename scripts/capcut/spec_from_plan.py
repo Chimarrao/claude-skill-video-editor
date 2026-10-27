@@ -56,6 +56,13 @@ if light_overlay:
         else:
             merged.append([x0, x1])
     segments = merged
+# SEM FLASHES: pedaço de overlay muito curto (sobra entre dois clipes, cauda de entrada/saída de uma animação) aparece como um "piscar" na tela.
+# O usuário sempre apaga esses takes à mão: não os gere. Mínimo 1,5 s (os rótulos leves sobre B-roll duram >= 3 s).
+MIN_OVERLAY_SEGMENT = 1.5
+dropped = [x for x in segments if x[1] - x[0] < MIN_OVERLAY_SEGMENT]
+segments = [x for x in segments if x[1] - x[0] >= MIN_OVERLAY_SEGMENT]
+if dropped:
+    print(f"overlay: {len(dropped)} pedaço(s) < {MIN_OVERLAY_SEGMENT}s descartado(s) (piscar): " + ", ".join(f"{x[0]:.1f}-{x[1]:.1f}" for x in dropped))
 spec["overlay_segments"] = segments
 # ALTERNATIVAS: se o usuário apagar uma animação, estende-se o clipe anterior (o que ele fazia à mão); tabela em ALTERNATIVES_BROLL.md
 alternatives = []

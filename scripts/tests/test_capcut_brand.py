@@ -8,6 +8,7 @@ Monta o draft numa pasta TEMPORÁRIA (nada é escrito nos seus projetos) e confe
    M5 propaganda (vídeo + áudio) começa no instante pedido e tem a duração do pacote; nada do overlay/B-roll/narração sobrepõe a propaganda
    M6 vinheta final nos últimos segundos, por cima do B-roll; B-roll e preenchimento chegam até o fim
    M7 nenhuma trilha tem segmentos sobrepostos
+   M8 áudio da propaganda como arquivo comum em media/ (legível), nunca o .m4a cifrado de Resources/combination
 Rode em animacao/ (precisa de plan.json com promo_t, capcut_spec.json e o pacote privado). Sai 1 se algo falhar.
 """
 
@@ -55,6 +56,21 @@ for t in info["tracks"]:
         for ref in [s["material_id"]] + s.get("extra_material_refs", []):
             if ref not in ids:
                 errors.append(f"M1: referência inexistente {ref[:8]} na trilha {t.get('name')}")
+
+# M8 áudio da propaganda: arquivo COMUM em media/ e legível (o do pacote é cifrado: no projeto novo dava "Formato de mídia incompatível")
+for m in info["materials"].get("audios", []):
+    if "Resources/combination/" in (m.get("path") or ""):
+        errors.append(f"M8: áudio ainda aponta para Resources/combination (cifrado): {m['path'][-60:]}")
+promo_audio = drafts / "TESTE marca" / "media" / "promo_audio.m4a"
+if not promo_audio.exists():
+    errors.append("M8: media/promo_audio.m4a não foi criado")
+else:
+    _p = subprocess.run(["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", str(promo_audio)], capture_output=True, text=True)
+    try:
+        if float(_p.stdout.strip()) < 5:
+            errors.append(f"M8: promo_audio.m4a com duração suspeita ({_p.stdout.strip()}s)")
+    except ValueError:
+        errors.append("M8: promo_audio.m4a ilegível pelo ffprobe (formato incompatível)")
 
 # M2 ordem das trilhas
 names = [t.get("name") for t in info["tracks"]]
@@ -150,7 +166,9 @@ else:
         )
     # B-roll chega até o fim por baixo da vinheta
     clips = [x for x in segments("clips") if abs(x[0] - promo_time) > 0.05]
-    if not clips or clips[-1][1] < total - 0.1:
+    _webdoc = json.load(open("plan.json")).get("video_kind") in ("webdoc_broll", "webdoc_rounds") if os.path.exists("plan.json") else False
+    # webdoc: o fim do vídeo costuma ser animação/vazio (sem B-roll); só o preenchimento precisa chegar ao fim
+    if not _webdoc and (not clips or clips[-1][1] < total - 0.1):
         errors.append(
             f"M6: B-roll termina em {clips[-1][1] if clips else None}, o vídeo em {total:.2f}s (B-roll precisa ir até o fim)"
         )

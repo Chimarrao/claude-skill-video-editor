@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # QUALITY GATES em sequência (rodar em animacao/). Para no primeiro bloco que falhar e diz qual foi.
 #   run_gates.sh            → gates antes do render: plano (STRICT), tsc, testes de regras, filtro de clipes, gate_plan
+#   ALLOW_EMPTY=id1,id2 run_gates.sh → ids de Empty(...) declarados de propósito (ex.: vinheta do usuário) que o P6 aceita
 #   run_gates.sh --frames   → também o gate de frames reais (precisa de output/project.mov e capcut_spec.json)
 # Regra da skill: nada vai para o render/CapCut com gate vermelho; gate vermelho depois do render = corrigir e re-renderizar (ou recomeçar).
 SK="$(cd "$(dirname "$0")/../.." && pwd)"
@@ -19,7 +20,7 @@ passo "regras da lista com B-roll" $PY "$SK/scripts/tests/test_list_broll_rules.
 passo "clipes sem pessoas" $PY "$SK/scripts/tests/test_clips_without_people.py"
 passo "clipes: filtro CLIP+OCR" env TOKENIZERS_PARALLELISM=false $PYA "$SK/scripts/broll/classify_frames.py" --clips
 passo "folhas dos clipes (OLHAR!)" $PY "$SK/scripts/quality/clip_sheets.py"
-passo "gate 1: plano (ritmo, setas, imagens, janelas vazias)" $PY "$SK/scripts/quality/gate_plan.py"
+passo "gate 1: plano (ritmo, setas, imagens, janelas vazias)" $PY "$SK/scripts/quality/gate_plan.py" --allow-empty "${ALLOW_EMPTY:-}"
 if [ "$1" = "--frames" ]; then
   passo "montagem do CapCut: marca" $PY "$SK/scripts/tests/test_capcut_brand.py"
   passo "montagem do CapCut: overlay recortado" $PY "$SK/scripts/tests/test_capcut_overlay.py"

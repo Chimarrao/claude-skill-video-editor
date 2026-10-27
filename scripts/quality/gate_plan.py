@@ -178,6 +178,10 @@ for a, b in vazios:
     ids = [i for i, w in plan["windows"].items() if w[0] <= a + 0.1 and w[1] >= b - 0.1]
     if ids and all(i in permitidos for i in ids):
         continue
+    # o vazio é maior que a janela do Empty (saída/entrada das cenas vizinhas): vale se os Empty permitidos cobrem quase todo o trecho
+    cob = sum(max(0.0, min(b, w[1]) - max(a, w[0])) for i, w in plan["windows"].items() if i in permitidos)
+    if permitidos and cob >= (b - a) - 1.0:
+        continue
     erro("P6 janela vazia", f"{a:.1f}–{b:.1f}s ({b - a:.1f}s, cena {','.join(ids) or '?'}) só com fundo e fala: coloque animação/B-roll")
 
 # P9 título×grafo: o título cobre o palco (o resto escurece) de `início` até `início + 0,25 + 0,4 + digitação + dur + 0,35`;

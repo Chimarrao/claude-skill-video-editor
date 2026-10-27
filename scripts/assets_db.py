@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-"""Banco SQLite de assets (base64) da skill: database/assets.db
+"""Banco SQLite de assets da skill: database/assets.db  (o banco guarda só a REFERÊNCIA: coluna `file`; as imagens ficam como arquivos em database/images/)
 Comandos:
   assets_db.py sync [pasta ...]   importa imagens (default: assets/ + ./src/images do projeto atual) sem duplicar (por name); raster > 1600 px é reduzido no banco
+  assets_db.py externalize               tira as imagens/miniaturas do banco (base64 → arquivos em database/images/) e compacta o .db (rode uma vez em bancos antigos)
   assets_db.py list [filtro]            lista name, tipo, dimensões, categoria
   assets_db.py export <name|%pattern> [destino=src/images]   grava os arquivos decodificados
   assets_db.py open                      abre o sqlite3 interativo
@@ -17,14 +18,15 @@ Comandos:
 Tabelas: list_variations(id PK, name, usage, description, code, thumb_base64, chosen, note, origin, created), variation_base(key PK: helpers|main, code), transcripts(sha1 PK, file, bytes, duration, model, aligned, aligner, language, created, note, json) e assets(name PK, ext, mime, bytes, width, height, category, origin, added, base64).
 """
 
-import base64, glob, io, json, mimetypes, os, re, sqlite3, subprocess, sys, time
+import base64, glob, io, json, mimetypes, os, re, shutil, sqlite3, subprocess, sys, time
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DB = os.path.join(ROOT, "database", "assets.db")
 os.makedirs(os.path.dirname(DB), exist_ok=True)
 
 
-NEW_COLUMNS = dict(subject="TEXT", kind="TEXT", tags="TEXT", license="TEXT", source_url="TEXT", aspect="REAL", nonfree="INTEGER", quality="TEXT")
+IMG_DIR = os.path.join(ROOT, "database", "images")  # arquivos das imagens (fora do banco); o publish.sh copia as públicas para database/public_images/
+NEW_COLUMNS = dict(file="TEXT", subject="TEXT", kind="TEXT", tags="TEXT", license="TEXT", source_url="TEXT", aspect="REAL", nonfree="INTEGER", quality="TEXT")
 CATALOG = os.path.join(ROOT, "database", "image_catalog.json")
 KIND_CATEGORY = dict(logo="logo", tela="screen", foto="photo", obj="object")
 
@@ -33,7 +35,7 @@ def connect():
     """Abre o banco (criando a tabela `assets`, o índice e as colunas de catálogo se faltarem)."""
     c = sqlite3.connect(DB)
     c.execute("""CREATE TABLE IF NOT EXISTS assets(name TEXT PRIMARY KEY, ext TEXT, mime TEXT, bytes INTEGER,
-        width INTEGER, height INTEGER, category TEXT, origin TEXT, added TEXT, base64 TEXT)""")
+        width INTEGER, height INTEGER, category TEXT, origin TEXT, added TEXT, base64 TEXT, file TEXT)""")
     c.execute("CREATE INDEX IF NOT EXISTS i_cat ON assets(category)")
     have = {r[1] for r in c.execute("PRAGMA table_info(assets)")}
     for col, typ in NEW_COLUMNS.items():
@@ -141,8 +143,10 @@ def sync(folders):
                 continue
             w, h = dimensions(file_path, ext)
             data = compact_for_db(file_path, ext)
+            os.makedirs(IMG_DIR, exist_ok=True)
+            open(os.path.join(IMG_DIR, f"{name}.{ext}"), "wb").write(data)  # a imagem fica FORA do banco; o banco guarda a referência
             conn.execute(
-                "INSERT INTO assets(name, ext, mime, bytes, width, height, category, origin, added, base64, subject, kind, tags, license, source_url, aspect, nonfree, quality) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                "INSERT INTO assets(name, ext, mime, bytes, width, height, category, origin, added, file, subject, kind, tags, license, source_url, aspect, nonfree, quality) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                 (
                     name,
                     ext,
@@ -153,7 +157,7 @@ def sync(folders):
                     KIND_CATEGORY.get(m["kind"]) if m else category(name),
                     os.path.relpath(folder),
                     time.strftime("%Y-%m-%d"),
-                    base64.b64encode(data).decode(),
+                    f"images/{name}.{ext}",
                 )
                 + extra,
             )
@@ -320,6 +324,8 @@ def ensure_variant_tables(conn):
         chosen INTEGER DEFAULT 0, note TEXT, origin TEXT, created TEXT)"""
     )
     conn.execute("CREATE TABLE IF NOT EXISTS variation_base(key TEXT PRIMARY KEY, code TEXT)")
+    if "thumb_file" not in {r[1] for r in conn.execute("PRAGMA table_info(list_variations)")}:
+        conn.execute("ALTER TABLE list_variations ADD COLUMN thumb_file TEXT")  # miniatura como arquivo (database/images/variations/Vnn.png)
 
 
 def save_variant(file, thumbs=None, origin=""):
@@ -345,13 +351,15 @@ def save_variant(file, thumbs=None, origin=""):
         name, usage = meta.get(vid, (m.group(2), ""))[:2]
         thumb = None
         if thumbs and os.path.exists(os.path.join(thumbs, vid + ".png")):
-            thumb = base64.b64encode(open(os.path.join(thumbs, vid + ".png"), "rb").read()).decode()
+            os.makedirs(os.path.join(IMG_DIR, "variations"), exist_ok=True)
+            shutil.copy(os.path.join(thumbs, vid + ".png"), os.path.join(IMG_DIR, "variations", vid + ".png"))
+            thumb = f"images/variations/{vid}.png"
         previous = c.execute("SELECT chosen, note FROM list_variations WHERE id=?", (vid,)).fetchone() or (
             0,
             "",
         )
         c.execute(
-            "INSERT OR REPLACE INTO list_variations VALUES(?,?,?,?,?,?,?,?,?,?)",
+            "INSERT OR REPLACE INTO list_variations(id, name, usage, description, code, thumb_file, chosen, note, origin, created) VALUES(?,?,?,?,?,?,?,?,?,?)",
             (
                 vid,
                 name,
@@ -374,7 +382,7 @@ def list_variants():
     c = connect()
     ensure_variant_tables(c)
     for r in c.execute(
-        "SELECT id, name, usage, chosen, note, length(thumb_base64) IS NOT NULL FROM list_variations ORDER BY id"
+        "SELECT id, name, usage, chosen, note, COALESCE(thumb_file, thumb_base64) IS NOT NULL FROM list_variations ORDER BY id"
     ):
         print(f"{r[0]}  {'★' if r[3] else ' '} {r[1]:28s} {r[2]}" + (f"  [{r[4]}]" if r[4] else ""))
 
@@ -432,12 +440,46 @@ def list_assets(filter="%"):
         print(f"{r[4]:11} {r[0]:34} {r[1]:4} {r[2]}x{r[3]}  {int(r[5])} KB")
 
 
+def read_asset(name, ext, b64=None, ref=None):
+    """Bytes da imagem: do arquivo referenciado (database/<file>; também tenta database/images e database/public_images) ou, em bancos antigos, do base64."""
+    base = os.path.join(ROOT, "database")
+    for cand in filter(None, [ref and os.path.join(base, ref), os.path.join(IMG_DIR, f"{name}.{ext}"), os.path.join(base, "public_images", f"{name}.{ext}")]):
+        if os.path.exists(cand):
+            return open(cand, "rb").read()
+    return base64.b64decode(b64) if b64 else None
+
+
+def externalize():
+    """Move as imagens (e miniaturas das variações) de base64 dentro do banco para arquivos em database/images/ e compacta o banco."""
+    c = connect()
+    os.makedirs(IMG_DIR, exist_ok=True)
+    n = 0
+    for name, ext, b64 in c.execute("SELECT name, ext, base64 FROM assets WHERE base64 IS NOT NULL").fetchall():
+        open(os.path.join(IMG_DIR, f"{name}.{ext}"), "wb").write(base64.b64decode(b64))
+        c.execute("UPDATE assets SET file=?, base64=NULL WHERE name=?", (f"images/{name}.{ext}", name))
+        n += 1
+    ensure_variant_tables(c)
+    t = 0
+    for vid, b64 in c.execute("SELECT id, thumb_base64 FROM list_variations WHERE thumb_base64 IS NOT NULL").fetchall():
+        os.makedirs(os.path.join(IMG_DIR, "variations"), exist_ok=True)
+        open(os.path.join(IMG_DIR, "variations", f"{vid}.png"), "wb").write(base64.b64decode(b64))
+        c.execute("UPDATE list_variations SET thumb_file=?, thumb_base64=NULL WHERE id=?", (f"images/variations/{vid}.png", vid))
+        t += 1
+    c.commit()
+    c.execute("VACUUM")
+    print(f"{n} imagem(ns) e {t} miniatura(s) movidas para {IMG_DIR}; banco agora com {os.path.getsize(DB)/1e6:.1f} MB")
+
+
 def export_assets(pattern, destination="src/images"):
     """Grava em `destination` os arquivos decodificados dos assets que casam com o padrão."""
     os.makedirs(destination, exist_ok=True)
     n = 0
-    for name, ext, b64 in connect().execute("SELECT name, ext, base64 FROM assets WHERE name LIKE ?", (pattern,)):
-        open(os.path.join(destination, f"{name}.{ext}"), "wb").write(base64.b64decode(b64))
+    for name, ext, b64, ref in connect().execute("SELECT name, ext, base64, file FROM assets WHERE name LIKE ?", (pattern,)):
+        data = read_asset(name, ext, b64, ref)
+        if data is None:
+            print(f"  aviso: arquivo de '{name}' não encontrado ({ref}); rode `harvest_images.py`/`sync` para recriar")
+            continue
+        open(os.path.join(destination, f"{name}.{ext}"), "wb").write(data)
         n += 1
     print(f"{n} arquivo(s) exportado(s) para {destination}")
 
@@ -448,6 +490,8 @@ if __name__ == "__main__":
         sync(args[1:] or [p for p in (os.path.join(ROOT, "assets"), "src/images") if os.path.isdir(p)])
     elif args[0] == "list":
         list_assets(args[1] if len(args) > 1 else "%")
+    elif args[0] == "externalize":
+        externalize()
     elif args[0] == "export":
         export_assets(args[1], args[2] if len(args) > 2 else "src/images")
     elif args[0] == "transcript-save":

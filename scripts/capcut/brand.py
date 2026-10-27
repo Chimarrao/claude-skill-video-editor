@@ -18,6 +18,7 @@ segment / main / extras, e meta18. Trilhas e pastas do CapCut são mantidas como
 import json
 import re
 import shutil
+import subprocess
 import uuid
 from copy import deepcopy
 from pathlib import Path
@@ -251,6 +252,28 @@ def _make_track(template, name, segments):
     return track
 
 
+def _plain_audio(encrypted_path, destination):
+    """O áudio do clipe composto (Resources/combination/*_audio.m4a) vem CRIPTOGRAFADO (XOR de 1 byte; a chave fica no crypto_key_store.dat do projeto
+    de ORIGEM). Num projeto novo o CapCut não tem a chave e mostra "Formato de mídia incompatível". Aqui o arquivo é decifrado para um .m4a comum
+    (conferido com ffprobe) que entra como áudio normal em media/. Devolve True se conseguiu."""
+    raw = Path(encrypted_path).read_bytes()
+    key = raw[0]  # o contêiner QuickTime/MP4 começa com 00 00 00 xx: o 1º byte cifrado é a própria chave
+    for data in (bytes(b ^ key for b in raw), raw):
+        destination.write_bytes(data)
+        probe = subprocess.run(
+            ["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "csv=p=0", str(destination)],
+            capture_output=True,
+            text=True,
+        )
+        try:
+            if float(probe.stdout.strip()) > 1:
+                return True
+        except ValueError:
+            pass
+    destination.unlink(missing_ok=True)
+    return False
+
+
 def apply(
     pack,
     tracks,
@@ -311,6 +334,17 @@ def apply(
     # propaganda: vídeo na trilha de clipes + áudio na da narração (loudness vem nos extras do áudio)
     promo_video = _clone(roles["promo_video"], mats, promo_time_us, promo_dur)
     promo_audio = _clone(roles["promo_audio"], mats, promo_time_us, promo_dur)
+    # áudio da propaganda como arquivo COMUM em media/ (o original é cifrado com a chave do projeto de origem → "Formato de mídia incompatível")
+    _mat = next((m for m in mats.get("audios", []) if m["id"] == promo_audio["material_id"]), None)
+    if _mat and "Resources/combination/" in (_mat.get("path") or ""):
+        _enc = pack["folder"] / "Resources" / "combination" / _mat["path"].rsplit("/", 1)[-1]
+        (project / "media").mkdir(parents=True, exist_ok=True)
+        _plain = project / "media" / "promo_audio.m4a"
+        if _enc.exists() and _plain_audio(_enc, _plain):
+            _mat["path"] = "##_draftpath_placeholder_0E685133-18CE-45ED-8CB8-2904A212EC80_##/media/promo_audio.m4a"
+            _mat["type"] = "extract_music"
+            _mat["video_id"] = ""
+            promo_video["volume"] = 0.0  # o som vem só do áudio comum (sem dobrar com o do clipe composto)
     clips_track["segments"].append(promo_video)
     clips_track["segments"].sort(key=lambda s: s["target_timerange"]["start"])
     by_name["narration"]["segments"].append(promo_audio)

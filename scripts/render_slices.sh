@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Render do overlay em TRECHOS (resiste a queda do Chrome por falta de memória: o macOS com swap cheio derruba o Chrome headless
 # no meio do render de 30 min e perde tudo). Cada trecho vira /tmp/slices/part_K.mov (+ .ok); no fim concatena sem recodificar.
+# RES_SCALE=1 → força 1080p em cada trecho (padrão: o que estiver no project.meta; 2 = 4K).
 # Uso (em animacao/, vite na porta 9000):  bash <skill>/scripts/render_slices.sh [duração_total_s] [trecho_s=174]
 #   ex.: render_slices.sh 869.42        → 5 trechos de 174 s; trecho que cair é refeito (até 3 tentativas); trechos prontos são pulados
 # Detalhe: o `range` do Motion Canvas é INCLUSIVO no fim (6 s = 181 quadros), então cada trecho termina 1/30 s antes do próximo começar.
@@ -19,6 +20,9 @@ setrange() { python3 - "$1" "$2" <<'P'
 import json, sys
 m = json.load(open("src/project.meta"))
 m["shared"]["range"] = [float(sys.argv[1]), None if sys.argv[2] == "null" else float(sys.argv[2])]
+import os
+if os.environ.get("RES_SCALE"):  # RES_SCALE=1 → 1080p (o editor reescreve o meta e a escala volta a 2 = 4K, 4x maior e bem mais lento)
+    m["rendering"]["resolutionScale"] = float(os.environ["RES_SCALE"])
 json.dump(m, open("src/project.meta", "w"), indent=2)
 P
 }

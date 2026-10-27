@@ -16,3 +16,4 @@ export * from './impactReport';
 export * from './graphPiece';
 export * from './shortList';
 export * from './menuTerminal';
+export * from './rounds';

@@ -4457,6 +4457,56 @@
    ],
    "width": 1998
   },
+  "foto_chimarrao": {
+   "artist": "Peter Schmidtmeyer & George Johann Scharf",
+   "aspect": 1.626,
+   "aspect_class": "wide",
+   "bytes": 541547,
+   "file": "foto_chimarrao.jpg",
+   "height": 787,
+   "kind": "foto",
+   "license": "Public domain",
+   "name": "foto_chimarrao",
+   "nonfree": false,
+   "sha1": "29264c1052a3324f54c75ac61514abbe9201d3f9",
+   "source_key": "en.wikipedia.org:File:Schmidtmeyer, Peter & Scharf, G - Tertulia & Mate Party -JCB Library f1.2 (cropped).jpg",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Schmidtmeyer,_Peter_%26_Scharf,_G_-_Tertulia_%26_Mate_Party_-JCB_Library_f1.2_(cropped).jpg",
+   "subject": "chimarrao",
+   "tags": [
+    "chimarrao",
+    "bebida",
+    "cuia",
+    "erva",
+    "mate",
+    "gaucho"
+   ],
+   "width": 1280
+  },
+  "foto_chimarrao_2": {
+   "artist": "Lars Curfs ( Grashoofd )",
+   "aspect": 1.501,
+   "aspect_class": "wide",
+   "bytes": 150251,
+   "file": "foto_chimarrao_2.jpg",
+   "height": 853,
+   "kind": "foto",
+   "license": "CC BY-SA 3.0",
+   "name": "foto_chimarrao_2",
+   "nonfree": false,
+   "sha1": "235681b65f8818b6f06c8b8f2344a9b4f0cbcda7",
+   "source_key": "en.wikipedia.org:File:Man in Buenos Aires drinking mate.JPG",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Man_in_Buenos_Aires_drinking_mate.JPG",
+   "subject": "chimarrao",
+   "tags": [
+    "chimarrao",
+    "bebida",
+    "cuia",
+    "erva",
+    "mate",
+    "gaucho"
+   ],
+   "width": 1280
+  },
   "foto_chrome_os": {
    "artist": "Closari",
    "aspect": 1.32,
@@ -4652,7 +4702,7 @@
    "license": "CC BY-SA 4.0",
    "name": "foto_cinnamon",
    "nonfree": false,
-   "quality": "check:rank 50",
+   "quality": "low",
    "rank": 50,
    "sha1": "fd24ff737af35596fcb6b6484f0e981187ce2872",
    "source_key": "commons.wikimedia.org:File:Fireball Cinnamon Whisky.jpg",
@@ -11652,6 +11702,28 @@
    ],
    "width": 1442
   },
+  "foto_live_usb": {
+   "artist": "Hohum",
+   "aspect": 0.455,
+   "aspect_class": "tall",
+   "bytes": 476425,
+   "file": "foto_live_usb.jpg",
+   "height": 2202,
+   "kind": "foto",
+   "license": "Public domain",
+   "name": "foto_live_usb",
+   "nonfree": false,
+   "quality": "ok",
+   "sha1": "cd71652d2ef4149f9e79d04ddbb68bd12c5055bc",
+   "source_key": "en.wikipedia.org:File:Sony Micro Vault Tiny 4 GB.jpg",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Sony_Micro_Vault_Tiny_4_GB.jpg",
+   "subject": "live_usb",
+   "tags": [
+    "linux",
+    "pendrive"
+   ],
+   "width": 1002
+  },
   "foto_lubuntu": {
    "artist": "Lubuntu community",
    "aspect": 1.778,
@@ -14293,6 +14365,102 @@
    ],
    "width": 638
   },
+  "foto_nemo_file_manager": {
+   "artist": "Rudra Saraswat and the Ubuntu Unity developer team",
+   "aspect": 1.778,
+   "aspect_class": "wide",
+   "bytes": 75457,
+   "file": "foto_nemo_file_manager.jpg",
+   "height": 450,
+   "kind": "foto",
+   "license": "GPL",
+   "name": "foto_nemo_file_manager",
+   "nonfree": false,
+   "quality": "ok",
+   "sha1": "3d362e5ee1f6cccaf0cf4ca3c908dd7c4c2940bb",
+   "source_key": "commons.wikimedia.org:File:Ubuntu Unity 22.04 LTS Nemo 5.2.4 file manager High Contrast theme - English.jpg",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Ubuntu_Unity_22.04_LTS_Nemo_5.2.4_file_manager_High_Contrast_theme_-_English.jpg",
+   "subject": "nemo_file_manager",
+   "tags": [
+    "linux",
+    "mint",
+    "cinnamon",
+    "arquivos"
+   ],
+   "width": 800
+  },
+  "foto_nemo_file_manager_2": {
+   "artist": "Rudra Saraswat and the Ubuntu Unity developer team",
+   "aspect": 1.778,
+   "aspect_class": "wide",
+   "bytes": 77800,
+   "file": "foto_nemo_file_manager_2.jpg",
+   "height": 450,
+   "kind": "foto",
+   "license": "GPL",
+   "name": "foto_nemo_file_manager_2",
+   "nonfree": false,
+   "quality": "low:quase-duplicata de foto_nemo_file_manager",
+   "sha1": "ee16936050a5ebf2862a1846f73c53403697bf05",
+   "source_key": "commons.wikimedia.org:File:Ubuntu Unity 22.04 LTS Nemo 5.2.4 file manager Adwaita theme - English.jpg",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Ubuntu_Unity_22.04_LTS_Nemo_5.2.4_file_manager_Adwaita_theme_-_English.jpg",
+   "subject": "nemo_file_manager",
+   "tags": [
+    "linux",
+    "mint",
+    "cinnamon",
+    "arquivos"
+   ],
+   "width": 800
+  },
+  "foto_nemo_file_manager_3": {
+   "artist": "Rudra Saraswat and the Ubuntu Unity developer team",
+   "aspect": 1.778,
+   "aspect_class": "wide",
+   "bytes": 72634,
+   "file": "foto_nemo_file_manager_3.jpg",
+   "height": 450,
+   "kind": "foto",
+   "license": "GPL",
+   "name": "foto_nemo_file_manager_3",
+   "nonfree": false,
+   "quality": "ok",
+   "sha1": "70be9fed45c8f1e7a52a3e5232ca7a12809bc168",
+   "source_key": "commons.wikimedia.org:File:Ubuntu Unity 22.04 LTS Nemo 5.2.4 file manager Yaru-unity-dark theme Humanity icons - English.jpg",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Ubuntu_Unity_22.04_LTS_Nemo_5.2.4_file_manager_Yaru-unity-dark_theme_Humanity_icons_-_English.jpg",
+   "subject": "nemo_file_manager",
+   "tags": [
+    "linux",
+    "mint",
+    "cinnamon",
+    "arquivos"
+   ],
+   "width": 800
+  },
+  "foto_nemo_file_manager_4": {
+   "artist": "Rudra Saraswat and the Ubuntu Unity developer team",
+   "aspect": 1.778,
+   "aspect_class": "wide",
+   "bytes": 76757,
+   "file": "foto_nemo_file_manager_4.jpg",
+   "height": 450,
+   "kind": "foto",
+   "license": "GPL",
+   "name": "foto_nemo_file_manager_4",
+   "nonfree": false,
+   "quality": "low:quase-duplicata de foto_nemo_file_manager",
+   "sha1": "1af19f9ea7fe22be7d28f17c549324d017caca48",
+   "source_key": "commons.wikimedia.org:File:Ubuntu Unity 22.04 LTS Nemo 5.2.4 file manager Yaru-unity theme Humanity Icons - English.jpg",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Ubuntu_Unity_22.04_LTS_Nemo_5.2.4_file_manager_Yaru-unity_theme_Humanity_Icons_-_English.jpg",
+   "subject": "nemo_file_manager",
+   "tags": [
+    "linux",
+    "mint",
+    "cinnamon",
+    "arquivos"
+   ],
+   "width": 800
+  },
   "foto_neovim": {
    "artist": "Petr.Mach.Wraith",
    "aspect": 1.6,
@@ -15030,6 +15198,98 @@
     "gpu"
    ],
    "width": 1280
+  },
+  "foto_old_netbook": {
+   "artist": "cRaig Forrester",
+   "aspect": 0.879,
+   "aspect_class": "square",
+   "bytes": 4150824,
+   "file": "foto_old_netbook.jpg",
+   "height": 2320,
+   "kind": "foto",
+   "license": "CC BY-SA 2.0",
+   "name": "foto_old_netbook",
+   "nonfree": false,
+   "quality": "ok",
+   "sha1": "091a4afe95f7b38be68c2a4146c041d86ed77648",
+   "source_key": "en.wikipedia.org:File:HP Mini 1000.jpg",
+   "source_url": "https://commons.wikimedia.org/wiki/File:HP_Mini_1000.jpg",
+   "subject": "old_netbook",
+   "tags": [
+    "hardware",
+    "pc",
+    "antigo"
+   ],
+   "width": 2040
+  },
+  "foto_old_netbook_2": {
+   "artist": "Bull-Doser at English Wikipedia",
+   "aspect": 1.087,
+   "aspect_class": "square",
+   "bytes": 441544,
+   "file": "foto_old_netbook_2.jpg",
+   "height": 1465,
+   "kind": "foto",
+   "license": "Public domain",
+   "name": "foto_old_netbook_2",
+   "nonfree": false,
+   "quality": "ok",
+   "sha1": "76bd0c5659d7f2e9a99d14adaeff8342a0383949",
+   "source_key": "en.wikipedia.org:File:Craig Netbook.jpg",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Craig_Netbook.jpg",
+   "subject": "old_netbook",
+   "tags": [
+    "hardware",
+    "pc",
+    "antigo"
+   ],
+   "width": 1593
+  },
+  "foto_old_netbook_3": {
+   "artist": "Ryan McFarland",
+   "aspect": 1.25,
+   "aspect_class": "wide",
+   "bytes": 262687,
+   "file": "foto_old_netbook_3.jpg",
+   "height": 1024,
+   "kind": "foto",
+   "license": "CC BY 2.0",
+   "name": "foto_old_netbook_3",
+   "nonfree": false,
+   "quality": "ok",
+   "sha1": "0f0ec8fd3eda813c90170d53642574456f1dbda3",
+   "source_key": "en.wikipedia.org:File:Acer Aspire One Netbook first impressions.jpg",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Acer_Aspire_One_Netbook_first_impressions.jpg",
+   "subject": "old_netbook",
+   "tags": [
+    "hardware",
+    "pc",
+    "antigo"
+   ],
+   "width": 1280
+  },
+  "foto_old_netbook_4": {
+   "artist": "Red at English Wikipedia",
+   "aspect": 1.165,
+   "aspect_class": "square",
+   "bytes": 104871,
+   "file": "foto_old_netbook_4.jpg",
+   "height": 600,
+   "kind": "foto",
+   "license": "CC BY 3.0",
+   "name": "foto_old_netbook_4",
+   "nonfree": false,
+   "quality": "ok",
+   "sha1": "59e8a00d2e15981cc0bcc1e918941ea031f4cb80",
+   "source_key": "en.wikipedia.org:File:ASUS Eee White Alt.jpg",
+   "source_url": "https://commons.wikimedia.org/wiki/File:ASUS_Eee_White_Alt.jpg",
+   "subject": "old_netbook",
+   "tags": [
+    "hardware",
+    "pc",
+    "antigo"
+   ],
+   "width": 699
   },
   "foto_onedrive": {
    "artist": "cory",
@@ -16838,6 +17098,98 @@
    ],
    "width": 1280
   },
+  "foto_ram_memory_module": {
+   "artist": "Mister rf",
+   "aspect": 1.16,
+   "aspect_class": "square",
+   "bytes": 437871,
+   "file": "foto_ram_memory_module.jpg",
+   "height": 1103,
+   "kind": "foto",
+   "license": "CC BY-SA 4.0",
+   "name": "foto_ram_memory_module",
+   "nonfree": false,
+   "quality": "ok",
+   "sha1": "57ec63764e7ac10bb634ed2de485aa9049cb3251",
+   "source_key": "en.wikipedia.org:File:THL32V1055BTG-6.jpg",
+   "source_url": "https://commons.wikimedia.org/wiki/File:THL32V1055BTG-6.jpg",
+   "subject": "ram_memory_module",
+   "tags": [
+    "hardware",
+    "memoria",
+    "ram"
+   ],
+   "width": 1280
+  },
+  "foto_ram_memory_module_2": {
+   "artist": "Veeblefetzer",
+   "aspect": 2.058,
+   "aspect_class": "wide",
+   "bytes": 294091,
+   "file": "foto_ram_memory_module_2.jpg",
+   "height": 622,
+   "kind": "foto",
+   "license": "CC BY 4.0",
+   "name": "foto_ram_memory_module_2",
+   "nonfree": false,
+   "quality": "ok",
+   "sha1": "f6898ad37b4dfbba5926652c240a770806af36be",
+   "source_key": "en.wikipedia.org:File:168 pin and 184 pin DIMM.jpg",
+   "source_url": "https://commons.wikimedia.org/wiki/File:168_pin_and_184_pin_DIMM.jpg",
+   "subject": "ram_memory_module",
+   "tags": [
+    "hardware",
+    "memoria",
+    "ram"
+   ],
+   "width": 1280
+  },
+  "foto_ram_memory_module_3": {
+   "artist": "Raimond Spekking",
+   "aspect": 1.778,
+   "aspect_class": "wide",
+   "bytes": 216048,
+   "file": "foto_ram_memory_module_3.jpg",
+   "height": 720,
+   "kind": "foto",
+   "license": "CC BY-SA 4.0",
+   "name": "foto_ram_memory_module_3",
+   "nonfree": false,
+   "quality": "ok",
+   "sha1": "768eff1030cc0218beddbd1aea2615f367a2b283",
+   "source_key": "en.wikipedia.org:File:Mitsubishi DIMM MH8S64APHC-6 -4330.jpg",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Mitsubishi_DIMM_MH8S64APHC-6_-4330.jpg",
+   "subject": "ram_memory_module",
+   "tags": [
+    "hardware",
+    "memoria",
+    "ram"
+   ],
+   "width": 1280
+  },
+  "foto_ram_memory_module_4": {
+   "artist": "Raimond Spekking",
+   "aspect": 1.778,
+   "aspect_class": "wide",
+   "bytes": 217061,
+   "file": "foto_ram_memory_module_4.jpg",
+   "height": 720,
+   "kind": "foto",
+   "license": "CC BY-SA 4.0",
+   "name": "foto_ram_memory_module_4",
+   "nonfree": false,
+   "quality": "ok",
+   "sha1": "cad070245af50c2d7b116e0acdaa366f1673201d",
+   "source_key": "en.wikipedia.org:File:Mitsubishi DIMM MH8S64APHC-6 -4329.jpg",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Mitsubishi_DIMM_MH8S64APHC-6_-4329.jpg",
+   "subject": "ram_memory_module",
+   "tags": [
+    "hardware",
+    "memoria",
+    "ram"
+   ],
+   "width": 1280
+  },
   "foto_raspberry_pi": {
    "artist": "Phiarc",
    "aspect": 1.081,
@@ -17200,6 +17552,52 @@
     "pessoa",
     "gnu",
     "fsf"
+   ],
+   "width": 1280
+  },
+  "foto_rio_grande_do_sul": {
+   "artist": "MTur Destinos",
+   "aspect": 1.499,
+   "aspect_class": "wide",
+   "bytes": 308503,
+   "file": "foto_rio_grande_do_sul.jpg",
+   "height": 854,
+   "kind": "foto",
+   "license": "Public domain",
+   "name": "foto_rio_grande_do_sul",
+   "nonfree": false,
+   "sha1": "b9cf3855e01a84dc6ba11d16aaa98fe22d59a426",
+   "source_key": "en.wikipedia.org:File:RenatoSoares ônibusturístico Gramado RS (27030946738).jpg",
+   "source_url": "https://commons.wikimedia.org/wiki/File:RenatoSoares_%C3%B4nibustur%C3%ADstico_Gramado_RS_(27030946738).jpg",
+   "subject": "rio_grande_do_sul",
+   "tags": [
+    "mapa",
+    "estado",
+    "brasil",
+    "gaucho"
+   ],
+   "width": 1280
+  },
+  "foto_rio_grande_do_sul_2": {
+   "artist": "Suomi NPP / VIIRS",
+   "aspect": 1.501,
+   "aspect_class": "wide",
+   "bytes": 425518,
+   "file": "foto_rio_grande_do_sul_2.jpg",
+   "height": 853,
+   "kind": "foto",
+   "license": "Public domain",
+   "name": "foto_rio_grande_do_sul_2",
+   "nonfree": false,
+   "sha1": "e1a1cf3f24a81dffca0820c305a919586681027c",
+   "source_key": "commons.wikimedia.org:File:2023 Rio Grande do Sul extratropical cyclone.jpg",
+   "source_url": "https://commons.wikimedia.org/wiki/File:2023_Rio_Grande_do_Sul_extratropical_cyclone.jpg",
+   "subject": "rio_grande_do_sul",
+   "tags": [
+    "mapa",
+    "estado",
+    "brasil",
+    "gaucho"
    ],
    "width": 1280
   },
@@ -28809,6 +29207,58 @@
    ],
    "width": 1280
   },
+  "logo_chimarrao": {
+   "artist": "Mario Marcolongo",
+   "aspect": 1.578,
+   "aspect_class": "wide",
+   "bytes": 51676,
+   "file": "logo_chimarrao.png",
+   "height": 811,
+   "kind": "logo",
+   "license": "CC BY-SA 4.0",
+   "name": "logo_chimarrao",
+   "nonfree": false,
+   "quality": "low",
+   "sha1": "51138780078860c5b64a8cc9c3fe08f49c894ff8",
+   "source_key": "en.wikipedia.org:File:Benzo(a)pyrene Concentration in Processed Yerba Maté Leaves Sampled in 2006, 2008, and 2010 - Column Chart.svg",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Benzo(a)pyrene_Concentration_in_Processed_Yerba_Mat%C3%A9_Leaves_Sampled_in_2006,_2008,_and_2010_-_Column_Chart.svg",
+   "subject": "chimarrao",
+   "tags": [
+    "chimarrao",
+    "bebida",
+    "cuia",
+    "erva",
+    "mate",
+    "gaucho"
+   ],
+   "width": 1280
+  },
+  "logo_chimarrao_2": {
+   "artist": "Heraldry",
+   "aspect": 0.999,
+   "aspect_class": "square",
+   "bytes": 303807,
+   "file": "logo_chimarrao_2.png",
+   "height": 1281,
+   "kind": "logo",
+   "license": "CC BY-SA 3.0",
+   "name": "logo_chimarrao_2",
+   "nonfree": false,
+   "quality": "low",
+   "sha1": "47ba325a92fd5f6095a6c15e77afa3b2df44b6fb",
+   "source_key": "en.wikipedia.org:File:Latin America (orthographic projection).svg",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Latin_America_(orthographic_projection).svg",
+   "subject": "chimarrao",
+   "tags": [
+    "chimarrao",
+    "bebida",
+    "cuia",
+    "erva",
+    "mate",
+    "gaucho"
+   ],
+   "width": 1280
+  },
   "logo_chrome_os": {
    "artist": "Google",
    "aspect": 4.706,
@@ -33830,25 +34280,46 @@
    "width": 1280
   },
   "logo_gnome_2": {
-   "artist": "Jakub Steiner",
+   "artist": "https://gitlab.gnome.org/jimmac",
    "aspect": 1.0,
    "aspect_class": "square",
-   "bytes": 224086,
+   "bytes": 208676,
    "file": "logo_gnome_2.png",
    "height": 1280,
    "kind": "logo",
    "license": "GPLv2",
    "name": "logo_gnome_2",
    "nonfree": false,
-   "quality": "low:fora do assunto (rank 262)",
-   "rank": 262,
-   "sha1": "526b36a870e06ea44d4d49141640d4dd18eaff81",
-   "source_key": "commons.wikimedia.org:File:GNOME Videos Logo--2018.svg",
-   "source_url": "https://commons.wikimedia.org/wiki/File:GNOME_Videos_Logo--2018.svg",
-   "subject": "gnome",
+   "quality": "ok",
+   "sha1": "7bac31799ad23ff36d416db8e41279c7b3e6fe4a",
+   "source_key": "commons.wikimedia.org:File:GNOME Screenshot icon 2018.svg",
+   "source_url": "https://commons.wikimedia.org/wiki/File:GNOME_Screenshot_icon_2018.svg",
+   "subject": "gnome_2",
    "tags": [
-    "desktop",
-    "gnome"
+    "mate",
+    "desktop"
+   ],
+   "width": 1280
+  },
+  "logo_gnome_2_2": {
+   "artist": "https://gitlab.gnome.org/snwh",
+   "aspect": 1.0,
+   "aspect_class": "square",
+   "bytes": 42415,
+   "file": "logo_gnome_2_2.png",
+   "height": 1280,
+   "kind": "logo",
+   "license": "GPLv2",
+   "name": "logo_gnome_2_2",
+   "nonfree": false,
+   "quality": "ok",
+   "sha1": "fb0bfffccedb3314bcfd41484a28cf688db08882",
+   "source_key": "commons.wikimedia.org:File:GNOME System Monitor icon 2019.svg",
+   "source_url": "https://commons.wikimedia.org/wiki/File:GNOME_System_Monitor_icon_2019.svg",
+   "subject": "gnome_2",
+   "tags": [
+    "mate",
+    "desktop"
    ],
    "width": 1280
   },
@@ -39906,7 +40377,7 @@
    "license": "CC BY-SA 4.0",
    "name": "logo_linux_mint",
    "nonfree": false,
-   "quality": "check:rank 45",
+   "quality": "low",
    "rank": 45,
    "sha1": "8e931bcf28184990f68dd467f024aa0a4dd9fab7",
    "source_key": "commons.wikimedia.org:File:Логотип Linux Mint LOVE Edition.svg",
@@ -40026,6 +40497,28 @@
     "distro"
    ],
    "width": 1280
+  },
+  "logo_live_usb": {
+   "artist": "Slymdesign",
+   "aspect": 0.996,
+   "aspect_class": "square",
+   "bytes": 147353,
+   "file": "logo_live_usb.png",
+   "height": 514,
+   "kind": "logo",
+   "license": "CC BY-SA 3.0",
+   "name": "logo_live_usb",
+   "nonfree": false,
+   "quality": "ok",
+   "sha1": "c5ecb125b012bc5db1d7dcf001f76b57a420b713",
+   "source_key": "commons.wikimedia.org:File:Linux Live USB Creator - Logo.png",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Linux_Live_USB_Creator_-_Logo.png",
+   "subject": "live_usb",
+   "tags": [
+    "linux",
+    "pendrive"
+   ],
+   "width": 512
   },
   "logo_llvm": {
    "artist": "",
@@ -41583,7 +42076,7 @@
    "license": "CC BY-SA 4.0",
    "name": "logo_mate_desktop",
    "nonfree": false,
-   "quality": "ok",
+   "quality": "low",
    "rank": 1,
    "sha1": "5e07b272b9e681d0fae92bb00d002cc9e49e06ef",
    "source_key": "commons.wikimedia.org:File:MATE Desktop Environment Logo.svg",
@@ -41627,7 +42120,7 @@
    "license": "GFDL",
    "name": "logo_mate_desktop_3",
    "nonfree": false,
-   "quality": "low:quase-duplicata de logo_mate_desktop",
+   "quality": "low",
    "rank": 1,
    "sha1": "96824dd663580a57130527203fcd3695f4d6e47f",
    "source_key": "commons.wikimedia.org:File:MATE Desktop Environment Logo.png",
@@ -41637,6 +42130,46 @@
     "desktop"
    ],
    "width": 450
+  },
+  "logo_mate_desktop_4": {
+   "artist": "probably Joseph Krieger - http://mate-desktop.org/team/",
+   "aspect": 1.0,
+   "aspect_class": "square",
+   "bytes": 4187,
+   "file": "logo_mate_desktop_4.png",
+   "height": 48,
+   "kind": "logo",
+   "license": "GPL",
+   "name": "logo_mate_desktop_4",
+   "nonfree": false,
+   "sha1": "14908636fcc350fae72fe6b15d73d338fd7faf40",
+   "source_key": "commons.wikimedia.org:File:Mate icon.png",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Mate_icon.png",
+   "subject": "mate_desktop",
+   "tags": [],
+   "width": 48
+  },
+  "logo_mate_desktop_5": {
+   "artist": "Kaidor",
+   "aspect": 1.015,
+   "aspect_class": "wide",
+   "bytes": 44133,
+   "file": "logo_mate_desktop_5.png",
+   "height": 1009,
+   "kind": "logo",
+   "license": "CC BY-SA 4.0",
+   "name": "logo_mate_desktop_5",
+   "nonfree": false,
+   "quality": "ok",
+   "rank": 1,
+   "sha1": "68ca16d00bb77a64829da289fc1052432bcf3307",
+   "source_key": "commons.wikimedia.org:File:Mate-logo-BW.svg (recolorido verde-oliva #87a556, indicado pelo usuário)",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Mate-logo-BW.svg",
+   "subject": "mate_desktop",
+   "tags": [
+    "desktop"
+   ],
+   "width": 1024
   },
   "logo_meego": {
    "artist": "Miller-Boyett Productions",
@@ -43945,6 +44478,30 @@
     "editor"
    ],
    "width": 299
+  },
+  "logo_nemo_file_manager": {
+   "artist": "Ineuw",
+   "aspect": 1.158,
+   "aspect_class": "square",
+   "bytes": 7257,
+   "file": "logo_nemo_file_manager.jpg",
+   "height": 322,
+   "kind": "logo",
+   "license": "CC BY-SA 4.0",
+   "name": "logo_nemo_file_manager",
+   "nonfree": false,
+   "quality": "ok",
+   "sha1": "0ce369db8b9dfb6453bb2318b663d667d94111ef",
+   "source_key": "en.wikipedia.org:File:Application icon for nemo file manager1.jpg",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Application_icon_for_nemo_file_manager1.jpg",
+   "subject": "nemo_file_manager",
+   "tags": [
+    "linux",
+    "mint",
+    "cinnamon",
+    "arquivos"
+   ],
+   "width": 373
   },
   "logo_neovim": {
    "artist": "Jason Long",
@@ -48291,6 +48848,29 @@
    ],
    "width": 428
   },
+  "logo_ram_memory_module": {
+   "artist": "No machine-readable author provided. Martini assumed (based on copyright claims).",
+   "aspect": 0.707,
+   "aspect_class": "tall",
+   "bytes": 85420,
+   "file": "logo_ram_memory_module.png",
+   "height": 1811,
+   "kind": "logo",
+   "license": "Public domain",
+   "name": "logo_ram_memory_module",
+   "nonfree": false,
+   "quality": "ok",
+   "sha1": "0deda69405c110885833ee7bb873202c41f20518",
+   "source_key": "en.wikipedia.org:File:Laptop SODIMM DDR Memory Comparison V2.svg",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Laptop_SODIMM_DDR_Memory_Comparison_V2.svg",
+   "subject": "ram_memory_module",
+   "tags": [
+    "hardware",
+    "memoria",
+    "ram"
+   ],
+   "width": 1280
+  },
   "logo_raspberry_pi": {
    "artist": "dirkk",
    "aspect": 1.328,
@@ -48901,6 +49481,75 @@
    "tags": [
     "distro",
     "redhat"
+   ],
+   "width": 1280
+  },
+  "logo_rio_grande_do_sul": {
+   "artist": "TUBS",
+   "aspect": 1.011,
+   "aspect_class": "square",
+   "bytes": 356091,
+   "file": "logo_rio_grande_do_sul.png",
+   "height": 1266,
+   "kind": "logo",
+   "license": "CC BY-SA 3.0",
+   "name": "logo_rio_grande_do_sul",
+   "nonfree": false,
+   "sha1": "affa7152f7db13f720432738c31011bf828ff08c",
+   "source_key": "en.wikipedia.org:File:Rio Grande do Sul in Brazil.svg",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Rio_Grande_do_Sul_in_Brazil.svg",
+   "subject": "rio_grande_do_sul",
+   "tags": [
+    "mapa",
+    "estado",
+    "brasil",
+    "gaucho"
+   ],
+   "width": 1280
+  },
+  "logo_rio_grande_do_sul_2": {
+   "artist": "Srfortes",
+   "aspect": 1.429,
+   "aspect_class": "wide",
+   "bytes": 115082,
+   "file": "logo_rio_grande_do_sul_2.png",
+   "height": 896,
+   "kind": "logo",
+   "license": "Public domain",
+   "name": "logo_rio_grande_do_sul_2",
+   "nonfree": false,
+   "sha1": "00041791af011f1fa40bb48f357ede26b11a0995",
+   "source_key": "en.wikipedia.org:File:Bandeira do Rio Grande do Sul.svg",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Bandeira_do_Rio_Grande_do_Sul.svg",
+   "subject": "rio_grande_do_sul",
+   "tags": [
+    "mapa",
+    "estado",
+    "brasil",
+    "gaucho"
+   ],
+   "width": 1280
+  },
+  "logo_rio_grande_do_sul_3": {
+   "artist": "Ypiranga Futebol Clube (Erechim, Rio Grande do Sul)",
+   "aspect": 0.844,
+   "aspect_class": "tall",
+   "bytes": 75500,
+   "file": "logo_rio_grande_do_sul_3.png",
+   "height": 1517,
+   "kind": "logo",
+   "license": "Public domain",
+   "name": "logo_rio_grande_do_sul_3",
+   "nonfree": false,
+   "sha1": "bbbbd6e5906d539cf47c712a5cb91e44c546d742",
+   "source_key": "commons.wikimedia.org:File:Ypiranga Futebol Clube (Erechim, Rio Grande do Sul) logo.svg",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Ypiranga_Futebol_Clube_(Erechim,_Rio_Grande_do_Sul)_logo.svg",
+   "subject": "rio_grande_do_sul",
+   "tags": [
+    "mapa",
+    "estado",
+    "brasil",
+    "gaucho"
    ],
    "width": 1280
   },
@@ -50673,7 +51322,7 @@
    "license": "CC BY 4.0",
    "name": "logo_ssd",
    "nonfree": false,
-   "quality": "check:rank 128",
+   "quality": "low",
    "rank": 128,
    "sha1": "b1cc067855e1c76f1a7e11bc853a2c3ad5a11eba",
    "source_key": "en.wikipedia.org:File:Historical cost of computer memory and storage.svg",
@@ -52270,6 +52919,72 @@
     "notebook"
    ],
    "width": 1280
+  },
+  "logo_thunar": {
+   "artist": "Xfce project",
+   "aspect": 1.0,
+   "aspect_class": "square",
+   "bytes": 339542,
+   "file": "logo_thunar.png",
+   "height": 1280,
+   "kind": "logo",
+   "license": "GPL",
+   "name": "logo_thunar",
+   "nonfree": false,
+   "quality": "ok",
+   "sha1": "ee4722ffbd95bc282026423f2e63c089174e71fd",
+   "source_key": "en.wikipedia.org:File:Thunar.svg",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Thunar.svg",
+   "subject": "thunar",
+   "tags": [
+    "xfce",
+    "arquivos"
+   ],
+   "width": 1280
+  },
+  "logo_thunar_2": {
+   "artist": "Thunar",
+   "aspect": 0.843,
+   "aspect_class": "tall",
+   "bytes": 37571,
+   "file": "logo_thunar_2.png",
+   "height": 204,
+   "kind": "logo",
+   "license": "CC BY-SA 3.0",
+   "name": "logo_thunar_2",
+   "nonfree": false,
+   "quality": "ok",
+   "sha1": "a85cc157475ab7b8d4a93b28413ef3c6e875df25",
+   "source_key": "en.wikipedia.org:File:Thunar-about-logo.png",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Thunar-about-logo.png",
+   "subject": "thunar",
+   "tags": [
+    "xfce",
+    "arquivos"
+   ],
+   "width": 172
+  },
+  "logo_thunar_3": {
+   "artist": "Thunar",
+   "aspect": 1.0,
+   "aspect_class": "square",
+   "bytes": 18834,
+   "file": "logo_thunar_3.png",
+   "height": 128,
+   "kind": "logo",
+   "license": "CC BY-SA 3.0",
+   "name": "logo_thunar_3",
+   "nonfree": false,
+   "quality": "low:quase-duplicata de logo_thunar",
+   "sha1": "42d0cfe14668ecc883ac27a862898bd6e397d823",
+   "source_key": "commons.wikimedia.org:File:Thunar-logo.png",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Thunar-logo.png",
+   "subject": "thunar",
+   "tags": [
+    "xfce",
+    "arquivos"
+   ],
+   "width": 128
   },
   "logo_tiktok": {
    "artist": "Freedoxm",
@@ -55031,7 +55746,7 @@
    "license": "CC BY-SA 3.0",
    "name": "logo_windows_11",
    "nonfree": false,
-   "quality": "check:rank 114",
+   "quality": "low",
    "rank": 114,
    "sha1": "60c4d0d052318591f0d64accffdeec35c41ef446",
    "source_key": "commons.wikimedia.org:File:Windows 11 Windows Calculator.svg",
@@ -58111,7 +58826,7 @@
    "license": "LGPL",
    "name": "logo_xfce",
    "nonfree": false,
-   "quality": "ok",
+   "quality": "low:não é logo (papel de parede do Xfce)",
    "rank": 16,
    "sha1": "3b1fcc9be2d0777de47592d7dd12b6e06f768e3f",
    "source_key": "commons.wikimedia.org:File:Xfce 4 background-teal.svg",
@@ -58231,6 +58946,28 @@
     "desktop"
    ],
    "width": 800
+  },
+  "logo_xorg_server": {
+   "artist": "ScotXW",
+   "aspect": 1.333,
+   "aspect_class": "wide",
+   "bytes": 120787,
+   "file": "logo_xorg_server.png",
+   "height": 960,
+   "kind": "logo",
+   "license": "CC BY-SA 3.0",
+   "name": "logo_xorg_server",
+   "nonfree": false,
+   "quality": "ok",
+   "sha1": "733334f51e2975c2a293b2d0985f983840ac93e3",
+   "source_key": "en.wikipedia.org:File:Linux graphics drivers 2D.svg",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Linux_graphics_drivers_2D.svg",
+   "subject": "xorg_server",
+   "tags": [
+    "linux",
+    "desktop"
+   ],
+   "width": 1280
   },
   "logo_xubuntu": {
    "artist": "Canonical",
@@ -60808,6 +61545,52 @@
    ],
    "width": 1000
   },
+  "obj_emoji_chimarrao": {
+   "artist": "Kaidor",
+   "aspect": 1.0,
+   "aspect_class": "wide",
+   "bytes": 25981,
+   "file": "obj_emoji_chimarrao.png",
+   "height": 256,
+   "kind": "obj",
+   "license": "MIT",
+   "name": "obj_emoji_chimarrao",
+   "nonfree": false,
+   "quality": "ok",
+   "rank": 1,
+   "sha1": "498a9109a0bbc0596913f7c6e8e8fd63fa3cdfc5",
+   "source_key": "github.com/microsoft/fluentui-emoji: Mate (Fluent Emoji 3D)",
+   "source_url": "https://github.com/microsoft/fluentui-emoji",
+   "subject": "emoji_fluent",
+   "tags": [
+    "emoji",
+    "chimarrao"
+   ],
+   "width": 256
+  },
+  "obj_emoji_riso": {
+   "artist": "Kaidor",
+   "aspect": 1.0,
+   "aspect_class": "wide",
+   "bytes": 44153,
+   "file": "obj_emoji_riso.png",
+   "height": 256,
+   "kind": "obj",
+   "license": "MIT",
+   "name": "obj_emoji_riso",
+   "nonfree": false,
+   "quality": "ok",
+   "rank": 1,
+   "sha1": "47bd2b36d9f3c2cd3608051b65e5aeeb2522a1d8",
+   "source_key": "github.com/microsoft/fluentui-emoji: Face with tears of joy (Fluent Emoji 3D)",
+   "source_url": "https://github.com/microsoft/fluentui-emoji",
+   "subject": "emoji_fluent",
+   "tags": [
+    "emoji",
+    "riso"
+   ],
+   "width": 256
+  },
   "obj_eniac": {
    "artist": "Michael Hicks from Saint Paul, MN, USA",
    "aspect": 0.667,
@@ -62250,6 +63033,28 @@
    ],
    "width": 1280
   },
+  "obj_live_usb": {
+   "artist": "Ravi Dwivedi",
+   "aspect": 1.333,
+   "aspect_class": "wide",
+   "bytes": 239146,
+   "file": "obj_live_usb.jpg",
+   "height": 960,
+   "kind": "obj",
+   "license": "CC BY-SA 4.0",
+   "name": "obj_live_usb",
+   "nonfree": false,
+   "quality": "ok",
+   "sha1": "09ae7f75e920a5a5d0316bc76e22898df1458b99",
+   "source_key": "commons.wikimedia.org:File:Ubuntu live USB running in Liberated Computer.jpg",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Ubuntu_live_USB_running_in_Liberated_Computer.jpg",
+   "subject": "live_usb",
+   "tags": [
+    "linux",
+    "pendrive"
+   ],
+   "width": 1280
+  },
   "obj_mac_os_8": {
    "artist": "Tony Webster",
    "aspect": 1.667,
@@ -63229,6 +64034,52 @@
    ],
    "width": 1280
   },
+  "obj_old_netbook": {
+   "artist": "Anderslöv",
+   "aspect": 1.333,
+   "aspect_class": "wide",
+   "bytes": 266818,
+   "file": "obj_old_netbook.jpg",
+   "height": 960,
+   "kind": "obj",
+   "license": "CC BY-SA 4.0",
+   "name": "obj_old_netbook",
+   "nonfree": false,
+   "quality": "ok",
+   "sha1": "86a47b18fe72f3d2f3a055a34bd4611e44f5925c",
+   "source_key": "en.wikipedia.org:File:Samsung laptop nc10.jpg",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Samsung_laptop_nc10.jpg",
+   "subject": "old_netbook",
+   "tags": [
+    "hardware",
+    "pc",
+    "antigo"
+   ],
+   "width": 1280
+  },
+  "obj_old_netbook_2": {
+   "artist": "Raimond Spekking",
+   "aspect": 1.778,
+   "aspect_class": "wide",
+   "bytes": 292134,
+   "file": "obj_old_netbook_2.jpg",
+   "height": 720,
+   "kind": "obj",
+   "license": "CC BY-SA 4.0",
+   "name": "obj_old_netbook_2",
+   "nonfree": false,
+   "quality": "ok",
+   "sha1": "d9241ecdb046b052159d864622ad76205c9de66c",
+   "source_key": "en.wikipedia.org:File:Samsung NC10 - motherboard-1263.jpg",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Samsung_NC10_-_motherboard-1263.jpg",
+   "subject": "old_netbook",
+   "tags": [
+    "hardware",
+    "pc",
+    "antigo"
+   ],
+   "width": 1280
+  },
   "obj_open_source": {
    "artist": "Ahunt",
    "aspect": 0.611,
@@ -63661,6 +64512,29 @@
     "hardware"
    ],
    "width": 791
+  },
+  "obj_ram_memory_module": {
+   "artist": "Evan-Amos",
+   "aspect": 1.578,
+   "aspect_class": "wide",
+   "bytes": 220872,
+   "file": "obj_ram_memory_module.jpg",
+   "height": 811,
+   "kind": "obj",
+   "license": "Public domain",
+   "name": "obj_ram_memory_module",
+   "nonfree": false,
+   "quality": "ok",
+   "sha1": "5d5f9b8d426a080ce9a6d1577be64084505dde09",
+   "source_key": "en.wikipedia.org:File:Samsung-1GB-DDR2-Laptop-RAM.jpg",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Samsung-1GB-DDR2-Laptop-RAM.jpg",
+   "subject": "ram_memory_module",
+   "tags": [
+    "hardware",
+    "memoria",
+    "ram"
+   ],
+   "width": 1280
   },
   "obj_raspberry_pi": {
    "artist": "Profpcde",
@@ -74419,6 +75293,31 @@
    ],
    "width": 1280
   },
+  "tela_chimarrao": {
+   "artist": "Gary Mark Smith",
+   "aspect": 1.475,
+   "aspect_class": "wide",
+   "bytes": 745949,
+   "file": "tela_chimarrao.png",
+   "height": 600,
+   "kind": "tela",
+   "license": "CC BY-SA 3.0",
+   "name": "tela_chimarrao",
+   "nonfree": false,
+   "sha1": "717167222777f150c130aaf11081d57d2a8e2680",
+   "source_key": "en.wikipedia.org:File:MateinUruguay.png",
+   "source_url": "https://commons.wikimedia.org/wiki/File:MateinUruguay.png",
+   "subject": "chimarrao",
+   "tags": [
+    "chimarrao",
+    "bebida",
+    "cuia",
+    "erva",
+    "mate",
+    "gaucho"
+   ],
+   "width": 885
+  },
   "tela_chrome_devtools": {
    "artist": "Novem Linguae",
    "aspect": 1.778,
@@ -81117,25 +82016,112 @@
    "width": 1920
   },
   "tela_gnome_2": {
-   "artist": "Gawiłowski",
-   "aspect": 1.553,
+   "artist": "Editor-1 (Farhad Mohammadi Majd)",
+   "aspect": 1.778,
    "aspect_class": "wide",
-   "bytes": 270973,
+   "bytes": 1342361,
    "file": "tela_gnome_2.png",
-   "height": 824,
+   "height": 1080,
    "kind": "tela",
-   "license": "CC0",
+   "license": "GPL",
    "name": "tela_gnome_2",
    "nonfree": false,
    "quality": "ok",
-   "rank": 28,
-   "sha1": "cb713241516cbcc50e3c3dd4be8db61c2abba0df",
-   "source_key": "en.wikipedia.org:File:Gnome Builder 46.1.png",
-   "source_url": "https://commons.wikimedia.org/wiki/File:Gnome_Builder_46.1.png",
-   "subject": "gnome",
+   "sha1": "338e702bfcf93b8580bbab5f6f0c34f9c7792aac",
+   "source_key": "commons.wikimedia.org:File:GNOME Shell, GNOME Clocks, Evince, gThumb, GNOME Files at version 3.30 (2018-09) in Dark theme.png",
+   "source_url": "https://commons.wikimedia.org/wiki/File:GNOME_Shell,_GNOME_Clocks,_Evince,_gThumb,_GNOME_Files_at_version_3.30_(2018-09)_in_Dark_theme.png",
+   "subject": "gnome_2",
    "tags": [
-    "desktop",
-    "gnome"
+    "mate",
+    "desktop"
+   ],
+   "width": 1920
+  },
+  "tela_gnome_2_2": {
+   "artist": "The original uploader was Karderio at English Wikipedia . Later versions were uploaded by Nessup , Tene at en.wikipedia ",
+   "aspect": 1.333,
+   "aspect_class": "wide",
+   "bytes": 422919,
+   "file": "tela_gnome_2_2.png",
+   "height": 1050,
+   "kind": "tela",
+   "license": "GPL",
+   "name": "tela_gnome_2_2",
+   "nonfree": false,
+   "quality": "ok",
+   "sha1": "bd722fa0c651afb41a3795d8f3c68522918efb6e",
+   "source_key": "commons.wikimedia.org:File:GNOME-Screenshot-2.10-FC4.png",
+   "source_url": "https://commons.wikimedia.org/wiki/File:GNOME-Screenshot-2.10-FC4.png",
+   "subject": "gnome_2",
+   "tags": [
+    "mate",
+    "desktop"
+   ],
+   "width": 1400
+  },
+  "tela_gnome_2_3": {
+   "artist": "GNOME, Ubuntu and others.",
+   "aspect": 1.6,
+   "aspect_class": "wide",
+   "bytes": 647153,
+   "file": "tela_gnome_2_3.png",
+   "height": 900,
+   "kind": "tela",
+   "license": "GPL",
+   "name": "tela_gnome_2_3",
+   "nonfree": false,
+   "quality": "ok",
+   "sha1": "07960336878a0a1aeee64409c3c9fdfeaa1b67d4",
+   "source_key": "commons.wikimedia.org:File:Screenshot of Ubuntu 9.04 with GNOME 2.26.png",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Screenshot_of_Ubuntu_9.04_with_GNOME_2.26.png",
+   "subject": "gnome_2",
+   "tags": [
+    "mate",
+    "desktop"
+   ],
+   "width": 1440
+  },
+  "tela_gnome_2_4": {
+   "artist": "Canonical Ltd. / Ubuntu Foundation",
+   "aspect": 1.6,
+   "aspect_class": "wide",
+   "bytes": 280862,
+   "file": "tela_gnome_2_4.png",
+   "height": 800,
+   "kind": "tela",
+   "license": "GPL",
+   "name": "tela_gnome_2_4",
+   "nonfree": false,
+   "quality": "ok",
+   "sha1": "0916c3c44c786189370c076adc87aa7133a2e8f0",
+   "source_key": "en.wikipedia.org:File:Ubuntu 9.10.png",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Ubuntu_9.10.png",
+   "subject": "gnome_2",
+   "tags": [
+    "mate",
+    "desktop"
+   ],
+   "width": 1280
+  },
+  "tela_gnome_2_5": {
+   "artist": "Hydriz",
+   "aspect": 1.6,
+   "aspect_class": "wide",
+   "bytes": 491519,
+   "file": "tela_gnome_2_5.png",
+   "height": 800,
+   "kind": "tela",
+   "license": "GPL",
+   "name": "tela_gnome_2_5",
+   "nonfree": false,
+   "quality": "ok",
+   "sha1": "7d3b76d7af9cedc4ea42bcf6917d499e8e702227",
+   "source_key": "en.wikipedia.org:File:Ubuntu 10.10.png",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Ubuntu_10.10.png",
+   "subject": "gnome_2",
+   "tags": [
+    "mate",
+    "desktop"
    ],
    "width": 1280
   },
@@ -90048,6 +91034,182 @@
    ],
    "width": 1600
   },
+  "tela_linux_mint_22": {
+   "artist": "Clement Lefebvre",
+   "aspect": 1.896,
+   "aspect_class": "wide",
+   "bytes": 22000,
+   "file": "tela_linux_mint_22.webp",
+   "height": 675,
+   "kind": "tela",
+   "license": "GPL",
+   "name": "tela_linux_mint_22",
+   "nonfree": false,
+   "quality": "ok",
+   "sha1": "8ae13a8ffd50445c202c09552f39a83c07ae5c1f",
+   "source_key": "commons.wikimedia.org:File:Linux Mint 22.2 Cinnamon eng.webp",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Linux_Mint_22.2_Cinnamon_eng.webp",
+   "subject": "linux_mint_22",
+   "tags": [
+    "linux",
+    "mint"
+   ],
+   "width": 1280
+  },
+  "tela_linux_mint_22_2": {
+   "artist": "Clement Lefebvre",
+   "aspect": 1.896,
+   "aspect_class": "wide",
+   "bytes": 22458,
+   "file": "tela_linux_mint_22_2.webp",
+   "height": 675,
+   "kind": "tela",
+   "license": "GPL",
+   "name": "tela_linux_mint_22_2",
+   "nonfree": false,
+   "quality": "low:quase-duplicata de tela_linux_mint_22",
+   "sha1": "e1aebe1dc915b51e6b3ffde60e82b56f906c6cd3",
+   "source_key": "commons.wikimedia.org:File:Linux Mint 22.2 Cinnamon rus.webp",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Linux_Mint_22.2_Cinnamon_rus.webp",
+   "subject": "linux_mint_22",
+   "tags": [
+    "linux",
+    "mint"
+   ],
+   "width": 1280
+  },
+  "tela_linux_mint_22_3": {
+   "artist": "Clement Lefebvre",
+   "aspect": 1.896,
+   "aspect_class": "wide",
+   "bytes": 22274,
+   "file": "tela_linux_mint_22_3.webp",
+   "height": 675,
+   "kind": "tela",
+   "license": "GPL",
+   "name": "tela_linux_mint_22_3",
+   "nonfree": false,
+   "quality": "low:quase-duplicata de tela_linux_mint_22",
+   "sha1": "640f4f3f8bb085e5c837ec5a80519f686fbb1b7e",
+   "source_key": "commons.wikimedia.org:File:Linux Mint 22.2 Cinnamon ukr.webp",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Linux_Mint_22.2_Cinnamon_ukr.webp",
+   "subject": "linux_mint_22",
+   "tags": [
+    "linux",
+    "mint"
+   ],
+   "width": 1280
+  },
+  "tela_linux_mint_22_4": {
+   "artist": "Clement Lefebvre",
+   "aspect": 1.896,
+   "aspect_class": "wide",
+   "bytes": 23794,
+   "file": "tela_linux_mint_22_4.webp",
+   "height": 675,
+   "kind": "tela",
+   "license": "GPL",
+   "name": "tela_linux_mint_22_4",
+   "nonfree": false,
+   "quality": "low:quase-duplicata de tela_linux_mint_22",
+   "sha1": "fec9a54919032bcbf8fb62e54498465322d3532b",
+   "source_key": "commons.wikimedia.org:File:Linux Mint 22.2 MATE eng.webp",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Linux_Mint_22.2_MATE_eng.webp",
+   "subject": "linux_mint_22",
+   "tags": [
+    "linux",
+    "mint"
+   ],
+   "width": 1280
+  },
+  "tela_linux_mint_22_5": {
+   "artist": "Clement Lefebvre",
+   "aspect": 1.896,
+   "aspect_class": "wide",
+   "bytes": 24436,
+   "file": "tela_linux_mint_22_5.webp",
+   "height": 675,
+   "kind": "tela",
+   "license": "GPL",
+   "name": "tela_linux_mint_22_5",
+   "nonfree": false,
+   "quality": "low:quase-duplicata de tela_linux_mint_22",
+   "sha1": "984e19db8e9e1162cf0e5b1ec7a017cb1adc4606",
+   "source_key": "commons.wikimedia.org:File:Linux Mint 22.2 MATE rus.webp",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Linux_Mint_22.2_MATE_rus.webp",
+   "subject": "linux_mint_22",
+   "tags": [
+    "linux",
+    "mint"
+   ],
+   "width": 1280
+  },
+  "tela_linux_mint_22_6": {
+   "artist": "Clement Lefebvre",
+   "aspect": 1.896,
+   "aspect_class": "wide",
+   "bytes": 24034,
+   "file": "tela_linux_mint_22_6.webp",
+   "height": 675,
+   "kind": "tela",
+   "license": "GPL",
+   "name": "tela_linux_mint_22_6",
+   "nonfree": false,
+   "quality": "low:quase-duplicata de tela_linux_mint_22",
+   "sha1": "78735d798341dd39ee66d2fd3f218e0d5a56ae37",
+   "source_key": "commons.wikimedia.org:File:Linux Mint 22.2 MATE ukr.webp",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Linux_Mint_22.2_MATE_ukr.webp",
+   "subject": "linux_mint_22",
+   "tags": [
+    "linux",
+    "mint"
+   ],
+   "width": 1280
+  },
+  "tela_linux_mint_22_7": {
+   "artist": "Clement Lefebvre",
+   "aspect": 1.896,
+   "aspect_class": "wide",
+   "bytes": 22322,
+   "file": "tela_linux_mint_22_7.webp",
+   "height": 675,
+   "kind": "tela",
+   "license": "GPL",
+   "name": "tela_linux_mint_22_7",
+   "nonfree": false,
+   "quality": "low:quase-duplicata de tela_linux_mint_22",
+   "sha1": "673afcb7a8f1c662236000af8da6201e6b3ac198",
+   "source_key": "commons.wikimedia.org:File:Linux Mint 22.2 XFCE eng.webp",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Linux_Mint_22.2_XFCE_eng.webp",
+   "subject": "linux_mint_22",
+   "tags": [
+    "linux",
+    "mint"
+   ],
+   "width": 1280
+  },
+  "tela_linux_mint_22_8": {
+   "artist": "Clement Lefebvre",
+   "aspect": 1.896,
+   "aspect_class": "wide",
+   "bytes": 22276,
+   "file": "tela_linux_mint_22_8.webp",
+   "height": 675,
+   "kind": "tela",
+   "license": "GPL",
+   "name": "tela_linux_mint_22_8",
+   "nonfree": false,
+   "quality": "low:quase-duplicata de tela_linux_mint_22",
+   "sha1": "0b920884b8b9ed19dbb008ce035f70695a374144",
+   "source_key": "commons.wikimedia.org:File:Linux Mint 22.2 XFCE rus.webp",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Linux_Mint_22.2_XFCE_rus.webp",
+   "subject": "linux_mint_22",
+   "tags": [
+    "linux",
+    "mint"
+   ],
+   "width": 1280
+  },
   "tela_linux_mint_3": {
    "artist": "The Linux Mint team",
    "aspect": 1.6,
@@ -90091,6 +91253,138 @@
     "distro"
    ],
    "width": 1920
+  },
+  "tela_live_usb": {
+   "artist": "",
+   "aspect": 1.779,
+   "aspect_class": "wide",
+   "bytes": 137680,
+   "file": "tela_live_usb.png",
+   "height": 768,
+   "kind": "tela",
+   "license": "Public domain",
+   "name": "tela_live_usb",
+   "nonfree": false,
+   "quality": "ok",
+   "sha1": "3f2e8ca16ef65669d60fd8207e1e2921f879f042",
+   "source_key": "commons.wikimedia.org:File:Ubuntu 9.10 startup liveusb.png",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Ubuntu_9.10_startup_liveusb.png",
+   "subject": "live_usb",
+   "tags": [
+    "linux",
+    "pendrive"
+   ],
+   "width": 1366
+  },
+  "tela_live_usb_2": {
+   "artist": "Canonical Ltd. / Ubuntu Foundation",
+   "aspect": 1.779,
+   "aspect_class": "wide",
+   "bytes": 851080,
+   "file": "tela_live_usb_2.png",
+   "height": 768,
+   "kind": "tela",
+   "license": "GPL",
+   "name": "tela_live_usb_2",
+   "nonfree": false,
+   "quality": "ok",
+   "sha1": "ec5477576333f024dca9dbbc2e27f0b56ad3596a",
+   "source_key": "commons.wikimedia.org:File:Ubuntu 10.10 Maverick Meerkat Netbook Live USB.png",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Ubuntu_10.10_Maverick_Meerkat_Netbook_Live_USB.png",
+   "subject": "live_usb",
+   "tags": [
+    "linux",
+    "pendrive"
+   ],
+   "width": 1366
+  },
+  "tela_live_usb_3": {
+   "artist": "http://hacktolive.org/ (broken link)",
+   "aspect": 1.333,
+   "aspect_class": "wide",
+   "bytes": 208539,
+   "file": "tela_live_usb_3.png",
+   "height": 768,
+   "kind": "tela",
+   "license": "GPL",
+   "name": "tela_live_usb_3",
+   "nonfree": false,
+   "quality": "ok",
+   "sha1": "90df9cd5cac344be7fd3ed2b356f48d86fe99140",
+   "source_key": "en.wikipedia.org:File:Live USB Ubuntu 8.04 LTS.png",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Live_USB_Ubuntu_8.04_LTS.png",
+   "subject": "live_usb",
+   "tags": [
+    "linux",
+    "pendrive"
+   ],
+   "width": 1024
+  },
+  "tela_live_usb_4": {
+   "artist": "Carolingio93",
+   "aspect": 1.333,
+   "aspect_class": "wide",
+   "bytes": 336443,
+   "file": "tela_live_usb_4.png",
+   "height": 768,
+   "kind": "tela",
+   "license": "CC BY 3.0",
+   "name": "tela_live_usb_4",
+   "nonfree": false,
+   "quality": "ok",
+   "sha1": "ab1e4157df241d2f02035b959cd512c8a1b1dc12",
+   "source_key": "commons.wikimedia.org:File:Liveusbmandriva.png",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Liveusbmandriva.png",
+   "subject": "live_usb",
+   "tags": [
+    "linux",
+    "pendrive"
+   ],
+   "width": 1024
+  },
+  "tela_live_usb_5": {
+   "artist": "Canonical Ltd. / Ubuntu Foundation",
+   "aspect": 1.707,
+   "aspect_class": "wide",
+   "bytes": 357480,
+   "file": "tela_live_usb_5.png",
+   "height": 600,
+   "kind": "tela",
+   "license": "GPL",
+   "name": "tela_live_usb_5",
+   "nonfree": false,
+   "quality": "ok",
+   "sha1": "08c07eeb7923a10682cc5f3e1dbd67075f6c2648",
+   "source_key": "commons.wikimedia.org:File:Ubuntu 10.04 Lucid Lynx Netbook Live USB.png",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Ubuntu_10.04_Lucid_Lynx_Netbook_Live_USB.png",
+   "subject": "live_usb",
+   "tags": [
+    "linux",
+    "pendrive"
+   ],
+   "width": 1024
+  },
+  "tela_live_usb_6": {
+   "artist": "Loksterr",
+   "aspect": 1.119,
+   "aspect_class": "square",
+   "bytes": 67011,
+   "file": "tela_live_usb_6.png",
+   "height": 504,
+   "kind": "tela",
+   "license": "CC0",
+   "name": "tela_live_usb_6",
+   "nonfree": false,
+   "quality": "ok",
+   "sha1": "1f4733b1560f791cc104b95482c3cfb019179ffa",
+   "source_key": "commons.wikimedia.org:File:LiveUSB Install - screenshot.png",
+   "source_url": "https://commons.wikimedia.org/wiki/File:LiveUSB_Install_-_screenshot.png",
+   "subject": "live_usb",
+   "tags": [
+    "linux",
+    "pendrive"
+   ],
+   "width": 564
   },
   "tela_lmde": {
    "artist": "Clement Lefebvre",
@@ -96773,6 +98067,198 @@
    ],
    "width": 1145
   },
+  "tela_nemo_file_manager": {
+   "artist": "Rudra Saraswat and the Ubuntu Unity developer team",
+   "aspect": 1.778,
+   "aspect_class": "wide",
+   "bytes": 327880,
+   "file": "tela_nemo_file_manager.png",
+   "height": 1080,
+   "kind": "tela",
+   "license": "GPL",
+   "name": "tela_nemo_file_manager",
+   "nonfree": false,
+   "quality": "ok",
+   "sha1": "94e52104fd4fffe0960d643f2cc6969977083fa6",
+   "source_key": "commons.wikimedia.org:File:Ubuntu Unity 21.10 Nemo 4.8.6 file manager Ambiance theme - English.png",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Ubuntu_Unity_21.10_Nemo_4.8.6_file_manager_Ambiance_theme_-_English.png",
+   "subject": "nemo_file_manager",
+   "tags": [
+    "linux",
+    "mint",
+    "cinnamon",
+    "arquivos"
+   ],
+   "width": 1920
+  },
+  "tela_nemo_file_manager_2": {
+   "artist": "Rudra Saraswat and the Ubuntu Unity developer team",
+   "aspect": 1.778,
+   "aspect_class": "wide",
+   "bytes": 287393,
+   "file": "tela_nemo_file_manager_2.png",
+   "height": 1080,
+   "kind": "tela",
+   "license": "GPL",
+   "name": "tela_nemo_file_manager_2",
+   "nonfree": false,
+   "quality": "ok",
+   "sha1": "f1ccc423e0eef69fa4a456b552f171b8cc567c3f",
+   "source_key": "commons.wikimedia.org:File:Ubuntu Unity 21.10 Nemo 4.8.6 file manager Adwaita theme - English.png",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Ubuntu_Unity_21.10_Nemo_4.8.6_file_manager_Adwaita_theme_-_English.png",
+   "subject": "nemo_file_manager",
+   "tags": [
+    "linux",
+    "mint",
+    "cinnamon",
+    "arquivos"
+   ],
+   "width": 1920
+  },
+  "tela_nemo_file_manager_3": {
+   "artist": "Rudra Saraswat and the Ubuntu Unity developer team",
+   "aspect": 1.778,
+   "aspect_class": "wide",
+   "bytes": 292339,
+   "file": "tela_nemo_file_manager_3.png",
+   "height": 1080,
+   "kind": "tela",
+   "license": "GPL",
+   "name": "tela_nemo_file_manager_3",
+   "nonfree": false,
+   "quality": "low:quase-duplicata de tela_nemo_file_manager_2",
+   "sha1": "efb9bab7b41d23e3c2244e0665c97713b96052d9",
+   "source_key": "commons.wikimedia.org:File:Ubuntu Unity 21.10 Nemo 4.8.6 file manager High Contrast theme - English.png",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Ubuntu_Unity_21.10_Nemo_4.8.6_file_manager_High_Contrast_theme_-_English.png",
+   "subject": "nemo_file_manager",
+   "tags": [
+    "linux",
+    "mint",
+    "cinnamon",
+    "arquivos"
+   ],
+   "width": 1920
+  },
+  "tela_nemo_file_manager_4": {
+   "artist": "Rudra Saraswat and the Ubuntu Unity developer team",
+   "aspect": 1.778,
+   "aspect_class": "wide",
+   "bytes": 329039,
+   "file": "tela_nemo_file_manager_4.png",
+   "height": 1080,
+   "kind": "tela",
+   "license": "GPL",
+   "name": "tela_nemo_file_manager_4",
+   "nonfree": false,
+   "quality": "low:quase-duplicata de tela_nemo_file_manager_2",
+   "sha1": "d5878c50d05d7d7e073a09cdf9b670ded7dba6ce",
+   "source_key": "commons.wikimedia.org:File:Ubuntu Unity 21.10 Nemo 4.8.6 file manager Radiance theme - English.png",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Ubuntu_Unity_21.10_Nemo_4.8.6_file_manager_Radiance_theme_-_English.png",
+   "subject": "nemo_file_manager",
+   "tags": [
+    "linux",
+    "mint",
+    "cinnamon",
+    "arquivos"
+   ],
+   "width": 1920
+  },
+  "tela_nemo_file_manager_5": {
+   "artist": "Rudra Saraswat and the Ubuntu Unity developer team",
+   "aspect": 1.778,
+   "aspect_class": "wide",
+   "bytes": 565013,
+   "file": "tela_nemo_file_manager_5.png",
+   "height": 1080,
+   "kind": "tela",
+   "license": "GPL",
+   "name": "tela_nemo_file_manager_5",
+   "nonfree": false,
+   "quality": "ok",
+   "sha1": "90bb0e70bcb39a5e1189702dcd0bdf2eba3cf381",
+   "source_key": "commons.wikimedia.org:File:Ubuntu Unity 22.10 Nemo 5.4.3 file manager Ambiance theme - English.png",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Ubuntu_Unity_22.10_Nemo_5.4.3_file_manager_Ambiance_theme_-_English.png",
+   "subject": "nemo_file_manager",
+   "tags": [
+    "linux",
+    "mint",
+    "cinnamon",
+    "arquivos"
+   ],
+   "width": 1920
+  },
+  "tela_nemo_file_manager_6": {
+   "artist": "Rudra Saraswat and the Ubuntu Unity developer team",
+   "aspect": 1.778,
+   "aspect_class": "wide",
+   "bytes": 565408,
+   "file": "tela_nemo_file_manager_6.png",
+   "height": 1080,
+   "kind": "tela",
+   "license": "GPL",
+   "name": "tela_nemo_file_manager_6",
+   "nonfree": false,
+   "quality": "ok",
+   "sha1": "c33f30c6ff08f3b3cc46fbad446e16f700292b83",
+   "source_key": "commons.wikimedia.org:File:Ubuntu Unity 22.10 Nemo 5.4.3 file manager Radiance theme - English.png",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Ubuntu_Unity_22.10_Nemo_5.4.3_file_manager_Radiance_theme_-_English.png",
+   "subject": "nemo_file_manager",
+   "tags": [
+    "linux",
+    "mint",
+    "cinnamon",
+    "arquivos"
+   ],
+   "width": 1920
+  },
+  "tela_nemo_file_manager_7": {
+   "artist": "Rudra Saraswat and the Ubuntu Unity developer team",
+   "aspect": 1.778,
+   "aspect_class": "wide",
+   "bytes": 541257,
+   "file": "tela_nemo_file_manager_7.png",
+   "height": 1080,
+   "kind": "tela",
+   "license": "GPL",
+   "name": "tela_nemo_file_manager_7",
+   "nonfree": false,
+   "quality": "low:quase-duplicata de tela_nemo_file_manager_6",
+   "sha1": "d7820b24bffcbb94f3a884f5a0266bb4da8dafed",
+   "source_key": "commons.wikimedia.org:File:Ubuntu Unity 22.10 Nemo 5.4.3 file manager Yaru-light theme - English.png",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Ubuntu_Unity_22.10_Nemo_5.4.3_file_manager_Yaru-light_theme_-_English.png",
+   "subject": "nemo_file_manager",
+   "tags": [
+    "linux",
+    "mint",
+    "cinnamon",
+    "arquivos"
+   ],
+   "width": 1920
+  },
+  "tela_nemo_file_manager_8": {
+   "artist": "Rudra Saraswat and the Ubuntu Unity developer team",
+   "aspect": 1.778,
+   "aspect_class": "wide",
+   "bytes": 406097,
+   "file": "tela_nemo_file_manager_8.png",
+   "height": 1080,
+   "kind": "tela",
+   "license": "GPL",
+   "name": "tela_nemo_file_manager_8",
+   "nonfree": false,
+   "quality": "ok",
+   "sha1": "c178a9765268c98ac1fc1638e6d6830b08e2fe2b",
+   "source_key": "commons.wikimedia.org:File:Ubuntu Unity 23.04 Nemo 5.6.3 file manager default Yaru-dark theme - English.png",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Ubuntu_Unity_23.04_Nemo_5.6.3_file_manager_default_Yaru-dark_theme_-_English.png",
+   "subject": "nemo_file_manager",
+   "tags": [
+    "linux",
+    "mint",
+    "cinnamon",
+    "arquivos"
+   ],
+   "width": 1920
+  },
   "tela_neovim": {
    "artist": "Ainurlindale",
    "aspect": 1.778,
@@ -98565,6 +100051,98 @@
     "livre"
    ],
    "width": 1059
+  },
+  "tela_old_netbook": {
+   "artist": "Kozuch",
+   "aspect": 1.19,
+   "aspect_class": "wide",
+   "bytes": 17991,
+   "file": "tela_old_netbook.png",
+   "height": 806,
+   "kind": "tela",
+   "license": "CC BY-SA 3.0",
+   "name": "tela_old_netbook",
+   "nonfree": false,
+   "quality": "ok",
+   "sha1": "c6f7767766fa3e5dbe735d9aeb3be4dbfe0e6bc8",
+   "source_key": "en.wikipedia.org:File:Netbook popularity in 2008 (PriceGrabber).png",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Netbook_popularity_in_2008_(PriceGrabber).png",
+   "subject": "old_netbook",
+   "tags": [
+    "hardware",
+    "pc",
+    "antigo"
+   ],
+   "width": 959
+  },
+  "tela_old_netbook_2": {
+   "artist": "BiT",
+   "aspect": 1.333,
+   "aspect_class": "wide",
+   "bytes": 300917,
+   "file": "tela_old_netbook_2.png",
+   "height": 600,
+   "kind": "tela",
+   "license": "GPL",
+   "name": "tela_old_netbook_2",
+   "nonfree": false,
+   "quality": "ok",
+   "sha1": "beec1689b613899f1307cc011229c18a3168f663",
+   "source_key": "commons.wikimedia.org:File:Ubuntu Netbook Remix-is (Files & Folders).png",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Ubuntu_Netbook_Remix-is_(Files_%26_Folders).png",
+   "subject": "old_netbook",
+   "tags": [
+    "hardware",
+    "pc",
+    "antigo"
+   ],
+   "width": 800
+  },
+  "tela_old_netbook_3": {
+   "artist": "BiT",
+   "aspect": 1.333,
+   "aspect_class": "wide",
+   "bytes": 534985,
+   "file": "tela_old_netbook_3.png",
+   "height": 600,
+   "kind": "tela",
+   "license": "GPL",
+   "name": "tela_old_netbook_3",
+   "nonfree": false,
+   "quality": "ok",
+   "sha1": "1122d797f68dc71f68665a6f82631a472a7731f3",
+   "source_key": "commons.wikimedia.org:File:Ubuntu Netbook Remix-is (Files & Folders 2).png",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Ubuntu_Netbook_Remix-is_(Files_%26_Folders_2).png",
+   "subject": "old_netbook",
+   "tags": [
+    "hardware",
+    "pc",
+    "antigo"
+   ],
+   "width": 800
+  },
+  "tela_old_netbook_4": {
+   "artist": "BiT",
+   "aspect": 1.333,
+   "aspect_class": "wide",
+   "bytes": 530310,
+   "file": "tela_old_netbook_4.png",
+   "height": 600,
+   "kind": "tela",
+   "license": "GPL",
+   "name": "tela_old_netbook_4",
+   "nonfree": false,
+   "quality": "ok",
+   "sha1": "968b8476bdd8e09bef6f189d46f9d6162c95beda",
+   "source_key": "commons.wikimedia.org:File:Ubuntu Netbook Remix-is (Files & Folders 3).png",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Ubuntu_Netbook_Remix-is_(Files_%26_Folders_3).png",
+   "subject": "old_netbook",
+   "tags": [
+    "hardware",
+    "pc",
+    "antigo"
+   ],
+   "width": 800
   },
   "tela_onedrive": {
    "artist": "The Microsoft Corporation.",
@@ -104147,6 +105725,98 @@
    ],
    "width": 2560
   },
+  "tela_rio_grande_do_sul": {
+   "artist": "Governo do Rio Grande do Sul",
+   "aspect": 1.779,
+   "aspect_class": "wide",
+   "bytes": 998300,
+   "file": "tela_rio_grande_do_sul.png",
+   "height": 768,
+   "kind": "tela",
+   "license": "CC BY 3.0",
+   "name": "tela_rio_grande_do_sul",
+   "nonfree": false,
+   "sha1": "e7971e48603455c4d88caf658f48542da886a8c7",
+   "source_key": "commons.wikimedia.org:File:José Cesário (Secretário de Estado das Comunidades Portuguesas) e Beto Grill (Governador em exercício do Rio Grande do Sul).png",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Jos%C3%A9_Ces%C3%A1rio_(Secret%C3%A1rio_de_Estado_das_Comunidades_Portuguesas)_e_Beto_Grill_(Governador_em_exerc%C3%ADcio_do_Rio_Grande_do_Sul).png",
+   "subject": "rio_grande_do_sul",
+   "tags": [
+    "mapa",
+    "estado",
+    "brasil",
+    "gaucho"
+   ],
+   "width": 1366
+  },
+  "tela_rio_grande_do_sul_2": {
+   "artist": "Yourecoveredinbees",
+   "aspect": 1.184,
+   "aspect_class": "wide",
+   "bytes": 847241,
+   "file": "tela_rio_grande_do_sul_2.png",
+   "height": 924,
+   "kind": "tela",
+   "license": "CC BY 4.0",
+   "name": "tela_rio_grande_do_sul_2",
+   "nonfree": false,
+   "sha1": "210da13903892687c098becd67771c1be5703e19",
+   "source_key": "en.wikipedia.org:File:Global Forest Change tree-cover loss year in Rio Grande do Sul, 2001-2024.png",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Global_Forest_Change_tree-cover_loss_year_in_Rio_Grande_do_Sul,_2001-2024.png",
+   "subject": "rio_grande_do_sul",
+   "tags": [
+    "mapa",
+    "estado",
+    "brasil",
+    "gaucho"
+   ],
+   "width": 1094
+  },
+  "tela_rio_grande_do_sul_3": {
+   "artist": "Palácio Piratini",
+   "aspect": 1.953,
+   "aspect_class": "wide",
+   "bytes": 1540846,
+   "file": "tela_rio_grande_do_sul_3.png",
+   "height": 592,
+   "kind": "tela",
+   "license": "CC BY 3.0",
+   "name": "tela_rio_grande_do_sul_3",
+   "nonfree": false,
+   "sha1": "3e42e04cb5e6ef6f1418f5e65a8a957ff2a58570",
+   "source_key": "commons.wikimedia.org:File:Gabinete do governador do Rio Grande do Sul.png",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Gabinete_do_governador_do_Rio_Grande_do_Sul.png",
+   "subject": "rio_grande_do_sul",
+   "tags": [
+    "mapa",
+    "estado",
+    "brasil",
+    "gaucho"
+   ],
+   "width": 1156
+  },
+  "tela_rio_grande_do_sul_4": {
+   "artist": "Brigada Militar do Rio Grande do Sul",
+   "aspect": 1.019,
+   "aspect_class": "square",
+   "bytes": 449170,
+   "file": "tela_rio_grande_do_sul_4.png",
+   "height": 785,
+   "kind": "tela",
+   "license": "Public domain",
+   "name": "tela_rio_grande_do_sul_4",
+   "nonfree": false,
+   "sha1": "44cd3e6b2e4edcdfe33157deb719e10fe22524f1",
+   "source_key": "commons.wikimedia.org:File:Brasão Brigada Militar do Rio Grande do Sul.png",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Bras%C3%A3o_Brigada_Militar_do_Rio_Grande_do_Sul.png",
+   "subject": "rio_grande_do_sul",
+   "tags": [
+    "mapa",
+    "estado",
+    "brasil",
+    "gaucho"
+   ],
+   "width": 800
+  },
   "tela_riscos": {
    "artist": "Marcin Wichary ( https://www.flickr.com/photos/mwichary/ )",
    "aspect": 0.75,
@@ -108737,6 +110407,116 @@
    ],
    "width": 2032
   },
+  "tela_thunar": {
+   "artist": "MX Linux developer team",
+   "aspect": 1.778,
+   "aspect_class": "wide",
+   "bytes": 2020165,
+   "file": "tela_thunar.png",
+   "height": 1080,
+   "kind": "tela",
+   "license": "GPL",
+   "name": "tela_thunar",
+   "nonfree": false,
+   "quality": "ok",
+   "sha1": "85015e956dfdc738a4a61942e5ca94c1de2b4447",
+   "source_key": "commons.wikimedia.org:File:MX 21.2.1 MX Comfort theme with Thunar - English.png",
+   "source_url": "https://commons.wikimedia.org/wiki/File:MX_21.2.1_MX_Comfort_theme_with_Thunar_-_English.png",
+   "subject": "thunar",
+   "tags": [
+    "xfce",
+    "arquivos"
+   ],
+   "width": 1920
+  },
+  "tela_thunar_2": {
+   "artist": "MX Linux developer team",
+   "aspect": 1.778,
+   "aspect_class": "wide",
+   "bytes": 2192989,
+   "file": "tela_thunar_2.png",
+   "height": 1080,
+   "kind": "tela",
+   "license": "GPL",
+   "name": "tela_thunar_2",
+   "nonfree": false,
+   "quality": "ok",
+   "sha1": "705a7360364d6713e8c9ec937cb625d3acdcb6fc",
+   "source_key": "commons.wikimedia.org:File:MX 21.2.1 Numix theme with Thunar - English.png",
+   "source_url": "https://commons.wikimedia.org/wiki/File:MX_21.2.1_Numix_theme_with_Thunar_-_English.png",
+   "subject": "thunar",
+   "tags": [
+    "xfce",
+    "arquivos"
+   ],
+   "width": 1920
+  },
+  "tela_thunar_3": {
+   "artist": "The Xubuntu team",
+   "aspect": 1.778,
+   "aspect_class": "wide",
+   "bytes": 314962,
+   "file": "tela_thunar_3.png",
+   "height": 1080,
+   "kind": "tela",
+   "license": "GPL",
+   "name": "tela_thunar_3",
+   "nonfree": false,
+   "quality": "ok",
+   "sha1": "5bdf77c2e800add2232ac91564350cdba211e3fb",
+   "source_key": "commons.wikimedia.org:File:Xubuntu 22.10 Thunar 4.17.9 file manager search - English.png",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Xubuntu_22.10_Thunar_4.17.9_file_manager_search_-_English.png",
+   "subject": "thunar",
+   "tags": [
+    "xfce",
+    "arquivos"
+   ],
+   "width": 1920
+  },
+  "tela_thunar_4": {
+   "artist": "The Xubuntu team",
+   "aspect": 1.778,
+   "aspect_class": "wide",
+   "bytes": 329995,
+   "file": "tela_thunar_4.png",
+   "height": 1080,
+   "kind": "tela",
+   "license": "GPL",
+   "name": "tela_thunar_4",
+   "nonfree": false,
+   "quality": "low:quase-duplicata de tela_thunar_3",
+   "sha1": "219a6671c9f0533cbc28e77d1cf7e095f0ec65da",
+   "source_key": "commons.wikimedia.org:File:Xubuntu 22.10 Thunar 4.17.9 file manager search results - English.png",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Xubuntu_22.10_Thunar_4.17.9_file_manager_search_results_-_English.png",
+   "subject": "thunar",
+   "tags": [
+    "xfce",
+    "arquivos"
+   ],
+   "width": 1920
+  },
+  "tela_thunar_5": {
+   "artist": "The Xubuntu team",
+   "aspect": 1.778,
+   "aspect_class": "wide",
+   "bytes": 214403,
+   "file": "tela_thunar_5.png",
+   "height": 1080,
+   "kind": "tela",
+   "license": "GPL",
+   "name": "tela_thunar_5",
+   "nonfree": false,
+   "quality": "ok",
+   "sha1": "5f9f0b891ce53e5a39ed79d95a83c82c649a68e4",
+   "source_key": "commons.wikimedia.org:File:Xubuntu 23.04 Thunar 4.18.4 file manager Greybird theme - English.png",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Xubuntu_23.04_Thunar_4.18.4_file_manager_Greybird_theme_-_English.png",
+   "subject": "thunar",
+   "tags": [
+    "xfce",
+    "arquivos"
+   ],
+   "width": 1920
+  },
   "tela_tiktok": {
    "artist": "Stay Tuned",
    "aspect": 0.856,
@@ -108824,6 +110604,29 @@
     "social"
    ],
    "width": 1118
+  },
+  "tela_timeshift": {
+   "artist": "Dominic Mazzoni and Roger Dannenberg",
+   "aspect": 1.376,
+   "aspect_class": "wide",
+   "bytes": 27511,
+   "file": "tela_timeshift.png",
+   "height": 548,
+   "kind": "tela",
+   "license": "GPL",
+   "name": "tela_timeshift",
+   "nonfree": false,
+   "quality": "low",
+   "sha1": "1790163f3f66c6f9effc6f262c5265d1d089da09",
+   "source_key": "commons.wikimedia.org:File:Audacity TimeShift 2010-05-31.png",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Audacity_TimeShift_2010-05-31.png",
+   "subject": "timeshift",
+   "tags": [
+    "linux",
+    "backup",
+    "restauracao"
+   ],
+   "width": 754
   },
   "tela_tiny_core_linux": {
    "artist": "Amitie 10g",
@@ -110141,6 +111944,336 @@
     "ubuntu"
    ],
    "width": 2560
+  },
+  "tela_ubuntu_24_04": {
+   "artist": "Canonical Inc",
+   "aspect": 1.778,
+   "aspect_class": "wide",
+   "bytes": 2245453,
+   "file": "tela_ubuntu_24_04.png",
+   "height": 1080,
+   "kind": "tela",
+   "license": "GPL",
+   "name": "tela_ubuntu_24_04",
+   "nonfree": false,
+   "quality": "ok",
+   "sha1": "890528b91cba08b2a583ba353fd872703ffbc5ca",
+   "source_key": "commons.wikimedia.org:File:Ubuntu 24.04 LTS alternate Numbat wallpaper - English.png",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Ubuntu_24.04_LTS_alternate_Numbat_wallpaper_-_English.png",
+   "subject": "ubuntu_24_04",
+   "tags": [
+    "ubuntu",
+    "lts"
+   ],
+   "width": 1920
+  },
+  "tela_ubuntu_24_04_2": {
+   "artist": "Canonical Inc",
+   "aspect": 1.778,
+   "aspect_class": "wide",
+   "bytes": 1113903,
+   "file": "tela_ubuntu_24_04_2.png",
+   "height": 1080,
+   "kind": "tela",
+   "license": "GPL",
+   "name": "tela_ubuntu_24_04_2",
+   "nonfree": false,
+   "quality": "ok",
+   "sha1": "7225b8dbbfd2857271bb2976bd584db332a84642",
+   "source_key": "commons.wikimedia.org:File:Ubuntu 24.04 LTS default dark wallpaper - English.png",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Ubuntu_24.04_LTS_default_dark_wallpaper_-_English.png",
+   "subject": "ubuntu_24_04",
+   "tags": [
+    "ubuntu",
+    "lts"
+   ],
+   "width": 1920
+  },
+  "tela_ubuntu_24_04_3": {
+   "artist": "Canonical Inc",
+   "aspect": 1.778,
+   "aspect_class": "wide",
+   "bytes": 1462906,
+   "file": "tela_ubuntu_24_04_3.png",
+   "height": 1080,
+   "kind": "tela",
+   "license": "GPL",
+   "name": "tela_ubuntu_24_04_3",
+   "nonfree": false,
+   "quality": "ok",
+   "sha1": "6626177413993a7ec485a928cbc5edc04b6c9912",
+   "source_key": "commons.wikimedia.org:File:Ubuntu 24.04 LTS default desktop - English.png",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Ubuntu_24.04_LTS_default_desktop_-_English.png",
+   "subject": "ubuntu_24_04",
+   "tags": [
+    "ubuntu",
+    "lts"
+   ],
+   "width": 1920
+  },
+  "tela_ubuntu_24_04_4": {
+   "artist": "Canonical Inc",
+   "aspect": 1.778,
+   "aspect_class": "wide",
+   "bytes": 1437848,
+   "file": "tela_ubuntu_24_04_4.png",
+   "height": 1080,
+   "kind": "tela",
+   "license": "GPL",
+   "name": "tela_ubuntu_24_04_4",
+   "nonfree": false,
+   "quality": "low:quase-duplicata de tela_ubuntu_24_04_3",
+   "sha1": "f0d5e54c77c6ded576af12c20035d7012361cd9d",
+   "source_key": "commons.wikimedia.org:File:Ubuntu 24.04 LTS Quick Settings menu - English.png",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Ubuntu_24.04_LTS_Quick_Settings_menu_-_English.png",
+   "subject": "ubuntu_24_04",
+   "tags": [
+    "ubuntu",
+    "lts"
+   ],
+   "width": 1920
+  },
+  "tela_ubuntu_24_04_5": {
+   "artist": "Canonical Inc",
+   "aspect": 1.778,
+   "aspect_class": "wide",
+   "bytes": 394874,
+   "file": "tela_ubuntu_24_04_5.png",
+   "height": 1080,
+   "kind": "tela",
+   "license": "GPL",
+   "name": "tela_ubuntu_24_04_5",
+   "nonfree": false,
+   "quality": "ok",
+   "sha1": "6e707e72d0dff69cd06b4b5bf43152ecab59ccee",
+   "source_key": "commons.wikimedia.org:File:Ubuntu 24.04 LTS alternate dark Numbat wallpaper - English.png",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Ubuntu_24.04_LTS_alternate_dark_Numbat_wallpaper_-_English.png",
+   "subject": "ubuntu_24_04",
+   "tags": [
+    "ubuntu",
+    "lts"
+   ],
+   "width": 1920
+  },
+  "tela_ubuntu_24_04_6": {
+   "artist": "Canonical Inc",
+   "aspect": 1.778,
+   "aspect_class": "wide",
+   "bytes": 896241,
+   "file": "tela_ubuntu_24_04_6.png",
+   "height": 1080,
+   "kind": "tela",
+   "license": "GPL",
+   "name": "tela_ubuntu_24_04_6",
+   "nonfree": false,
+   "quality": "ok",
+   "sha1": "295b95c22726923bd783d5b9b8fb38b3c8ee4732",
+   "source_key": "commons.wikimedia.org:File:Ubuntu 24.04 LTS Ubuntu App Center - English.png",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Ubuntu_24.04_LTS_Ubuntu_App_Center_-_English.png",
+   "subject": "ubuntu_24_04",
+   "tags": [
+    "ubuntu",
+    "lts"
+   ],
+   "width": 1920
+  },
+  "tela_ubuntu_24_04_7": {
+   "artist": "Joshua Peisach and team",
+   "aspect": 1.778,
+   "aspect_class": "wide",
+   "bytes": 534027,
+   "file": "tela_ubuntu_24_04_7.png",
+   "height": 1080,
+   "kind": "tela",
+   "license": "GPL",
+   "name": "tela_ubuntu_24_04_7",
+   "nonfree": false,
+   "quality": "ok",
+   "sha1": "d8becc0625c1b9a631535f7643cc9dadfd9ba253",
+   "source_key": "commons.wikimedia.org:File:Ubuntu Cinnamon 24.04 LTS default desktop - English.png",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Ubuntu_Cinnamon_24.04_LTS_default_desktop_-_English.png",
+   "subject": "ubuntu_24_04",
+   "tags": [
+    "ubuntu",
+    "lts"
+   ],
+   "width": 1920
+  },
+  "tela_ubuntu_26_04": {
+   "artist": "Canonical Limited",
+   "aspect": 1.778,
+   "aspect_class": "wide",
+   "bytes": 1811028,
+   "file": "tela_ubuntu_26_04.png",
+   "height": 1080,
+   "kind": "tela",
+   "license": "GPL",
+   "name": "tela_ubuntu_26_04",
+   "nonfree": false,
+   "quality": "ok",
+   "sha1": "559c01f14f787a6663c38cf5757b55400fb8ab7e",
+   "source_key": "commons.wikimedia.org:File:Ubuntu 26.04 LTS Quick menu - English.png",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Ubuntu_26.04_LTS_Quick_menu_-_English.png",
+   "subject": "ubuntu_26_04",
+   "tags": [
+    "ubuntu",
+    "lts"
+   ],
+   "width": 1920
+  },
+  "tela_ubuntu_26_04_2": {
+   "artist": "Canonical Limited",
+   "aspect": 1.778,
+   "aspect_class": "wide",
+   "bytes": 214867,
+   "file": "tela_ubuntu_26_04_2.png",
+   "height": 1080,
+   "kind": "tela",
+   "license": "GPL",
+   "name": "tela_ubuntu_26_04_2",
+   "nonfree": false,
+   "quality": "ok",
+   "sha1": "bba809e765417c8fe6d30cc8f6f2b71c13455acf",
+   "source_key": "commons.wikimedia.org:File:Ubuntu 26.04 LTS applications menu - English.png",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Ubuntu_26.04_LTS_applications_menu_-_English.png",
+   "subject": "ubuntu_26_04",
+   "tags": [
+    "ubuntu",
+    "lts"
+   ],
+   "width": 1920
+  },
+  "tela_ubuntu_26_04_3": {
+   "artist": "Canonical Limited",
+   "aspect": 1.778,
+   "aspect_class": "wide",
+   "bytes": 1025811,
+   "file": "tela_ubuntu_26_04_3.png",
+   "height": 1080,
+   "kind": "tela",
+   "license": "GPL",
+   "name": "tela_ubuntu_26_04_3",
+   "nonfree": false,
+   "quality": "ok",
+   "sha1": "5c1ba863595c22a724aad2220e27fd3ba8e017dc",
+   "source_key": "commons.wikimedia.org:File:Ubuntu 26.04 LTS alternate wallpaper 1 - English.png",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Ubuntu_26.04_LTS_alternate_wallpaper_1_-_English.png",
+   "subject": "ubuntu_26_04",
+   "tags": [
+    "ubuntu",
+    "lts"
+   ],
+   "width": 1920
+  },
+  "tela_ubuntu_26_04_4": {
+   "artist": "Canonical Limited",
+   "aspect": 1.778,
+   "aspect_class": "wide",
+   "bytes": 969821,
+   "file": "tela_ubuntu_26_04_4.png",
+   "height": 1080,
+   "kind": "tela",
+   "license": "GPL",
+   "name": "tela_ubuntu_26_04_4",
+   "nonfree": false,
+   "quality": "ok",
+   "sha1": "2b0bf55b6665c7d11e0be6e1062c44277249f620",
+   "source_key": "commons.wikimedia.org:File:Ubuntu 26.04 LTS alternate wallpaper 2 - English.png",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Ubuntu_26.04_LTS_alternate_wallpaper_2_-_English.png",
+   "subject": "ubuntu_26_04",
+   "tags": [
+    "ubuntu",
+    "lts"
+   ],
+   "width": 1920
+  },
+  "tela_ubuntu_26_04_5": {
+   "artist": "Canonical Limited",
+   "aspect": 1.778,
+   "aspect_class": "wide",
+   "bytes": 600273,
+   "file": "tela_ubuntu_26_04_5.png",
+   "height": 1080,
+   "kind": "tela",
+   "license": "GPL",
+   "name": "tela_ubuntu_26_04_5",
+   "nonfree": false,
+   "quality": "ok",
+   "sha1": "f56651067ac7b667ba292ac175358623696b4b33",
+   "source_key": "commons.wikimedia.org:File:Ubuntu 26.04 LTS System About - English.png",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Ubuntu_26.04_LTS_System_About_-_English.png",
+   "subject": "ubuntu_26_04",
+   "tags": [
+    "ubuntu",
+    "lts"
+   ],
+   "width": 1920
+  },
+  "tela_ubuntu_26_04_6": {
+   "artist": "Canonical Limited",
+   "aspect": 1.778,
+   "aspect_class": "wide",
+   "bytes": 801274,
+   "file": "tela_ubuntu_26_04_6.png",
+   "height": 1080,
+   "kind": "tela",
+   "license": "GPL",
+   "name": "tela_ubuntu_26_04_6",
+   "nonfree": false,
+   "quality": "ok",
+   "sha1": "2e70c060c5a83082d67225cf0d1cf2636dc6e6ed",
+   "source_key": "commons.wikimedia.org:File:Ubuntu 26.04 LTS dark desktop - English.png",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Ubuntu_26.04_LTS_dark_desktop_-_English.png",
+   "subject": "ubuntu_26_04",
+   "tags": [
+    "ubuntu",
+    "lts"
+   ],
+   "width": 1920
+  },
+  "tela_ubuntu_26_04_7": {
+   "artist": "Canonical Limited",
+   "aspect": 1.778,
+   "aspect_class": "wide",
+   "bytes": 694968,
+   "file": "tela_ubuntu_26_04_7.png",
+   "height": 1080,
+   "kind": "tela",
+   "license": "GPL",
+   "name": "tela_ubuntu_26_04_7",
+   "nonfree": false,
+   "quality": "ok",
+   "sha1": "468a235b76e01b7141084a4b76030b4ca72cd024",
+   "source_key": "commons.wikimedia.org:File:Ubuntu 26.04 LTS Appearance dark - English.png",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Ubuntu_26.04_LTS_Appearance_dark_-_English.png",
+   "subject": "ubuntu_26_04",
+   "tags": [
+    "ubuntu",
+    "lts"
+   ],
+   "width": 1920
+  },
+  "tela_ubuntu_26_04_8": {
+   "artist": "Canonical Limited",
+   "aspect": 1.778,
+   "aspect_class": "wide",
+   "bytes": 1366328,
+   "file": "tela_ubuntu_26_04_8.png",
+   "height": 1080,
+   "kind": "tela",
+   "license": "GPL",
+   "name": "tela_ubuntu_26_04_8",
+   "nonfree": false,
+   "quality": "ok",
+   "sha1": "cc9468820a4697e9ff10b7694c1cc74d4b6e3a35",
+   "source_key": "commons.wikimedia.org:File:Ubuntu 26.04 LTS Appearance default - English.png",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Ubuntu_26.04_LTS_Appearance_default_-_English.png",
+   "subject": "ubuntu_26_04",
+   "tags": [
+    "ubuntu",
+    "lts"
+   ],
+   "width": 1920
   },
   "tela_ubuntu_3": {
    "artist": "Unknown author Unknown author",
@@ -119099,6 +121232,28 @@
    ],
    "width": 1920
   },
+  "tela_xorg_server": {
+   "artist": "Software: X.Org Foundation Screenshot: VulcanSphere",
+   "aspect": 0.78,
+   "aspect_class": "tall",
+   "bytes": 14971,
+   "file": "tela_xorg_server.png",
+   "height": 645,
+   "kind": "tela",
+   "license": "MIT",
+   "name": "tela_xorg_server",
+   "nonfree": false,
+   "quality": "ok",
+   "sha1": "e8af3b731283d73c581b5a4b0d941836eb364f93",
+   "source_key": "en.wikipedia.org:File:Xdpyinfo screenshot.png",
+   "source_url": "https://commons.wikimedia.org/wiki/File:Xdpyinfo_screenshot.png",
+   "subject": "xorg_server",
+   "tags": [
+    "linux",
+    "desktop"
+   ],
+   "width": 503
+  },
   "tela_xubuntu": {
    "artist": "Canonical Ltd.",
    "aspect": 1.778,
@@ -120360,6 +122515,10 @@
    "done": "2026-10-16",
    "images": 9
   },
+  "chimarrao": {
+   "done": "2026-10-26",
+   "images": 5
+  },
   "chrome_devtools": {
    "done": "2026-10-16",
    "images": 1
@@ -120687,6 +122846,10 @@
   "gnome": {
    "done": "2026-10-16",
    "images": 19
+  },
+  "gnome_2": {
+   "done": "2026-10-26",
+   "images": 7
   },
   "gnome_3": {
    "done": "2026-10-16",
@@ -121072,6 +123235,14 @@
    "done": "2026-10-16",
    "images": 12
   },
+  "linux_mint_22": {
+   "done": "2026-10-26",
+   "images": 8
+  },
+  "live_usb": {
+   "done": "2026-10-26",
+   "images": 9
+  },
   "llvm": {
    "done": "2026-10-16",
    "images": 2
@@ -121218,7 +123389,7 @@
   },
   "mate_desktop": {
    "done": "2026-10-16",
-   "images": 14
+   "images": 15
   },
   "meego": {
    "done": "2026-10-16",
@@ -121344,6 +123515,10 @@
    "done": "2026-10-16",
    "images": 6
   },
+  "nemo_file_manager": {
+   "done": "2026-10-26",
+   "images": 13
+  },
   "neovim": {
    "done": "2026-10-16",
    "images": 8
@@ -121434,6 +123609,10 @@
   },
   "obs_studio": {
    "done": "2026-10-16",
+   "images": 10
+  },
+  "old_netbook": {
+   "done": "2026-10-26",
    "images": 10
   },
   "onedrive": {
@@ -121696,6 +123875,10 @@
    "done": "2026-10-16",
    "images": 5
   },
+  "ram_memory_module": {
+   "done": "2026-10-26",
+   "images": 6
+  },
   "raspberry_pi": {
    "done": "2026-10-16",
    "images": 27
@@ -121735,6 +123918,10 @@
   "richard_stallman": {
    "done": "2026-10-16",
    "images": 3
+  },
+  "rio_grande_do_sul": {
+   "done": "2026-10-26",
+   "images": 9
   },
   "riscos": {
    "done": "2026-10-16",
@@ -121924,6 +124111,10 @@
    "done": "2026-10-16",
    "images": 17
   },
+  "swap_space": {
+   "done": "2026-10-26",
+   "images": 0
+  },
   "sway": {
    "done": "2026-10-16",
    "images": 7
@@ -121996,6 +124187,10 @@
    "done": "2026-10-16",
    "images": 11
   },
+  "thunar": {
+   "done": "2026-10-26",
+   "images": 8
+  },
   "tiktok": {
    "done": "2026-10-16",
    "images": 9
@@ -122007,6 +124202,10 @@
   "tim_cook": {
    "done": "2026-10-16",
    "images": 4
+  },
+  "timeshift": {
+   "done": "2026-10-26",
+   "images": 1
   },
   "tiny_core_linux": {
    "done": "2026-10-16",
@@ -122067,6 +124266,14 @@
   "ubuntu_22_04": {
    "done": "2026-10-16",
    "images": 6
+  },
+  "ubuntu_24_04": {
+   "done": "2026-10-26",
+   "images": 7
+  },
+  "ubuntu_26_04": {
+   "done": "2026-10-26",
+   "images": 8
   },
   "ubuntu_mate": {
    "done": "2026-10-16",
@@ -122403,6 +124610,10 @@
   "xfce": {
    "done": "2026-10-16",
    "images": 18
+  },
+  "xorg_server": {
+   "done": "2026-10-26",
+   "images": 2
   },
   "xubuntu": {
    "done": "2026-10-16",

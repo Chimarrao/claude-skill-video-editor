@@ -10,7 +10,7 @@ import {
   waitFor,
 } from '@motion-canvas/core';
 import {MK, MONO} from './monokai';
-import {WHITE, FONT, SHADOW, SHADOW_TEXT} from './style';
+import {WHITE, FONT, SHADOW, SHADOW_TEXT, ACCENTS} from './style';
 
 /** Numeração: zero à esquerda só quando o total passa de 9 (01/12, mas 1/4). */
 export const num = (i: number, total: number) => (total > 9 ? String(i).padStart(2, '0') : String(i));
@@ -254,13 +254,17 @@ export function statCard(value: string, label: string, color: string, pct?: numb
       ) : null}
       <Rect direction="column" gap={10} alignItems="start" width={pct != null ? 520 : 680}>
         {pct == null ? (
-          <Txt
-            text={value}
-            fontFamily={MONO}
-            fontWeight={800}
-            fontSize={Math.max(70, Math.min(130, 680 / (value.length * 0.62)))}
-            fill={color}
-          />
+          <Rect layout direction="row" alignItems="end" gap={18}>
+            {value.split(' ').map((part, k, all_) => (
+              <Txt
+                text={part}
+                fontFamily={MONO}
+                fontWeight={800}
+                fontSize={Math.max(70, Math.min(130, 680 / (value.replace(' ', '').length * 0.62 + 1))) * (k > 0 && all_.length > 1 ? 0.62 : 1)}
+                fill={color}
+              />
+            ))}
+          </Rect>
         ) : null}
         <Txt
           text={label}
@@ -282,42 +286,38 @@ export function statCard(value: string, label: string, color: string, pct?: numb
 export interface FactLine {
   icon: string;
   text: string;
+  color?: string;
 }
 /** Lista de fatos: ícone de linha em disco + frase curta; entram em sequência. */
 export function factsList(lines: FactLine[]): Piece {
   const items: Rect[] = [];
-  const no = (<Rect layout direction="column" gap={18} alignItems="start" />) as Rect;
-  for (const l of lines) {
+  const no = (<Rect layout direction="column" gap={20} alignItems="start" />) as Rect;
+  lines.forEach((l, i) => {
+    const accent = l.color ?? ACCENTS[i % ACCENTS.length];
     const r = (
       <Rect
         layout
-        gap={24}
+        gap={26}
         alignItems="center"
-        padding={[16, 28]}
-        radius={20}
-        fill="rgba(39,40,34,0.95)"
-        stroke="rgba(255,255,255,0.14)"
-        lineWidth={2}
+        padding={[18, 34, 18, 22]}
+        radius={26}
+        fill="rgba(16,18,26,0.96)"
+        stroke={accent}
+        lineWidth={4}
         opacity={0}
-        {...SHADOW}
+        shadowColor={accent}
+        shadowBlur={26}
+        shadowOffset={[0, 6]}
       >
-        <Rect
-          size={64}
-          radius={32}
-          fill={MK.background2}
-          stroke="rgba(255,255,255,0.4)"
-          lineWidth={3}
-          alignItems="center"
-          justifyContent="center"
-        >
-          <Img src={l.icon} size={36} />
+        <Rect size={78} radius={39} fill={accent} alignItems="center" justifyContent="center">
+          <Img src={l.icon} size={46} />
         </Rect>
-        <Txt text={l.text} width={640} textWrap fontFamily={FONT} fontWeight={600} fontSize={38} fill={WHITE} />
+        <Txt text={l.text} width={680} textWrap fontFamily={FONT} fontWeight={700} fontSize={42} fill={WHITE} />
       </Rect>
     ) as Rect;
     items.push(r);
     no.add(r);
-  }
+  });
   return {
     no,
     *enter() {

@@ -36,6 +36,13 @@ import {
   statCard,
   vanish,
   titleItem,
+  roundCard,
+  duel,
+  verdictBadge,
+  barsChart,
+  profileCard,
+  profileRow,
+  scoreStrip,
 } from '../lib';
 import scenes from './scenes.json';
 import codes from './codes.json';
@@ -94,7 +101,14 @@ interface PieceJson {
     | 'graph'
     | 'title'
     | 'comparison'
-    | 'screen';
+    | 'screen'
+    | 'round'
+    | 'duel'
+    | 'verdict'
+    | 'bars'
+    | 'profile'
+    | 'profiles'
+    | 'scorestrip';
   props: any;
   beat: string;
 }
@@ -240,7 +254,7 @@ function build(p: PieceJson): {piece: Piece; reveal?: () => any} {
     case 'stat':
       return {piece: statCard(a.value, a.label, a.color, a.pct)};
     case 'facts':
-      return {piece: factsList(a.lines.map((l: any) => ({icon: IMG[l.icon], text: l.text})))};
+      return {piece: factsList(a.lines.map((l: any) => ({icon: IMG[l.icon], text: l.text, color: l.color})))};
     case 'comparison':
       return {
         piece: comparison(
@@ -283,6 +297,27 @@ function build(p: PieceJson): {piece: Piece; reveal?: () => any} {
         },
       };
     }
+    case 'round':
+      return {piece: roundCard(a.n, a.title, a.sub ?? '', {...a.a, logo: img(a.a.logo)}, {...a.b, logo: img(a.b.logo)})};
+    case 'duel':
+      return {piece: duel({...a.a, logo: img(a.a.logo)}, {...a.b, logo: img(a.b.logo)}, a.focus ?? 'both')};
+    case 'verdict':
+      return {piece: verdictBadge(a.label, a.result, a.sub ?? '', a.color, img(a.logo), a.asp ?? 1)};
+    case 'bars':
+      return {
+        piece: barsChart(
+          a.title,
+          a.unit ?? '',
+          a.items.map((i: any) => ({...i, logo: img(i.logo)})),
+          a.note ?? '',
+        ),
+      };
+    case 'profile':
+      return {piece: profileCard(a.n, {...a.profile, logo: img(a.profile.logo)})};
+    case 'profiles':
+      return {piece: profileRow(a.profiles.map((p: any) => ({...p, logo: img(p.logo)})))};
+    case 'scorestrip':
+      return {piece: scoreStrip(a.results)};
     default:
       throw new Error('peca desconhecida ' + p.kind);
   }
@@ -301,7 +336,7 @@ function* composite(view: View2D, c: Scene): ThreadGenerator {
   for (const q of pieces) {
     const [x, y, zoom0] = c.light
       ? POS_LIGHT[q.p.slot]
-      : [...POS[q.p.slot], q.p.slot === 'center' && ['facts', 'stat', 'comparison'].includes(q.p.kind) ? 1.4 : 1];
+      : [...POS[q.p.slot], q.p.slot === 'center' && ['facts', 'stat', 'comparison'].includes(q.p.kind) ? 1.7 : 1];
     // grafo: ampliado (esc) e centrado — o usuário dava zoom 1,4–1,7× à mão em todo grafo
     const [gx, gy, zoom] =
       q.p.kind === 'graph' && !c.light

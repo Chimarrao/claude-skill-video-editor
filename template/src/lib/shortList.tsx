@@ -1,7 +1,7 @@
 import {Circle, Img, Rect, Txt} from '@motion-canvas/2d';
 import {all, easeOutCubic, ThreadGenerator} from '@motion-canvas/core';
 import {MK, MONO} from './monokai';
-import {WHITE, FONT, SHADOW} from './style';
+import {WHITE, FONT, ACCENTS} from './style';
 import {num} from './cards';
 
 export interface ShortListItem {
@@ -49,6 +49,7 @@ export function shortList(title: string, items: ShortListItem[], color: string):
   const cards: Rect[] = [];
   items.forEach((it, i) => {
     const col = columns[two ? (i < lines ? 0 : 1) : 0];
+    const accent = ACCENTS[i % ACCENTS.length];
     const card = (
       <Rect
         layout
@@ -58,22 +59,22 @@ export function shortList(title: string, items: ShortListItem[], color: string):
         padding={[0, 28]}
         alignItems="center"
         radius={22}
-        fill="rgba(39,40,34,0.95)"
-        stroke="rgba(255,255,255,0.14)"
+        fill="rgba(16,18,26,0.96)"
+        stroke={accent}
         lineWidth={2}
         opacity={0}
-        {...SHADOW}
+        shadowColor={accent}
+        shadowBlur={22}
+        shadowOffset={[0, 6]}
       >
-        <Circle size={54} fill={color} alignItems="center" justifyContent="center">
+        <Circle size={54} fill={accent} alignItems="center" justifyContent="center">
           <Txt text={num(it.num, items.length)} fontFamily={MONO} fontWeight={800} fontSize={30} fill="#0b0b10" />
         </Circle>
         {it.icon ? (
           <Rect
             size={62}
             radius={31}
-            fill={MK.background2}
-            stroke="rgba(255,255,255,0.4)"
-            lineWidth={3}
+            fill={accent}
             alignItems="center"
             justifyContent="center"
           >
@@ -99,10 +100,10 @@ export function shortList(title: string, items: ShortListItem[], color: string):
     *show(k: number) {
       if (k === 0) yield head.opacity(1, 0.4);
       cards.forEach((c, i) => {
-        if (i < k) c.stroke('rgba(255,255,255,0.14)');
+        if (i < k) c.lineWidth(2);
       });
       const c = cards[k];
-      c.stroke(color);
+      c.lineWidth(6);
       c.x(40);
       yield* all(c.opacity(1, 0.35), c.x(0, 0.45, easeOutCubic));
     },

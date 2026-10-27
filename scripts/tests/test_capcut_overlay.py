@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """TESTE: overlay recortado no CapCut. Roda na pasta animacao/ (precisa de plan_data.py, plan.json, output/project.mov).
 Gera o spec + monta o draft numa pasta TEMPORÁRIA (não toca nos projetos do CapCut) e confere:
+ - nenhum pedaço de overlay < 1,5 s (pisca na tela);
  - nenhum segmento de overlay encosta num clipe de B-roll (animação nunca vaza sobre o vídeo);
  - overlay + clipes cobrem 100% da narração (sem buraco que o usuário teria que preencher);
  - source_timerange do overlay = target (sincronia com o .mov);
@@ -86,8 +87,12 @@ for x0, x1 in covered:
     current = max(current, x1)
 if total - current > 0.07:
     gaps.append((round(current, 2), round(total, 2)))
+gaps = [g for g in gaps if g[1] - g[0] > 1.6]  # sobras < 1,5 s entre clipes ficam só com o preenchimento (nada de overlay piscando)
 if gaps:
     errors.append(f"buracos sem overlay nem clipe: {gaps[:5]}")
+for a0, a1, _ in overlay_segs:
+    if a1 - a0 < 1.5 - 0.01:
+        errors.append(f"overlay {a0:.2f}-{a1:.2f} dura só {a1-a0:.2f}s: pisca na tela (mínimo 1,5 s)")
 shutil.rmtree(tmp, ignore_errors=True)
 print(f"trilhas {names[:4]} · {len(clips)} clipes · {len(overlay_segs)} segmentos de overlay · total {total:.1f}s")
 if errors:

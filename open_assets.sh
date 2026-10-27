@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Abre o banco de assets (SQLite, base64). Ex.: dentro do sqlite3:
+# Abre o banco de assets (SQLite; imagens como arquivos em database/images/). Ex.: dentro do sqlite3:
 #   SELECT name, category, width, height FROM assets WHERE name LIKE 'logo_%';
 # Fora: ./open_assets.sh sync [pasta...] | list [filtro] | export 'logo_win%' [pasta]
 cd "$(dirname "$0")" || exit 1

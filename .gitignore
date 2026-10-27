@@ -1,6 +1,7 @@
 # arquivos grandes / pessoais (não publicar)
 assets/background_filler_20min.mp4
 database/assets.db
+database/images/
 database/*.db-journal
 *.part
 .DS_Store

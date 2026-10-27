@@ -67,7 +67,8 @@ for c in sc:
     if titulo and grafo and f"{c['id']}-{titulo['beat']}" in ev:
         alvo = (c, titulo, grafo)
         break
-confere("G4 projeto tem cena com título + grafo para o teste", alvo is not None)
+if alvo is None:
+    print("pula  G4 (projeto sem cena com título + grafo; vale para listas)")
 if alvo:
     c, titulo, grafo = alvo
     ev[grafo["props"]["events"][-1]]["targetTime"] = ev[f"{c['id']}-{titulo['beat']}"]["targetTime"] + 0.8
@@ -75,12 +76,13 @@ if alvo:
     confere("G4 P9 pega item de grafo entrando sob o título", "P9 título×grafo" in roda(tmp3))
 tmp4 = copia()
 sc4 = json.load(open(tmp4 / "src/scenes/scenes.json"))
-for c in sc4:
-    if c["kind"] == "graph":
-        c["items"][0]["x"] = 930  # rótulo/ícone para fora da área segura
-        break
-json.dump(sc4, open(tmp4 / "src/scenes/scenes.json", "w"))
-confere("G5 P10 pega item fora da área segura do quadro", "P10 quadro" in roda(tmp4))
+alvo5 = next((c for c in sc4 if c["kind"] == "graph"), None)
+if alvo5 is None:
+    print("pula  G5 (projeto sem GraphScene; vale para listas/webdoc com grafo de cena inteira)")
+else:
+    alvo5["items"][0]["x"] = 930  # rótulo/ícone para fora da área segura
+    json.dump(sc4, open(tmp4 / "src/scenes/scenes.json", "w"))
+    confere("G5 P10 pega item fora da área segura do quadro", "P10 quadro" in roda(tmp4))
 for d in (tmp3, tmp4):
     shutil.rmtree(d, ignore_errors=True)
 

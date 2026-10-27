@@ -17,3 +17,6 @@ export const SHADOW_TEXT = {
   shadowBlur: 14,
   shadowOffset: [0, 3] as [number, number],
 };
+
+/** Paleta VIVA das listas (cada linha/cartão ganha uma cor; ciclo). */
+export const ACCENTS = ['#ff7b3a', '#3fa3ff', '#3ddc97', '#ffc857', '#c77dff', '#ff5c8a'];
