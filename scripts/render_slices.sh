@@ -2,7 +2,8 @@
 # Render do overlay em TRECHOS (resiste a queda do Chrome por falta de memória: o macOS com swap cheio derruba o Chrome headless
 # no meio do render de 30 min e perde tudo). Cada trecho vira /tmp/slices/part_K.mov (+ .ok); no fim concatena sem recodificar.
 # RES_SCALE=1 → força 1080p em cada trecho (padrão: o que estiver no project.meta; 2 = 4K).
-# Uso (em animacao/, vite na porta 9000):  bash <skill>/scripts/render_slices.sh [duração_total_s] [trecho_s=174]
+# O script reinicia o vite (porta 9000) antes de cada trecho; rode em animacao/ (precisa de `npm start` funcionando).
+# Uso (em animacao/):  bash <skill>/scripts/render_slices.sh [duração_total_s] [trecho_s=174]
 #   ex.: render_slices.sh 869.42        → 5 trechos de 174 s; trecho que cair é refeito (até 3 tentativas); trechos prontos são pulados
 # Detalhe: o `range` do Motion Canvas é INCLUSIVO no fim (6 s = 181 quadros), então cada trecho termina 1/30 s antes do próximo começar.
 set -u
@@ -39,6 +40,17 @@ if n < plan:
     print(f"meta truncado ({n} de {plan} eventos): abortando"); sys.exit(1)
 P
 }
+# O VITE PRECISA SER REINICIADO DEPOIS de plan.py/setrange: arquivos reescritos com o vite no ar (HMR) deixam o editor com estado velho e o render sai
+# EMBARALHADO ou VAZIO (overlay só 2% por trecho, arquivo minúsculo; aprendido no "webdoc com rounds"). Sequência que funciona: plan.py → range → vite novo → render.
+reinicia_vite() {
+  pkill -f "bin/vi[t]e" 2>/dev/null; pkill -f "npm star[t]" 2>/dev/null
+  for _ in $(seq 1 20); do curl -s -o /dev/null http://localhost:9000 || break; sleep 1; done   # espera o vite ANTIGO morrer (senão o curl "vê" ele e o render pega conexão recusada)
+  sleep 1
+  rm -rf node_modules/.vite
+  (nohup npm start > /tmp/vite_render.log 2>&1 &)
+  for _ in $(seq 1 40); do curl -s -o /dev/null http://localhost:9000 && break; sleep 1; done
+  sleep 8
+}
 for K in $(seq 0 $((N - 1))); do
   [ -f /tmp/slices/part_$K.ok ] && continue
   A=$((K * LEN))
@@ -50,6 +62,7 @@ for K in $(seq 0 $((N - 1))); do
     pkill -f "Google Chrome.*headless" 2>/dev/null; sleep 2
     restaura_meta || exit 1
     setrange "$A" "$B"
+    reinicia_vite
     OUT="$PWD/output" node "$PDIR/render_one.mjs" 2>&1 | tail -3
     DUR=$(ffprobe -v error -show_entries format=duration -of csv=p=0 output/project.mov 2>/dev/null || true)
     MIN=$([ "$K" -eq $((N - 1)) ] && echo 5 || echo $((LEN - 2)))
