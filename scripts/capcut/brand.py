@@ -228,6 +228,8 @@ def _make_room(tracks, mats, stop_us, resume_us, promo_dur_us):
                     after["id"] = new_id()
                     after["extra_material_refs"] = _clone_extras(seg.get("extra_material_refs", []), mats)
                 new_segs.append(after)
+        if track.get("name") == "overlay":  # o corte na propaganda pode deixar uma sobra de milissegundos de overlay: vira "flash" na tela
+            new_segs = [x for x in new_segs if x["target_timerange"]["duration"] >= 1_500_000]
         track["segments"] = new_segs
 
 

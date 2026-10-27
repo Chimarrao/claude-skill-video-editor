@@ -146,13 +146,12 @@ export function duel(a: DuelSide, b: DuelSide, focus: 'A' | 'B' | 'both' | 'winA
       fill={PANEL}
       stroke={s.color}
       lineWidth={dim ? 3 : win ? 10 : 7}
-      scale={win ? 1.05 : 1}
-      shadowColor={win ? s.color : SHADOW.shadowColor}
-      shadowBlur={win ? 60 : SHADOW.shadowBlur}
-      shadowOffset={win ? [0, 0] : SHADOW.shadowOffset}
+      scale={1}
+      {...SHADOW}
     >
       {win ? (
-        <Rect layout paddingTop={8} paddingBottom={8} paddingLeft={30} paddingRight={30} radius={22} fill={s.color}>
+        // a faixa fica sobre a borda de cima (fora do fluxo): o cartão tem a MESMA altura dos outros duelos (não invade a zona do avatar)
+        <Rect layout={false} width={250} height={58} radius={22} fill={s.color} y={() => -ref().height() / 2} zIndex={2}>
           {txt('VENCE', 40, '#0b0b10', 900, {letterSpacing: 8})}
         </Rect>
       ) : null}

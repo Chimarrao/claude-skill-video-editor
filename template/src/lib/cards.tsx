@@ -306,8 +306,8 @@ export function factsList(lines: FactLine[]): Piece {
         lineWidth={4}
         opacity={0}
         shadowColor={accent}
-        shadowBlur={26}
-        shadowOffset={[0, 6]}
+        shadowBlur={14}
+        shadowOffset={[0, 4]}
       >
         <Rect size={78} radius={39} fill={accent} alignItems="center" justifyContent="center">
           <Img src={l.icon} size={46} />

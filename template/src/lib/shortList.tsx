@@ -64,7 +64,7 @@ export function shortList(title: string, items: ShortListItem[], color: string):
         lineWidth={2}
         opacity={0}
         shadowColor={accent}
-        shadowBlur={22}
+        shadowBlur={14}
         shadowOffset={[0, 6]}
       >
         <Circle size={54} fill={accent} alignItems="center" justifyContent="center">
