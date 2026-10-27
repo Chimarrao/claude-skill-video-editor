@@ -10,7 +10,7 @@ import {
   waitFor,
 } from '@motion-canvas/core';
 import {MK, MONO} from './monokai';
-import {WHITE, FONT, SHADOW, SHADOW_TEXT, ACCENTS} from './style';
+import {WHITE, FONT, SHADOW, SHADOW_TEXT, ACCENTS, tint} from './style';
 
 /** Numeração: zero à esquerda só quando o total passa de 9 (01/12, mas 1/4). */
 export const num = (i: number, total: number) => (total > 9 ? String(i).padStart(2, '0') : String(i));
@@ -293,29 +293,34 @@ export interface FactLine {
 }
 /** Lista de fatos: ícone de linha em disco + frase curta; entram em sequência. */
 export function factsList(lines: FactLine[]): Piece {
+  // MODELO A (escolhido pelo usuário): painel escuro discreto, faixa colorida só na borda esquerda, ícone sobre tinta suave da mesma cor.
   const items: Rect[] = [];
-  const no = (<Rect layout direction="column" gap={20} alignItems="start" />) as Rect;
+  const W = 960;
+  const H = 124;
+  const no = (<Rect layout direction="column" gap={22} alignItems="center" />) as Rect;
   lines.forEach((l, i) => {
     const accent = l.color ?? ACCENTS[i % ACCENTS.length];
     const r = (
       <Rect
         layout
-        gap={26}
+        width={W}
+        height={H}
+        radius={20}
+        fill="#12141c"
+        stroke="rgba(255,255,255,0.12)"
+        lineWidth={2}
         alignItems="center"
-        padding={[18, 34, 18, 22]}
-        radius={26}
-        fill="rgba(16,18,26,0.96)"
-        stroke={accent}
-        lineWidth={4}
+        gap={28}
+        paddingLeft={44}
+        paddingRight={36}
+        clip
         opacity={0}
-        shadowColor={accent}
-        shadowBlur={14}
-        shadowOffset={[0, 4]}
       >
-        <Rect size={78} radius={39} fill={accent} alignItems="center" justifyContent="center">
+        <Rect layout={false} x={-W / 2 + 9} width={18} height={H} fill={accent} />
+        <Rect layout width={78} height={78} radius={39} fill={tint(accent, 0.22)} alignItems="center" justifyContent="center">
           <Img src={l.icon} size={46} />
         </Rect>
-        <Txt text={l.text} width={680} textWrap fontFamily={FONT} fontWeight={700} fontSize={42} fill={WHITE} />
+        <Txt text={l.text} width={W - 220} textWrap fontFamily={FONT} fontWeight={700} fontSize={44} fill={WHITE} />
       </Rect>
     ) as Rect;
     items.push(r);
@@ -324,7 +329,8 @@ export function factsList(lines: FactLine[]): Piece {
   return {
     no,
     *enter() {
-      yield* sequence(0.45, ...items.map(r => all(r.opacity(1, 0.3), r.x(0, 0.4, easeOutCubic))));
+      items.forEach(r => r.x(60));
+      yield* sequence(0.45, ...items.map(r => all(r.opacity(1, 0.35), r.x(0, 0.45, easeOutCubic))));
     },
     *exit() {
       yield* all(...items.map(r => r.opacity(0, 0.25)));

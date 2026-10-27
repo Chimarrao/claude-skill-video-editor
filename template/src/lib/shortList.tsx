@@ -1,7 +1,7 @@
 import {Circle, Img, Rect, Txt} from '@motion-canvas/2d';
 import {all, easeOutCubic, ThreadGenerator} from '@motion-canvas/core';
 import {MK, MONO} from './monokai';
-import {WHITE, FONT, ACCENTS} from './style';
+import {WHITE, FONT, ACCENTS, tint} from './style';
 import {num} from './cards';
 
 export interface ShortListItem {
@@ -50,46 +50,33 @@ export function shortList(title: string, items: ShortListItem[], color: string):
   items.forEach((it, i) => {
     const col = columns[two ? (i < lines ? 0 : 1) : 0];
     const accent = ACCENTS[i % ACCENTS.length];
+    // MODELO A: painel escuro, faixa colorida na borda esquerda, número e ícone sobre tinta suave; o cartão atual ganha aro da cor
     const card = (
       <Rect
         layout
         width={WIDTH}
         height={TALL}
         gap={22}
-        padding={[0, 28]}
+        paddingLeft={40}
+        paddingRight={24}
         alignItems="center"
-        radius={22}
-        fill="rgba(16,18,26,0.96)"
-        stroke={accent}
+        radius={20}
+        fill="#12141c"
+        stroke="rgba(255,255,255,0.12)"
         lineWidth={2}
         opacity={0}
-        shadowColor={accent}
-        shadowBlur={14}
-        shadowOffset={[0, 6]}
+        clip
       >
-        <Circle size={54} fill={accent} alignItems="center" justifyContent="center">
-          <Txt text={num(it.num, items.length)} fontFamily={MONO} fontWeight={800} fontSize={30} fill="#0b0b10" />
+        <Rect layout={false} x={-WIDTH / 2 + 9} width={18} height={TALL} fill={accent} />
+        <Circle size={54} fill={tint(accent, 0.22)} alignItems="center" justifyContent="center">
+          <Txt text={num(it.num, items.length)} fontFamily={MONO} fontWeight={800} fontSize={30} fill={accent} />
         </Circle>
         {it.icon ? (
-          <Rect
-            size={62}
-            radius={31}
-            fill={accent}
-            alignItems="center"
-            justifyContent="center"
-          >
+          <Rect size={62} radius={31} fill={tint(accent, 0.22)} alignItems="center" justifyContent="center">
             <Img src={it.icon} size={34} />
           </Rect>
         ) : null}
-        <Txt
-          text={it.label}
-          width={WIDTH - 230}
-          textWrap
-          fontFamily={FONT}
-          fontWeight={600}
-          fontSize={38}
-          fill={WHITE}
-        />
+        <Txt text={it.label} width={WIDTH - 250} textWrap fontFamily={FONT} fontWeight={700} fontSize={38} fill={WHITE} />
       </Rect>
     ) as Rect;
     cards.push(card);
@@ -100,10 +87,14 @@ export function shortList(title: string, items: ShortListItem[], color: string):
     *show(k: number) {
       if (k === 0) yield head.opacity(1, 0.4);
       cards.forEach((c, i) => {
-        if (i < k) c.lineWidth(2);
+        if (i < k) {
+          c.lineWidth(2);
+          c.stroke('rgba(255,255,255,0.12)');
+        }
       });
       const c = cards[k];
-      c.lineWidth(6);
+      c.lineWidth(4);
+      c.stroke(color);
       c.x(40);
       yield* all(c.opacity(1, 0.35), c.x(0, 0.45, easeOutCubic));
     },

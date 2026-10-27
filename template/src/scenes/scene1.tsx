@@ -336,7 +336,7 @@ function* composite(view: View2D, c: Scene): ThreadGenerator {
   for (const q of pieces) {
     const [x, y, zoom0] = c.light
       ? POS_LIGHT[q.p.slot]
-      : [...POS[q.p.slot], q.p.slot === 'center' && ['facts', 'stat', 'comparison'].includes(q.p.kind) ? 1.45 : 1];
+      : [...POS[q.p.slot], q.p.slot === 'center' && ['facts', 'stat', 'comparison'].includes(q.p.kind) ? (q.p.kind === 'facts' ? 1.15 : 1.45) : 1];
     // grafo: ampliado (esc) e centrado — o usuário dava zoom 1,4–1,7× à mão em todo grafo
     const [gx, gy, zoom] =
       q.p.kind === 'graph' && !c.light

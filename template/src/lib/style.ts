@@ -20,3 +20,9 @@ export const SHADOW_TEXT = {
 
 /** Paleta VIVA das listas (cada linha/cartão ganha uma cor; ciclo). */
 export const ACCENTS = ['#ff7b3a', '#3fa3ff', '#3ddc97', '#ffc857', '#c77dff', '#ff5c8a'];
+
+/** "#rrggbb" → "rgba(r,g,b,a)" (tintas suaves das listas). */
+export function tint(hex: string, a: number): string {
+  const n = parseInt(hex.slice(1), 16);
+  return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a})`;
+}
