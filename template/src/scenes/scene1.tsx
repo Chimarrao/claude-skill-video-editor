@@ -429,8 +429,14 @@ function* composite(view: View2D, c: Scene): ThreadGenerator {
       continue;
     }
     const q = o.q;
-    shown.push(q.piece.no);
     const ant = current[q.p.slot];
+    // duelo seguido de duelo (troca de foco A→B→veredito): transição SUAVE no mesmo cartão, sem sair e entrar de novo
+    if (ant && q.p.kind === 'duel' && ant.kind === 'duel' && ant.setFocus) {
+      yield* ant.setFocus((q.p.props.focus as string) ?? 'both');
+      (q.piece.no.parent() as Node).remove();
+      continue;
+    }
+    shown.push(q.piece.no);
     if (ant && (q.p.slot === 'dir' || q.p.slot === 'left' || (q.p.slot === 'center' && q.p.kind !== 'section'))) {
       yield* ant.exit();
       const k = shown.indexOf(ant.no);

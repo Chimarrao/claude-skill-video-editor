@@ -1,5 +1,5 @@
 import {Circle, Img, Rect, Txt} from '@motion-canvas/2d';
-import {all, createRef, easeOutBack, easeOutCubic, sequence, ThreadGenerator, waitFor} from '@motion-canvas/core';
+import {all, createRef, easeInOutCubic, easeOutBack, easeOutCubic, sequence, ThreadGenerator, waitFor} from '@motion-canvas/core';
 import {FONT, SHADOW, SHADOW_TEXT, WHITE} from './style';
 import {Piece} from './cards';
 
@@ -130,45 +130,51 @@ export function roundCard(n: string, title: string, sub: string, a: DuelSide, b:
 /** Duelo A × B: dois cartões com logo, nome e "chips" (3 traços), medalha VS no meio; `focus` destaca um lado e apaga o outro. */
 export function duel(a: DuelSide, b: DuelSide, focus: 'A' | 'B' | 'both' | 'winA' | 'winB' = 'both'): Piece {
   const refs = [createRef<Rect>(), createRef<Rect>()];
+  const bodies = [createRef<Rect>(), createRef<Rect>()];
+  const badges = [createRef<Rect>(), createRef<Rect>()];
   // O painel (fundo) é SEMPRE o mesmo, em qualquer foco. Foco A/B: o lado que não está sendo descrito perde só o CONTEÚDO (logo, nome, chips) e a
-  // borda afina. winA/winB (veredito): os dois ficam inteiros; o vencedor ganha brilho, borda grossa e a faixa "VENCE".
-  const card = (s: DuelSide, ref: any, dim: boolean, win: boolean) => (
-    <Rect
-      ref={ref}
-      layout
-      direction="column"
-      alignItems="center"
-      gap={22}
-      width={700}
-      paddingTop={38}
-      paddingBottom={38}
-      radius={36}
-      fill={PANEL}
-      stroke={s.color}
-      lineWidth={dim ? 3 : win ? 10 : 7}
-      scale={1}
-      {...SHADOW}
-    >
-      {win ? (
-        // a faixa fica sobre a borda de cima (fora do fluxo): o cartão tem a MESMA altura dos outros duelos (não invade a zona do avatar)
-        <Rect layout={false} width={250} height={58} radius={22} fill={s.color} y={() => -ref().height() / 2} zIndex={2}>
+  // borda afina. winA/winB (veredito): os dois ficam inteiros; o vencedor ganha borda grossa e a faixa "VENCE" (sobre a borda, fora do fluxo).
+  // Trocar de foco NÃO recria a peça: `setFocus` anima o conteúdo, a borda e a faixa (transição suave entre um lado e outro).
+  const target = (f: string, i: number) => ({
+    dim: (f === 'A' && i === 1) || (f === 'B' && i === 0),
+    win: (f === 'winA' && i === 0) || (f === 'winB' && i === 1),
+  });
+  const card = (s: DuelSide, i: number) => {
+    const t = target(focus, i);
+    return (
+      <Rect
+        ref={refs[i]}
+        layout
+        direction="column"
+        alignItems="center"
+        gap={22}
+        width={700}
+        paddingTop={38}
+        paddingBottom={38}
+        radius={36}
+        fill={PANEL}
+        stroke={s.color}
+        lineWidth={t.dim ? 3 : t.win ? 10 : 7}
+        {...SHADOW}
+      >
+        <Rect ref={badges[i]} layout={false} width={250} height={58} radius={22} fill={s.color} y={() => -refs[i]().height() / 2} zIndex={2} opacity={t.win ? 1 : 0}>
           {txt('VENCE', 40, '#0b0b10', 900, {letterSpacing: 8})}
         </Rect>
-      ) : null}
-      <Rect layout direction="column" alignItems="center" gap={22} opacity={dim ? 0.38 : 1}>
-        {plate(s.logo, s.asp ?? 1, 210, 140)}
-        {txt(s.name, 62, s.color, 900)}
-        <Rect layout direction="column" gap={12} alignItems="start" width={560}>
-          {(s.chips ?? []).map(c => (
-            <Rect layout direction="row" gap={16} alignItems="center">
-              <Circle size={16} fill={s.color} />
-              {txt(c, 38, WHITE, 700, {textWrap: true, width: 520})}
-            </Rect>
-          ))}
+        <Rect ref={bodies[i]} layout direction="column" alignItems="center" gap={22} opacity={t.dim ? 0.38 : 1}>
+          {plate(s.logo, s.asp ?? 1, 210, 140)}
+          {txt(s.name, 62, s.color, 900)}
+          <Rect layout direction="column" gap={12} alignItems="start" width={560}>
+            {(s.chips ?? []).map(c => (
+              <Rect layout direction="row" gap={16} alignItems="center">
+                <Circle size={16} fill={s.color} />
+                {txt(c, 38, WHITE, 700, {textWrap: true, width: 520})}
+              </Rect>
+            ))}
+          </Rect>
         </Rect>
       </Rect>
-    </Rect>
-  );
+    );
+  };
   const vs = (
     <Rect layout={false} width={140} height={140} radius={70} fill="#0b0b10" stroke={WHITE} lineWidth={6} {...SHADOW}>
       <Txt text="VS" fontFamily={FONT} fontWeight={900} fontSize={60} fill={WHITE} />
@@ -176,8 +182,8 @@ export function duel(a: DuelSide, b: DuelSide, focus: 'A' | 'B' | 'both' | 'winA
   );
   const no = (
     <Rect layout direction="row" alignItems="center" gap={60}>
-      {card(a, refs[0], focus === 'B', focus === 'winA')}
-      {card(b, refs[1], focus === 'A', focus === 'winB')}
+      {card(a, 0)}
+      {card(b, 1)}
     </Rect>
   ) as Rect;
   no.add(vs);
@@ -185,6 +191,7 @@ export function duel(a: DuelSide, b: DuelSide, focus: 'A' | 'B' | 'both' | 'winA
   no.opacity(0);
   return {
     no,
+    kind: 'duel',
     *enter() {
       refs[0]().x(-260);
       refs[1]().x(260);
@@ -196,10 +203,22 @@ export function duel(a: DuelSide, b: DuelSide, focus: 'A' | 'B' | 'both' | 'winA
         vs.scale(1, 0.5, easeOutBack),
       );
     },
+    *setFocus(f: string) {
+      yield* all(
+        ...[0, 1].map(i => {
+          const t = target(f, i);
+          return all(
+            bodies[i]().opacity(t.dim ? 0.38 : 1, 0.45, easeInOutCubic),
+            refs[i]().lineWidth(t.dim ? 3 : t.win ? 10 : 7, 0.45, easeInOutCubic),
+            badges[i]().opacity(t.win ? 1 : 0, 0.45, easeInOutCubic),
+          );
+        }),
+      );
+    },
     *exit() {
       yield* all(no.opacity(0, 0.3), no.scale(0.97, 0.3));
     },
-  };
+  } as Piece;
 }
 
 /** Selo de vencedor do round (carimbo): "XFCE VENCE", "EMPATE", "DEPENDE DO PERFIL". */

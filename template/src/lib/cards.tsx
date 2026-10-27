@@ -36,6 +36,9 @@ export interface Piece {
   no: Rect;
   /** Animação de ambiente opcional (loop); o motor cancela quando a peça deixa de ser a ativa. */
   ambient?(): ThreadGenerator;
+  /** Peças que sabem trocar de estado sem sair/entrar (ex.: duelo trocando o foco A→B): o motor chama isto no lugar de exit()+enter(). */
+  kind?: string;
+  setFocus?(focus: string): ThreadGenerator;
   enter(): ThreadGenerator;
   exit(): ThreadGenerator;
 }
