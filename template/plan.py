@@ -258,6 +258,8 @@ def Screenshot(img, caption, width=900, at=None):
             break
     if len(caption) > 60:
         raise SystemExit(f"Tela '{img}': legenda > 60 caracteres (curta!)")
+    if img.startswith("tela_"):  # aprendizado do webdoc com rounds: o usuário cortou as telas paradas e estendeu o B-roll no lugar
+        print(f"AVISO B-ROLL-PRIMEIRO: Screenshot('{img}') é uma tela de interface parada; se um vídeo de Assets/ mostra isso, use BrollWindow (o usuário troca por vídeo à mão)")
     return dict(slot="dir", kind="screen", at=at, props=dict(img=img, caption=caption, width=width))
 
 
